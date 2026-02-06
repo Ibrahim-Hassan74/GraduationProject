@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SmartMicrobus.API</name>
+    </assembly>
+    <members>
+        <member name="T:SmartMicrobus.API.Controllers.CustomControllerBase">
+            <summary>
+            Base controller for the E-StoreX API, providing common functionality for all controllers.
+            </summary>
+        </member>
+        <member name="M:SmartMicrobus.API.Controllers.CustomControllerBase.#ctor">
+            <summary>
+            Constructor for CustomControllerBase, initializing the unit of work.
+            </summary>
+        </member>
+    </members>
+</doc>
