@@ -9,6 +9,7 @@ namespace SmartMicrobus.Core.ServiceContracts.Account
         Task<ApiResponse> RegisterPassengerAsync(RegisterPassengerDTO dto);
         Task<ApiResponse> LoginAsync(LoginDTO loginDTO);
         Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDTO dto);
+        Task<ApiResponse> VerifyOtpAsync(VerifyOtpDTO dto);
         Task<ApiResponse> ConfirmAccountAsync(ConfirmAccountDTO dto);
         Task<ApiResponse> ResetPasswordAsync(ResetPasswordDTO dto);
         Task<ApiResponse> RefreshTokenAsync(TokenModel model);
