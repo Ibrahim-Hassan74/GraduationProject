@@ -52,6 +52,7 @@ namespace SmartMicrobus.Core
             services.Configure<WhatsAppSettings>(configuration.GetSection("WhatsAppSettings"));
             services.AddHttpClient<IWhatsAppService, WhatsAppService>();
             services.AddSingleton<IImageService, ImageService>();
+            services.AddScoped<IJwtService, JwtService>();
 
             return services;
         }

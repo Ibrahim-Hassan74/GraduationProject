@@ -21,7 +21,7 @@ namespace SmartMicrobus.Core.Services.Common
             _settings = settings.Value;
         }
 
-        public async Task<bool> SendInvoiceMessageAsync(string phone, string code)
+        public async Task<bool> SendOTPAsync(string phone, string code)
         {
             var payload = new WhatsAppTemplatePayload
             {

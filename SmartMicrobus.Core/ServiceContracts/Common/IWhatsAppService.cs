@@ -2,6 +2,6 @@
 {
     public interface IWhatsAppService
     {
-        Task<bool> SendInvoiceMessageAsync(string phone, string message);
+        Task<bool> SendOTPAsync(string phone, string code);
     }
 }

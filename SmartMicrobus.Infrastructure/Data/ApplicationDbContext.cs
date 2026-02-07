@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using System.Reflection;
 
@@ -15,5 +16,6 @@ namespace SmartMicrobus.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
+        public virtual DbSet<Photo> Photos { get; set; }
     }
 }

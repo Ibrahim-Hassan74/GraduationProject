@@ -16,8 +16,8 @@ namespace SmartMicrobus.Core.ServiceContracts.Account
         Task<ApiResponse> UpdateUserProfileAsync(UpdateUserDTO dto);
         Task<ApiResponse> ExternalLoginCallbackAsync(string remoteError = "");
         Task<ApiResponse> DeleteAccountAsync(string userId);
-        Task<ApiResponse> ResendConfirmationAccountAsync(string phone);
         Task<ApiResponse> UploadUserPhotoAsync(Guid userId, UploadUserPhotoDTO dto);
         Task<ApiResponse> DeleteUserPhotoAsync(Guid userId);
+        Task<ApiResponse> ResendConfirmationAccountAsync(string phone);
     }
 }
