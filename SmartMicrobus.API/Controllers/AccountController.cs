@@ -1,8 +1,10 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Account;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
+using System.Security.Claims;
 
 namespace SmartMicrobus.API.Controllers
 {
@@ -55,5 +57,48 @@ namespace SmartMicrobus.API.Controllers
             
             return StatusCode(response.StatusCode , response);
         }
+
+        [HttpPost("generate-new-jwt-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenModel model)
+        {
+            var response = await _authService.RefreshTokenAsync(model);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [HttpPatch("upload-photo")]
+        [Authorize]
+        public async Task<IActionResult> UploadUserPhoto([FromForm] UploadUserPhotoDTO dto)
+        {
+            var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdFromToken))
+                return StatusCode(StatusCodes.Status401Unauthorized, ApiResponseFactory.Unauthorized());
+
+            var result = await _authService.UploadUserPhotoAsync(Guid.Parse(userIdFromToken), dto);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("delete-photo")]
+        [Authorize]
+        public async Task<IActionResult> DeleteUserPhoto()
+        {
+            var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdFromToken))
+                return StatusCode(StatusCodes.Status401Unauthorized, ApiResponseFactory.Unauthorized());
+
+            var result = await _authService.DeleteUserPhotoAsync(Guid.Parse(userIdFromToken));
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("delete")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(ApiResponseFactory.Unauthorized("Invalid user."));
+            var result = await _authService.DeleteAccountAsync(userId);
+            return StatusCode(result.StatusCode, result);
+        }
+
     }
 }

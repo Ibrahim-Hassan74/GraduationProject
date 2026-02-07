@@ -4,7 +4,7 @@ using SmartMicrobus.Core.DTO.Common;
 
 namespace SmartMicrobus.Core.ServiceContracts.Common
 {
-    internal interface IImageService
+    public interface IImageService
     {
         Task<List<string>> AddImageAsync(IFormFileCollection files, string src);
         bool DeleteImageAsync(string src);

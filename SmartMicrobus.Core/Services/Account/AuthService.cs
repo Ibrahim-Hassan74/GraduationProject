@@ -1,11 +1,46 @@
-﻿using SmartMicrobus.Core.DTO.Account;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using SmartMicrobus.Core.Domain.Entities;
+using SmartMicrobus.Core.Domain.IdentityEntities;
+using SmartMicrobus.Core.DTO.Account;
 using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Account;
+using SmartMicrobus.Core.ServiceContracts.Common;
+using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace SmartMicrobus.Core.Services.Account
 {
     public class AuthService : IAuthService
     {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IJwtService _jwtService;
+        private readonly IWhatsAppService _whatsAppService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IImageService _imageService;
+
+        private const string OtpLoginProvider = "OTP";
+        private const string OtpTokenName = "ForgotPassword";
+
+        public AuthService(UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager,
+            IJwtService jwtService,
+            IWhatsAppService whatsAppService, 
+            IUnitOfWork unitOfWork,
+            IImageService imageService)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _jwtService = jwtService;
+            _whatsAppService = whatsAppService;
+            _unitOfWork = unitOfWork;
+            _imageService = imageService;
+        }
+
         public Task<ApiResponse> ConfirmAccountAsync(ConfirmAccountDTO dto)
         {
             throw new NotImplementedException();
@@ -21,7 +56,7 @@ namespace SmartMicrobus.Core.Services.Account
             var deleted = await _userManager.DeleteAsync(user);
 
             if (!deleted.Succeeded)
-                return ApiResponseFactory.Failure("Failed to delete account",400, deleted.Errors.Select(e => e.Description).ToList());
+                return ApiResponseFactory.Failure("Failed to delete account",400, deleted.Errors.Select(e => e.Description).ToArray());
 
             return ApiResponseFactory.Success("Account deleted successfully");
         }
@@ -74,7 +109,7 @@ namespace SmartMicrobus.Core.Services.Account
 
             try
             {
-                await _whatsAppService.SendInvoiceMessageAsync(user.PhoneNumber!, otp);
+                await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otp);
             }
             catch
             {
@@ -90,8 +125,9 @@ namespace SmartMicrobus.Core.Services.Account
             if (dto is null)
                 return ApiResponseFactory.BadRequest("Data is required.");
 
-            if (string.IsNullOrWhiteSpace(dto.PhoneNumber) || string.IsNullOrWhiteSpace(dto.Otp))
-                return ApiResponseFactory.BadRequest("Phone number and OTP are required.");
+            var validationResult = ValidationHelper.ModelValidation(dto);
+            if (!validationResult.Success)
+                return validationResult;
 
             var user = await _userManager.Users.SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
             if (user is null)
@@ -131,10 +167,9 @@ namespace SmartMicrobus.Core.Services.Account
             if (loginDTO is null)
                 return ApiResponseFactory.BadRequest("Login data is required.");
 
-            if (string.IsNullOrWhiteSpace(loginDTO.PhoneNumber) || string.IsNullOrWhiteSpace(loginDTO.Password))
-            {
-                return ApiResponseFactory.BadRequest("Phone number and password are required.");
-            }
+            var validationResult = ValidationHelper.ModelValidation(loginDTO);
+            if (!validationResult.Success)
+                return validationResult;
 
 
             var user = await _userManager.Users
@@ -163,7 +198,12 @@ namespace SmartMicrobus.Core.Services.Account
                 return ApiResponseFactory.Unauthorized("Invalid phone number or password.");
             }
 
-            var jwtResponse = await _jwtService.CreateJwtToken(user, loginDTO.RememberMe);
+            var jwtResponse = await _jwtService.CreateJwtToken(user, loginDTO.RememberMe) as ApiSuccessResponse;
+
+            user.RefreshToken = jwtResponse?.RefreshToken;
+            user.RefreshTokenExpirationDateTime = jwtResponse.RefreshTokenExpirationDateTime;
+
+            await _userManager.UpdateAsync(user);
 
             return jwtResponse;
         }
@@ -172,6 +212,14 @@ namespace SmartMicrobus.Core.Services.Account
         {
             if (userId == Guid.Empty)
                 return ApiResponseFactory.BadRequest("UserId is required.");
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user != null)
+            {
+                user.RefreshToken = null;
+                user.RefreshTokenExpirationDateTime = DateTimeOffset.MinValue;
+                await _userManager.UpdateAsync(user);
+            }
 
             await _signInManager.SignOutAsync();
 
@@ -251,8 +299,9 @@ namespace SmartMicrobus.Core.Services.Account
             if (dto is null)
                 return ApiResponseFactory.BadRequest("Reset data is required.");
 
-            if (dto.UserId == Guid.Empty || string.IsNullOrWhiteSpace(dto.Token) || string.IsNullOrWhiteSpace(dto.NewPassword))
-                return ApiResponseFactory.BadRequest("UserId, token and new password are required.");
+            var validationResult = ValidationHelper.ModelValidation(dto);
+            if (!validationResult.Success)
+                return validationResult;
 
             var user = await _userManager.FindByIdAsync(dto.UserId.ToString());
             if (user is null)
