@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using SmartMicrobus.API.Filters;
 using SmartMicrobus.Core;
@@ -18,6 +19,10 @@ builder.Configuration
     .AddJsonFile(Path.Combine(configPath, $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true);
 
 builder.Services.AddControllers();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddMemoryCache();
 
 builder.Services.AddCors(options =>
 {
@@ -104,6 +109,11 @@ builder.Services.AddApiVersioning(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 
+
+
+builder.Services.AddSingleton<IFileProvider>(
+    new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"))
+);
 
 builder.Services.AddEndpointsApiExplorer();
 
