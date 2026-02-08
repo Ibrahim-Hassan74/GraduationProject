@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using System.Reflection;
 
@@ -15,5 +16,8 @@ namespace SmartMicrobus.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
-    }
+
+        public DbSet<Driver> Drivers { get; set; }
+        public DbSet<Passenger> Passangers { get; set; }
+        }
 }

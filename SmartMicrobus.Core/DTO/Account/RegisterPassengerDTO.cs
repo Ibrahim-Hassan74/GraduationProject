@@ -1,7 +1,13 @@
-﻿namespace SmartMicrobus.Core.DTO.Account
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SmartMicrobus.Core.DTO.Account
 {
     public class RegisterPassengerDTO
     {
+        public string Name { get; set; }
+        [RegularExpression(@"^\+?\d{10,15}$", ErrorMessage = "Invalid Phone Number")]
+        public string PhoneNumber { get; set; }
+        public string Password { get; set; }
 
     }
 }

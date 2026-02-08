@@ -7,8 +7,12 @@ using SmartMicrobus.API.Filters;
 using SmartMicrobus.Core;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.RepositoryContracts;
+using SmartMicrobus.Core.ServiceContracts.Account;
+using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Infrastructure;
 using SmartMicrobus.Infrastructure.Data;
+using SmartMicrobus.Infrastructure.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +59,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         return new BadRequestObjectResult(response);
     };
 });
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+builder.Services.AddScoped<IPassangerRepository, PassangerRepository>();
 
 builder.Services.AddSwaggerGen(options =>
 {
