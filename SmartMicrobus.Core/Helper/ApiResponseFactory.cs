@@ -138,7 +138,7 @@ namespace SmartMicrobus.Core.Helper
                 ["expiration"] = res.Expiration?.ToString("o"),
                 ["refreshTokenExpirationDateTime"] = res.RefreshTokenExpirationDateTime.ToString("o"),
                 ["userName"] = res.UserName,
-                ["email"] = res.Email
+                ["phone"] = res.Phone
             };
         }
     }

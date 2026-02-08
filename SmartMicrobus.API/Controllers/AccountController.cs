@@ -17,8 +17,8 @@ namespace SmartMicrobus.API.Controllers
         {
             _authService = authService;
         }
-        [HttpPost]
-        [Route("RegisterDriver")]
+
+        [HttpPost("register-driver")]
         public async Task<IActionResult> RegisterDriver([FromBody] RegisterDriverDTO registerDriverDTO)
         {
             if (registerDriverDTO is null)
@@ -35,8 +35,7 @@ namespace SmartMicrobus.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
-        [Route("RegisterPassanger")]
+        [HttpPost("register-passanger")]
         public async Task<IActionResult> RegisterPassenger([FromBody] RegisterPassengerDTO registerPassengerDTO)
         {
             if (registerPassengerDTO is null)
@@ -85,9 +84,15 @@ namespace SmartMicrobus.API.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] Guid userId)
+        [Authorize]
+        public async Task<IActionResult> Logout()
         {
-            var response = await _authService.LogoutAsync(userId);
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if(string.IsNullOrEmpty(id))
+                return Unauthorized(ApiResponseFactory.Unauthorized("Invalid user."));
+
+            var response = await _authService.LogoutAsync(Guid.Parse(id));
             
             return StatusCode(response.StatusCode , response);
         }

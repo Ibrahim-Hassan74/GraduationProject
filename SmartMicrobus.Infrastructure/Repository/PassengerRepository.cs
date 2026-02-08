@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SmartMicrobus.Infrastructure.Repository
 {
-    public class PassangerRepository(ApplicationDbContext context) : IPassengerRepository
+    public class PassengerRepository(ApplicationDbContext context) : IPassengerRepository
     {
         public async Task<Passenger> AddPassengerAsync(Passenger passanger)
         {

@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace SmartMicrobus.Core.Domain.Entities
 {
-    public class Driver
+    public class Driver : BaseEntity<Guid>
     {
-        public Guid driverId { get; set; }
         public string LicenseNumber { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
     }

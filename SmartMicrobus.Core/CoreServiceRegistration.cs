@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using SmartMicrobus.Core.Domain.Options;
+using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
@@ -49,6 +50,29 @@ namespace SmartMicrobus.Core
                         return context.Response.WriteAsync(result);
                     }
                 };
+            });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy($"${nameof(UserRole.Driver)}", policy =>
+                    policy.RequireRole($"${nameof(UserRole.Driver)}"));
+
+                options.AddPolicy($"${nameof(UserRole.Passenger)}", policy =>
+                    policy.RequireRole($"${nameof(UserRole.Passenger)}"));
+
+                options.AddPolicy($"${nameof(UserRole.Staff)}", policy =>
+                    policy.RequireRole($"${nameof(UserRole.Staff)}"));
+
+                options.AddPolicy($"${nameof(UserRole.Manager)}", policy =>
+                    policy.RequireRole($"${nameof(UserRole.Manager)}"));
+
+                options.AddPolicy("NotAuthorized", policy =>
+                {
+                    policy.RequireAssertion(context =>
+                    {
+                        return !context.User.Identity.IsAuthenticated;
+                    });
+                });
             });
 
             services.Configure<WhatsAppSettings>(configuration.GetSection("WhatsAppSettings"));

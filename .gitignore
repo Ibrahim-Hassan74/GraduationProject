@@ -412,3 +412,4 @@ FodyWeavers.xsd
 # **/appsettings.json
 # **/appsettings.Development.json
 # **/appsettings.Production.json
+/SmartMicrobus.API/Configurations/appsettings.Development.json

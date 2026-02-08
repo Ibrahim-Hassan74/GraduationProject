@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace SmartMicrobus.Core.Domain.Entities
 {
-    public class Passenger
+    public class Passenger : BaseEntity<Guid>
     {
-        public Guid PassengerId { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
     }
 }

@@ -83,11 +83,14 @@ namespace SmartMicrobus.Core.Services.Common
             return new ApiSuccessResponse()
             {
                 Token = token,
-                Email = user.Email,
+                Phone = user.PhoneNumber,
                 UserName = user.DisplayName,
                 Expiration = expiration,
                 RefreshToken = GenerateRefreshToken(),
                 RefreshTokenExpirationDateTime = refreshTokenExpiry,
+                StatusCode = 200,
+                Success = true,
+                Message = "Token generated successfully"
             };
         }
 

@@ -8,8 +8,6 @@ using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.Helper;
-using SmartMicrobus.Core.RepositoryContracts;
-using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -36,9 +34,7 @@ namespace SmartMicrobus.Core.Services.Account
             IJwtService jwtService,
             IWhatsAppService whatsAppService, 
             IUnitOfWork unitOfWork,
-            IImageService imageService,
-            IDriverRepository driverRepository,
-            IPassengerRepository passangerRepository)
+            IImageService imageService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -46,8 +42,8 @@ namespace SmartMicrobus.Core.Services.Account
             _whatsAppService = whatsAppService;
             _unitOfWork = unitOfWork;
             _imageService = imageService;
-            _driverRepository = driverRepository;
-            _passangerRepository = passangerRepository;
+            _driverRepository = unitOfWork.DriverRepository;
+            _passangerRepository = unitOfWork.PassengerRepository;
         }
 
         public Task<ApiResponse> ConfirmAccountAsync(ConfirmAccountDTO dto)
@@ -121,7 +117,7 @@ namespace SmartMicrobus.Core.Services.Account
 
             var driver = new Driver
             {
-                driverId = user.Id,
+                Id = user.Id,
                 LicenseNumber = dto.LicenseNumber
             };
             
@@ -159,7 +155,7 @@ namespace SmartMicrobus.Core.Services.Account
 
             var passenger = new Passenger
             {
-                PassengerId = user.Id,
+                Id = user.Id,
             };
             var response = await _passangerRepository.AddPassengerAsync(passenger);
 

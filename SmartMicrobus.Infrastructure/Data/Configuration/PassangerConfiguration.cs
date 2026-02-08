@@ -13,10 +13,10 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<Passenger> builder)
         {
-            builder.HasKey(p => p.PassengerId);
+            builder.HasKey(p => p.Id);
             builder.HasOne(p => p.ApplicationUser)
                 .WithOne()
-                .HasForeignKey<Passenger>(p => p.PassengerId);
+                .HasForeignKey<Passenger>(p => p.Id);
         }
     }
 }

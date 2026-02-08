@@ -8,7 +8,7 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<Driver> builder)
         {
-            builder.HasKey(d => d.driverId);
+            builder.HasKey(d => d.Id);
 
             builder.Property(d => d.LicenseNumber)
                     .IsRequired()
@@ -16,7 +16,7 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
 
             builder.HasOne(d => d.ApplicationUser)
                 .WithOne()
-                .HasForeignKey<Driver>(d => d.driverId);
+                .HasForeignKey<Driver>(d => d.Id);
         }
     }
 }

@@ -16,8 +16,8 @@ namespace SmartMicrobus.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
-        public DbSet<Driver> Drivers { get; set; }
-        public DbSet<Passenger> Passangers { get; set; }
+        public virtual DbSet<Driver> Drivers { get; set; }
+        public virtual DbSet<Passenger> Passangers { get; set; }
         public virtual DbSet<Photo> Photos { get; set; }
     }
 }
