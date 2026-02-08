@@ -1,4 +1,3 @@
-csharp SmartMicrobus.Core\DTO\Account\VerifyOtpDTO.cs
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartMicrobus.Core.DTO.Account

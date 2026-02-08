@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SmartMicrobus.Core.RepositoryContracts
 {
-    public interface IPassangerRepository
+    public interface IPassengerRepository
     {
         Task<Passenger> AddPassengerAsync(Passenger passanger);
     }

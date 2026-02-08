@@ -6,7 +6,7 @@
     <members>
         <member name="T:SmartMicrobus.API.Controllers.CustomControllerBase">
             <summary>
-            Base controller for the E-StoreX API, providing common functionality for all controllers.
+            Base controller for the Smart Microbus API, providing common functionality for all controllers.
             </summary>
         </member>
         <member name="M:SmartMicrobus.API.Controllers.CustomControllerBase.#ctor">

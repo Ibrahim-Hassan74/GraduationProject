@@ -1,24 +1,15 @@
 ﻿using Asp.Versioning;
-<<<<<<< HEAD
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using SmartMicrobus.Core.DTO.Account;
-using SmartMicrobus.Core.ServiceContracts.Account;
-using System.Threading.Tasks;
-=======
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Account;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using System.Security.Claims;
->>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
 
 namespace SmartMicrobus.API.Controllers
 {
     [ApiVersion("1.0")]
-    public class AccountController(IAuthService authService) : CustomControllerBase
+    public class AccountController : CustomControllerBase
     {
         private readonly IAuthService _authService;
 
@@ -26,8 +17,6 @@ namespace SmartMicrobus.API.Controllers
         {
             _authService = authService;
         }
-
-<<<<<<< HEAD
         [HttpPost]
         [Route("RegisterDriver")]
         public async Task<IActionResult> RegisterDriver([FromBody] RegisterDriverDTO registerDriverDTO)
@@ -37,7 +26,7 @@ namespace SmartMicrobus.API.Controllers
                 throw new ArgumentNullException(nameof(registerDriverDTO), "RegisterDriverDTO cannot be null.");
             }
             
-            var response = await authService.RegisterDriverAsync(registerDriverDTO);
+            var response = await _authService.RegisterDriverAsync(registerDriverDTO);
 
             if (!response.Success)
             {
@@ -55,7 +44,7 @@ namespace SmartMicrobus.API.Controllers
                 throw new ArgumentNullException(nameof(registerPassengerDTO), "RegisterPassengerDTO cannot be null.");
             }
 
-            var response = await authService.RegisterPassengerAsync(registerPassengerDTO);
+            var response = await _authService.RegisterPassengerAsync(registerPassengerDTO);
             if (!response.Success)
             {
                 return BadRequest(response);
@@ -63,8 +52,6 @@ namespace SmartMicrobus.API.Controllers
             return Ok(response);
         }
 
-        }
-=======
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
         {
@@ -148,5 +135,4 @@ namespace SmartMicrobus.API.Controllers
         }
 
     }
->>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
 }

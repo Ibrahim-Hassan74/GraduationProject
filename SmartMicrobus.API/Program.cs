@@ -68,7 +68,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IDriverRepository, DriverRepository>();
-builder.Services.AddScoped<IPassangerRepository, PassangerRepository>();
+builder.Services.AddScoped<IPassengerRepository, PassangerRepository>();
 
 builder.Services.AddSwaggerGen(options =>
 {

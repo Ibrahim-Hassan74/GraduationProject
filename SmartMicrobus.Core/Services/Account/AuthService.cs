@@ -1,44 +1,32 @@
 ﻿using Microsoft.AspNetCore.Identity;
-<<<<<<< HEAD
-=======
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
->>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.DTO.Account;
 using SmartMicrobus.Core.DTO.Common;
-<<<<<<< HEAD
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Account;
-=======
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using System.Security.Claims;
 using System.Security.Cryptography;
->>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
 
 namespace SmartMicrobus.Core.Services.Account
 {
-    public class AuthService(UserManager<ApplicationUser> userManager, IDriverRepository driverRepository,
-        IPassangerRepository passangerRepository) : IAuthService
+    public class AuthService : IAuthService
     {
-<<<<<<< HEAD
-        public Task<ApiResponse> ConfirmAccountAsync(ConfirmAccountDTO dto)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ApiResponse> DeleteAccountAsync(string userId)
-=======
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IJwtService _jwtService;
         private readonly IWhatsAppService _whatsAppService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IImageService _imageService;
+
+        private readonly IDriverRepository _driverRepository;
+        private readonly IPassengerRepository _passangerRepository;
 
         private const string OtpLoginProvider = "OTP";
         private const string OtpTokenName = "ForgotPassword";
@@ -48,7 +36,9 @@ namespace SmartMicrobus.Core.Services.Account
             IJwtService jwtService,
             IWhatsAppService whatsAppService, 
             IUnitOfWork unitOfWork,
-            IImageService imageService)
+            IImageService imageService,
+            IDriverRepository driverRepository,
+            IPassengerRepository passangerRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -56,19 +46,14 @@ namespace SmartMicrobus.Core.Services.Account
             _whatsAppService = whatsAppService;
             _unitOfWork = unitOfWork;
             _imageService = imageService;
+            _driverRepository = driverRepository;
+            _passangerRepository = passangerRepository;
         }
 
         public Task<ApiResponse> ConfirmAccountAsync(ConfirmAccountDTO dto)
->>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
         {
             throw new NotImplementedException();
         }
-
-<<<<<<< HEAD
-        public Task<ApiResponse> DeleteUserPhotoAsync(Guid userId)
-        {
-            throw new NotImplementedException();
-=======
         public async Task<ApiResponse> DeleteAccountAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -104,31 +89,9 @@ namespace SmartMicrobus.Core.Services.Account
             await _userManager.UpdateAsync(user);
 
             return ApiResponseFactory.Success("User photo deleted successfully.");
->>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
         }
 
         public Task<ApiResponse> ExternalLoginCallbackAsync(string remoteError = "")
-        {
-            throw new NotImplementedException();
-        }
-
-<<<<<<< HEAD
-        public Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDTO dto)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ApiResponse> LoginAsync(LoginDTO loginDTO)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ApiResponse> LogoutAsync(Guid userId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ApiResponse> RefreshTokenAsync(TokenModel model)
         {
             throw new NotImplementedException();
         }
@@ -143,7 +106,7 @@ namespace SmartMicrobus.Core.Services.Account
                 Role = Enums.UserRole.Driver
             };
 
-            var result = await userManager.CreateAsync(user, dto.Password);
+            var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
                 return new ApiResponse
@@ -162,7 +125,7 @@ namespace SmartMicrobus.Core.Services.Account
                 LicenseNumber = dto.LicenseNumber
             };
             
-            await driverRepository.AddDriverAsync(driver);
+            await _driverRepository.AddDriverAsync(driver);
             return new ApiResponse
             {
                 Success = true,
@@ -181,14 +144,14 @@ namespace SmartMicrobus.Core.Services.Account
                 Role = Enums.UserRole.Passenger
             };
 
-            var result = await userManager.CreateAsync(user, dto.Password);
+            var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
                 return new ApiResponse
                 {
                     Success = false,
                     Message = "Failed to register passenger.",
-                    StatusCode = 400 
+                    StatusCode = 400
                 };
             }
 
@@ -198,15 +161,15 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 PassengerId = user.Id,
             };
-            var response = await passangerRepository.AddPassengerAsync(passenger);
+            var response = await _passangerRepository.AddPassengerAsync(passenger);
 
             return new ApiResponse
             {
                 Success = true,
                 Message = "Passenger registered successfully.",
-                StatusCode = 201 
+                StatusCode = 201
             };
-=======
+        }
         public async Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDTO dto)
         {
             if (dto is null || string.IsNullOrWhiteSpace(dto.PhoneNumber))
@@ -397,28 +360,10 @@ namespace SmartMicrobus.Core.Services.Account
 
             return authResponse;
         }
-
-        public Task<ApiResponse> RegisterDriverAsync(RegisterDriverDTO dto)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ApiResponse> RegisterPassengerAsync(RegisterPassengerDTO dto)
-        {
-            throw new NotImplementedException();
->>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
-        }
-
         public Task<ApiResponse> ResendConfirmationAccountAsync(string phone)
         {
             throw new NotImplementedException();
         }
-
-<<<<<<< HEAD
-        public Task<ApiResponse> ResetPasswordAsync(ResetPasswordDTO dto)
-        {
-            throw new NotImplementedException();
-=======
         public async Task<ApiResponse> ResetPasswordAsync(ResetPasswordDTO dto)
         {
             if (dto is null)
@@ -441,19 +386,12 @@ namespace SmartMicrobus.Core.Services.Account
             }
 
             return ApiResponseFactory.Success("Password has been reset successfully.");
->>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
         }
 
         public Task<ApiResponse> UpdateUserProfileAsync(UpdateUserDTO dto)
         {
             throw new NotImplementedException();
         }
-
-<<<<<<< HEAD
-        public Task<ApiResponse> UploadUserPhotoAsync(Guid userId, UploadUserPhotoDTO dto)
-        {
-            throw new NotImplementedException();
-=======
         public async Task<ApiResponse> UploadUserPhotoAsync(Guid userId, UploadUserPhotoDTO dto)
         {
             var user = await _userManager.Users
@@ -498,7 +436,6 @@ namespace SmartMicrobus.Core.Services.Account
             await _userManager.UpdateAsync(user);
 
             return ApiResponseFactory.Success("User photo uploaded successfully.");
->>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
         }
     }
 }
