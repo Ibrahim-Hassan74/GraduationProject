@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Infrastructure.Data;
+using SmartMicrobus.Infrastructure.Repository;
 using StackExchange.Redis;
 
 namespace SmartMicrobus.Infrastructure
@@ -10,6 +12,8 @@ namespace SmartMicrobus.Infrastructure
     {
         public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));

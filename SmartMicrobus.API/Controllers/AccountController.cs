@@ -1,22 +1,33 @@
 ﻿using Asp.Versioning;
+<<<<<<< HEAD
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Account;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using System.Threading.Tasks;
+=======
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SmartMicrobus.Core.DTO.Account;
+using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.ServiceContracts.Account;
+using System.Security.Claims;
+>>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
 
 namespace SmartMicrobus.API.Controllers
 {
     [ApiVersion("1.0")]
     public class AccountController(IAuthService authService) : CustomControllerBase
     {
-        [HttpGet("login")]
-        public IActionResult Login()
+        private readonly IAuthService _authService;
+
+        public AccountController(IAuthService authService)
         {
-            return Ok("Login endpoint");
+            _authService = authService;
         }
 
+<<<<<<< HEAD
         [HttpPost]
         [Route("RegisterDriver")]
         public async Task<IActionResult> RegisterDriver([FromBody] RegisterDriverDTO registerDriverDTO)
@@ -53,4 +64,89 @@ namespace SmartMicrobus.API.Controllers
         }
 
         }
+=======
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
+        {
+            var response = await _authService.LoginAsync(loginDto);
+            
+            return StatusCode(response.StatusCode , response);
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDTO dto)
+        {
+            var response = await _authService.ForgotPasswordAsync(dto);
+            
+            return StatusCode(response.StatusCode , response);
+        }
+
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDTO dto)
+        {
+            var response = await _authService.VerifyOtpAsync(dto);
+            
+            return StatusCode(response.StatusCode , response);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO dto)
+        {
+            var response = await _authService.ResetPasswordAsync(dto);
+            
+            return StatusCode(response.StatusCode , response);
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] Guid userId)
+        {
+            var response = await _authService.LogoutAsync(userId);
+            
+            return StatusCode(response.StatusCode , response);
+        }
+
+        [HttpPost("generate-new-jwt-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenModel model)
+        {
+            var response = await _authService.RefreshTokenAsync(model);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [HttpPatch("upload-photo")]
+        [Authorize]
+        public async Task<IActionResult> UploadUserPhoto([FromForm] UploadUserPhotoDTO dto)
+        {
+            var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdFromToken))
+                return StatusCode(StatusCodes.Status401Unauthorized, ApiResponseFactory.Unauthorized());
+
+            var result = await _authService.UploadUserPhotoAsync(Guid.Parse(userIdFromToken), dto);
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("delete-photo")]
+        [Authorize]
+        public async Task<IActionResult> DeleteUserPhoto()
+        {
+            var userIdFromToken = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdFromToken))
+                return StatusCode(StatusCodes.Status401Unauthorized, ApiResponseFactory.Unauthorized());
+
+            var result = await _authService.DeleteUserPhotoAsync(Guid.Parse(userIdFromToken));
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpDelete("delete")]
+        [Authorize]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized(ApiResponseFactory.Unauthorized("Invalid user."));
+            var result = await _authService.DeleteAccountAsync(userId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+    }
+>>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
 }

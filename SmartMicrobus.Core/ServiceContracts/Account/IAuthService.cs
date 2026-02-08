@@ -9,6 +9,7 @@ namespace SmartMicrobus.Core.ServiceContracts.Account
         Task<ApiResponse> RegisterPassengerAsync(RegisterPassengerDTO dto);
         Task<ApiResponse> LoginAsync(LoginDTO loginDTO);
         Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDTO dto);
+        Task<ApiResponse> VerifyOtpAsync(VerifyOtpDTO dto);
         Task<ApiResponse> ConfirmAccountAsync(ConfirmAccountDTO dto);
         Task<ApiResponse> ResetPasswordAsync(ResetPasswordDTO dto);
         Task<ApiResponse> RefreshTokenAsync(TokenModel model);
@@ -16,8 +17,12 @@ namespace SmartMicrobus.Core.ServiceContracts.Account
         Task<ApiResponse> UpdateUserProfileAsync(UpdateUserDTO dto);
         Task<ApiResponse> ExternalLoginCallbackAsync(string remoteError = "");
         Task<ApiResponse> DeleteAccountAsync(string userId);
+<<<<<<< HEAD
         Task<ApiResponse> ResendConfirmationAccountAsync(string phone);
+=======
+>>>>>>> e65c010ef2fca80349078645d5d9912eb28ef042
         Task<ApiResponse> UploadUserPhotoAsync(Guid userId, UploadUserPhotoDTO dto);
         Task<ApiResponse> DeleteUserPhotoAsync(Guid userId);
+        Task<ApiResponse> ResendConfirmationAccountAsync(string phone);
     }
 }

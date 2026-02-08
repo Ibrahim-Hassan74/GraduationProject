@@ -3,7 +3,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using SmartMicrobus.Core.Domain.Options;
 using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.ServiceContracts.Account;
+using SmartMicrobus.Core.ServiceContracts.Common;
+using SmartMicrobus.Core.Services.Account;
+using SmartMicrobus.Core.Services.Common;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -45,6 +50,12 @@ namespace SmartMicrobus.Core
                     }
                 };
             });
+
+            services.Configure<WhatsAppSettings>(configuration.GetSection("WhatsAppSettings"));
+            services.AddHttpClient<IWhatsAppService, WhatsAppService>();
+            services.AddSingleton<IImageService, ImageService>();
+            services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IAuthService, AuthService>();
 
             return services;
         }

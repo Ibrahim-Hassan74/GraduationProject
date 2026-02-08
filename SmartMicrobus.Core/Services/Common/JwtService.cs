@@ -40,7 +40,7 @@ namespace SmartMicrobus.Core.Services.Common
                  new Claim(JwtRegisteredClaimNames.Iat,
                     new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64), //Issued at (date and time of token generation)
                  new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), //Unique name identifier of the user Id
-                 new Claim(ClaimTypes.Email, user.Email), //Email of the user
+                 new Claim(ClaimTypes.MobilePhone, user.PhoneNumber), //Email of the user
                  new Claim("remember_me", rememberMe.ToString().ToLower())
              };
 

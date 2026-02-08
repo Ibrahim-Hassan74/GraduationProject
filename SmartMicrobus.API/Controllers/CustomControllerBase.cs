@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace SmartMicrobus.API.Controllers
 {
     /// <summary>
-    /// Base controller for the E-StoreX API, providing common functionality for all controllers.
+    /// Base controller for the Smart Microbus API, providing common functionality for all controllers.
     /// </summary>
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
