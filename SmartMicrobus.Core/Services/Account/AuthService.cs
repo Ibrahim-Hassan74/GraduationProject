@@ -179,12 +179,21 @@ namespace SmartMicrobus.Core.Services.Account
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
-                return new ApiResponse
+                return ApiResponseFactory.Failure("Failed to register driver.", 400, [.. result.Errors.Select(e => e.Description)]);
+            }
+
+            var otpRespnse = await GenerateUserOtp(user);
+            if (otpRespnse.Message != null) {
+                try
                 {
-                    Success = false,
-                    Message = "Failed to register driver.",
-                    StatusCode = 400 
-                };
+                    var ok = await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otpRespnse.Message);
+                    if (!ok)
+                        throw new Exception("WhatsApp service returned false.");
+                }
+                catch
+                {
+                    //log the error
+                }
             }
 
             var driver = new Driver
@@ -194,12 +203,7 @@ namespace SmartMicrobus.Core.Services.Account
             };
             
             await _driverRepository.AddDriverAsync(driver);
-            return new ApiResponse
-            {
-                Success = true,
-                Message = "Driver registered successfully.",
-                StatusCode = 201 
-            };
+            return ApiResponseFactory.Success("Driver registered successfully.");
         }
 
         public async Task<ApiResponse> RegisterPassengerAsync(RegisterPassengerDTO dto)
@@ -250,6 +254,28 @@ namespace SmartMicrobus.Core.Services.Account
                 return ApiResponseFactory.Success("If an account with the provided phone number exists, an OTP has been sent.");
             }
 
+            var response = await GenerateUserOtp(user);
+            string? otp = response.Message;
+            if (otp == null)
+                return ApiResponseFactory.InternalServerError("Failed to generate OTP. Please try again later.");
+
+
+            try
+            {
+                var ok = await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otp);
+                if (!ok)
+                    throw new Exception("WhatsApp service returned false.");
+            }
+            catch
+            {
+                return ApiResponseFactory.InternalServerError("Failed to send OTP. Please try again later.");
+            }
+
+            return ApiResponseFactory.Success("If an account with the provided phone number exists, an OTP has been sent.");
+        }
+
+        private async Task<ApiResponse> GenerateUserOtp(ApplicationUser user)
+        {
             var existing = await _userManager.GetAuthenticationTokenAsync(user, OtpLoginProvider, OtpTokenName);
             var existingParsed = TryParseStoredOtp(existing, out _, out var expiryTimeExisting, out var sentTimeExisting, out var existingCount);
 
@@ -263,7 +289,7 @@ namespace SmartMicrobus.Core.Services.Account
                     if (secondsSinceSent < cooldownSeconds)
                     {
                         var wait = (int)Math.Ceiling(cooldownSeconds - secondsSinceSent);
-                        var waitDate= DateTimeOffset.Now.AddSeconds(wait).ToString("hh:mm:ss");
+                        var waitDate = DateTimeOffset.Now.AddSeconds(wait).ToString("hh:mm:ss");
                         return ApiResponseFactory.TooManyRequests($"OTP already sent. Please wait {waitDate} before requesting a new one.");
                     }
                 }
@@ -282,21 +308,9 @@ namespace SmartMicrobus.Core.Services.Account
             var newCount = existingParsed ? existingCount + 1 : 0;
             // store otp | expiryUnix | sentUnix | resendCount
             var storedValue = $"{otp}|{expiry.ToUnixTimeSeconds()}|{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}|{newCount}";
+            await _userManager.SetAuthenticationTokenAsync(user, OtpLoginProvider, OtpTokenName, storedValue);
 
-
-            try
-            {
-                var ok = await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otp);
-                if (!ok)
-                    throw new Exception("WhatsApp service returned false.");
-                await _userManager.SetAuthenticationTokenAsync(user, OtpLoginProvider, OtpTokenName, storedValue);
-            }
-            catch
-            {
-                return ApiResponseFactory.InternalServerError("Failed to send OTP. Please try again later.");
-            }
-
-            return ApiResponseFactory.Success("If an account with the provided phone number exists, an OTP has been sent.");
+            return ApiResponseFactory.Success(otp);
         }
 
         public async Task<ApiResponse> VerifyOtpAsync(VerifyOtpDTO dto)
