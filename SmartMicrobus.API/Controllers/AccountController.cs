@@ -139,5 +139,22 @@ namespace SmartMicrobus.API.Controllers
             return StatusCode(result.StatusCode, result);
         }
 
+        [HttpPost("confirm-account")]
+        public async Task<IActionResult> ConfirmAccount([FromBody] ConfirmAccountDTO dto)
+        {
+            var response = await _authService.ConfirmAccountAsync(dto);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [HttpPost("resend-confirmation")]
+        public async Task<IActionResult> ResendConfirmation([FromBody] ForgotPasswordDTO dto)
+        {
+            if (dto is null)
+                return BadRequest(ApiResponseFactory.BadRequest("Phone number is required."));
+
+            var response = await _authService.ResendConfirmationAccountAsync(dto.PhoneNumber);
+            return StatusCode(response.StatusCode, response);
+        }
+
     }
 }
