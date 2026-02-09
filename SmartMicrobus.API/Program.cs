@@ -2,6 +2,7 @@ using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using SmartMicrobus.API.Filters;
@@ -34,6 +35,11 @@ builder.Services.AddCors(options =>
         policybuilder => policybuilder.AllowAnyOrigin()
                           .AllowAnyMethod()
                           .AllowAnyHeader());
+});
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>

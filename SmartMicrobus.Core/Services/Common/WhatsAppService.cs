@@ -25,11 +25,13 @@ namespace SmartMicrobus.Core.Services.Common
         {
             var payload = new WhatsAppTemplatePayload
             {
+                messaging_product = "whatsapp",
                 to = phone,
+                type = "template",
                 template = new WhatsAppTemplate
                 {
                     name = _settings.TemplateName,
-                    language = new WhatsAppLanguage { code = "ar" },
+                    language = new WhatsAppLanguage { code = "en" },
                     components = new List<WhatsAppComponent>
                     {
                         new WhatsAppComponent
@@ -37,7 +39,26 @@ namespace SmartMicrobus.Core.Services.Common
                             type = "body",
                             parameters = new List<WhatsAppParameter>
                             {
-                                new() { text = code }
+                                new WhatsAppParameter
+                                {
+                                    type = "text",
+                                    text = code
+                                }
+                            }
+                        },
+
+                        new WhatsAppComponent
+                        {
+                            type = "button",
+                            sub_type = "copy_code",
+                            index = "0",
+                            parameters = new List<WhatsAppParameter>
+                            {
+                                new WhatsAppParameter
+                                {
+                                    type = "coupon_code",
+                                    coupon_code = code
+                                }
                             }
                         }
                     }
@@ -56,5 +77,6 @@ namespace SmartMicrobus.Core.Services.Common
 
             return response.IsSuccessStatusCode;
         }
+
     }
 }

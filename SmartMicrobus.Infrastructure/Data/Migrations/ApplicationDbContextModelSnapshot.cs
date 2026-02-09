@@ -8,7 +8,7 @@ using SmartMicrobus.Infrastructure.Data;
 
 #nullable disable
 
-namespace SmartMicrobus.Infrastructure.Migrations
+namespace SmartMicrobus.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -127,7 +127,7 @@ namespace SmartMicrobus.Infrastructure.Migrations
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Driver", b =>
                 {
-                    b.Property<Guid>("driverId")
+                    b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LicenseNumber")
@@ -135,19 +135,41 @@ namespace SmartMicrobus.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.HasKey("driverId");
+                    b.HasKey("Id");
 
                     b.ToTable("Drivers");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Passenger", b =>
                 {
-                    b.Property<Guid>("PassengerId")
+                    b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("PassengerId");
+                    b.HasKey("Id");
 
                     b.ToTable("Passangers");
+                });
+
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Photo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ImageName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("Photos");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationRole", b =>
@@ -224,6 +246,12 @@ namespace SmartMicrobus.Infrastructure.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("RefreshTokenExpirationDateTime")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
@@ -306,7 +334,7 @@ namespace SmartMicrobus.Infrastructure.Migrations
                 {
                     b.HasOne("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", "ApplicationUser")
                         .WithOne()
-                        .HasForeignKey("SmartMicrobus.Core.Domain.Entities.Driver", "driverId")
+                        .HasForeignKey("SmartMicrobus.Core.Domain.Entities.Driver", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -317,11 +345,25 @@ namespace SmartMicrobus.Infrastructure.Migrations
                 {
                     b.HasOne("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", "ApplicationUser")
                         .WithOne()
-                        .HasForeignKey("SmartMicrobus.Core.Domain.Entities.Passenger", "PassengerId")
+                        .HasForeignKey("SmartMicrobus.Core.Domain.Entities.Passenger", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Photo", b =>
+                {
+                    b.HasOne("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", "User")
+                        .WithOne("Photo")
+                        .HasForeignKey("SmartMicrobus.Core.Domain.Entities.Photo", "UserId");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", b =>
+                {
+                    b.Navigation("Photo");
                 });
 #pragma warning restore 612, 618
         }
