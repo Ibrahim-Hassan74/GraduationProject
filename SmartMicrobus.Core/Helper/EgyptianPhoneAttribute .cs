@@ -35,10 +35,10 @@ namespace SmartMicrobus.Core.Helper
             if (cleaned.StartsWith("20"))
                 cleaned = cleaned[2..];
 
-            if (!cleaned.StartsWith("1") || cleaned.Length != 10)
+            if (!cleaned.StartsWith("01") || cleaned.Length != 11)
                 return null;
 
-            return "20" + cleaned;
+            return "2" + cleaned;
         }
     }
 }
