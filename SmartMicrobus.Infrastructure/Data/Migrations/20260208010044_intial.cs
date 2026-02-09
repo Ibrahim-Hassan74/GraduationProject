@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SmartMicrobus.Infrastructure.Migrations
+namespace SmartMicrobus.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
     public partial class intial : Migration
