@@ -263,14 +263,15 @@ namespace SmartMicrobus.Core.Services.Account
                     if (secondsSinceSent < cooldownSeconds)
                     {
                         var wait = (int)Math.Ceiling(cooldownSeconds - secondsSinceSent);
-                        var waitDate= DateTimeOffset.Now.AddSeconds(wait).ToString("hh mm ss");
-                        return ApiResponseFactory.TooManyRequests($"OTP recently sent. Please wait {waitDate} before requesting another.");
+                        var waitDate= DateTimeOffset.Now.AddSeconds(wait).ToString("hh:mm:ss");
+                        return ApiResponseFactory.TooManyRequests($"OTP already sent. Please wait {waitDate} before requesting a new one.");
                     }
                 }
                 else
                 {
                     var secondsUntilExpiry = (int)Math.Ceiling((expiryTimeExisting - DateTimeOffset.UtcNow).TotalSeconds);
-                    return ApiResponseFactory.TooManyRequests($"An OTP was already sent. Please wait {secondsUntilExpiry} seconds before requesting another.");
+                    var waitDate = DateTimeOffset.Now.AddSeconds(secondsUntilExpiry).ToString("hh:mm:ss");
+                    return ApiResponseFactory.TooManyRequests($"OTP already sent. Please wait {waitDate} before requesting a new one.");
                 }
             }
 
@@ -283,12 +284,12 @@ namespace SmartMicrobus.Core.Services.Account
             var storedValue = $"{otp}|{expiry.ToUnixTimeSeconds()}|{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}|{newCount}";
 
 
-                await _userManager.SetAuthenticationTokenAsync(user, OtpLoginProvider, OtpTokenName, storedValue);
             try
             {
                 var ok = await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otp);
                 if (!ok)
                     throw new Exception("WhatsApp service returned false.");
+                await _userManager.SetAuthenticationTokenAsync(user, OtpLoginProvider, OtpTokenName, storedValue);
             }
             catch
             {
@@ -472,13 +473,15 @@ namespace SmartMicrobus.Core.Services.Account
                     if (secondsSinceSent < cooldownSeconds)
                     {
                         var wait = (int)Math.Ceiling(cooldownSeconds - secondsSinceSent);
-                        return ApiResponseFactory.TooManyRequests($"OTP recently sent. Please wait {wait} seconds before requesting another.");
+                        var waitDate = DateTimeOffset.Now.AddSeconds(wait).ToString("hh:mm:ss");
+                        return ApiResponseFactory.TooManyRequests($"OTP already sent. Please wait {waitDate} before requesting a new one.");
                     }
                 }
                 else
                 {
                     var secondsUntilExpiry = (int)Math.Ceiling((expiryTimeExisting - DateTimeOffset.UtcNow).TotalSeconds);
-                    return ApiResponseFactory.TooManyRequests($"An OTP was already sent. Please wait {secondsUntilExpiry} seconds before requesting another.");
+                    var waitDate = DateTimeOffset.Now.AddSeconds(secondsUntilExpiry).ToString("hh:mm:ss");
+                    return ApiResponseFactory.TooManyRequests($"OTP already sent. Please wait {waitDate} before requesting a new one.");
                 }
             }
 
