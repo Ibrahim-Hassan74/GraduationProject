@@ -219,26 +219,32 @@ namespace SmartMicrobus.Core.Services.Account
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
-                return new ApiResponse
-                {
-                    Success = false,
-                    Message = "Failed to register passenger.",
-                    StatusCode = 400
-                };
+                return ApiResponseFactory.Failure("Failed to register passenger.", 400, [.. result.Errors.Select(e => e.Description)]);
             }
 
-            var passenger = new Passenger
+            var otpRespnse = await GenerateUserOtp(user);
+            if (otpRespnse.Message != null)
             {
-                Id = user.Id,
-            };
-            var response = await _passangerRepository.AddPassengerAsync(passenger);
+                try
+                {
+                    var ok = await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otpRespnse.Message);
+                    if (!ok)
+                        throw new Exception("WhatsApp service returned false.");
+                }
+                catch (Exception ex)
+                {
+                        //log the error
+                        Console.WriteLine($"{ex.Message},\n {ex.InnerException}");
+                }
 
-            return new ApiResponse
-            {
-                Success = true,
-                Message = "Passenger registered successfully.",
-                StatusCode = 201
-            };
+            }
+        var passenger = new Passenger
+        {
+            Id = user.Id,
+        };
+        var response = await _passangerRepository.AddPassengerAsync(passenger);
+        
+        return ApiResponseFactory.Success("Passenger registered successfully.");
         }
 
         public async Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDTO dto)

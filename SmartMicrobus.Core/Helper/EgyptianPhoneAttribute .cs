@@ -28,17 +28,11 @@ namespace SmartMicrobus.Core.Helper
                 return null;
 
             var cleaned = Regex.Replace(phone, @"\D", "");
-
-            if (cleaned.Length < 10)
+            if (string.IsNullOrEmpty(cleaned))
                 return null;
 
-            if (cleaned.StartsWith("20"))
-                cleaned = cleaned[2..];
-
-            if (!cleaned.StartsWith("01") || cleaned.Length != 11)
-                return null;
-
-            return "2" + cleaned;
+            var last9 = cleaned.Length > 9 ? cleaned[^9..] : cleaned;
+            return "201" + last9;
         }
     }
 }
