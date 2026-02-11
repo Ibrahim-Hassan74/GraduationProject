@@ -80,6 +80,7 @@ namespace SmartMicrobus.Core
             services.AddSingleton<IImageService, ImageService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IOtpService, OtpService>();
 
             return services;
         }

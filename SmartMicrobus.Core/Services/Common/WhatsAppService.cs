@@ -31,7 +31,7 @@ namespace SmartMicrobus.Core.Services.Common
                 template = new WhatsAppTemplate
                 {
                     name = _settings.TemplateName,
-                    language = new WhatsAppLanguage { code = "en" },
+                    language = new WhatsAppLanguage { code = "ar_eg" },
                     components = new List<WhatsAppComponent>
                     {
                         new WhatsAppComponent
