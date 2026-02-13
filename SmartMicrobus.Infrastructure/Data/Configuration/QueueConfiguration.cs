@@ -1,0 +1,24 @@
+﻿
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SmartMicrobus.Core.Domain.Entities;
+namespace SmartMicrobus.Infrastructure.Data.Configuration
+{
+    public class QueueConfiguration : IEntityTypeConfiguration<Queue>
+    {
+        public void Configure(EntityTypeBuilder<Queue> builder)
+        {
+            builder.HasKey(q => q.Id);
+
+            builder.HasOne(q => q.Station)
+                .WithMany()
+                .HasForeignKey(q => q.StationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(q => q.Route)
+                .WithMany()
+                .HasForeignKey(q => q.RouteId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+    }
+}

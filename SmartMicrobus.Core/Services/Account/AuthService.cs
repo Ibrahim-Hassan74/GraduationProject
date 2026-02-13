@@ -266,7 +266,7 @@ namespace SmartMicrobus.Core.Services.Account
 
             if (user is null)
             {
-                return ApiResponseFactory.Success("If an account with the provided phone number exists, an OTP has been sent.");
+                return ApiResponseFactory.NotFound("No account found with this phone number.");
             }
 
             if (!user.PhoneNumberConfirmed)
@@ -379,7 +379,7 @@ namespace SmartMicrobus.Core.Services.Account
 
             if (user is null)
             {
-                return ApiResponseFactory.Success("If an account with the provided phone number exists, an OTP has been sent.");
+                return ApiResponseFactory.NotFound("No account found with this phone number.");
             }
 
             if (user.PhoneNumberConfirmed)
