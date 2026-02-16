@@ -11,6 +11,7 @@ using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using SmartMicrobus.Core.Enums;
 
 namespace SmartMicrobus.Core.Services.Account
 {
@@ -22,6 +23,7 @@ namespace SmartMicrobus.Core.Services.Account
         private readonly IWhatsAppService _whatsAppService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IImageService _imageService;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
         private readonly IDriverRepository _driverRepository;
         private readonly IPassengerRepository _passangerRepository;
@@ -33,7 +35,8 @@ namespace SmartMicrobus.Core.Services.Account
             IWhatsAppService whatsAppService,
             IUnitOfWork unitOfWork,
             IImageService imageService,
-            IOtpService otpService)
+            IOtpService otpService,
+            RoleManager<ApplicationRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -44,6 +47,7 @@ namespace SmartMicrobus.Core.Services.Account
             _driverRepository = _unitOfWork.DriverRepository;
             _passangerRepository = _unitOfWork.PassengerRepository;
             _otpService = otpService;
+            _roleManager = roleManager;
         }
 
         // Parse stored token format:
@@ -56,7 +60,6 @@ namespace SmartMicrobus.Core.Services.Account
                 UserName = dto.PhoneNumber,
                 PhoneNumber = dto.PhoneNumber,
                 DisplayName = dto.DisplayName,
-                Role = Enums.UserRole.Driver
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -64,6 +67,8 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 return ApiResponseFactory.Failure("Failed to register driver.", 400, [.. result.Errors.Select(e => e.Description)]);
             }
+
+            await EnsureRoleExistsAndAssignAsync(user, UserRole.Driver.ToString());
 
             try
             {
@@ -105,7 +110,6 @@ namespace SmartMicrobus.Core.Services.Account
                 UserName = dto.PhoneNumber,
                 PhoneNumber = dto.PhoneNumber,
                 DisplayName = dto.Name,
-                Role = Enums.UserRole.Passenger
             };
 
             var result = await _userManager.CreateAsync(user, dto.Password);
@@ -113,6 +117,8 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 return ApiResponseFactory.Failure("Failed to register passenger.", 400, [.. result.Errors.Select(e => e.Description)]);
             }
+
+            await EnsureRoleExistsAndAssignAsync(user, UserRole.Passenger.ToString());
 
             try
             {
@@ -526,6 +532,14 @@ namespace SmartMicrobus.Core.Services.Account
         public Task<ApiResponse> ExternalLoginCallbackAsync(string remoteError = "")
         {
             throw new NotImplementedException();
+        }
+
+        private async Task EnsureRoleExistsAndAssignAsync(ApplicationUser user, string roleName)
+        {
+            if (!await _roleManager.RoleExistsAsync(roleName))
+                await _roleManager.CreateAsync(new ApplicationRole { Name = roleName });
+
+            await _userManager.AddToRoleAsync(user, roleName);
         }
     }
 }
