@@ -1,5 +1,4 @@
-﻿
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SmartMicrobus.Core.Domain.Entities;
 namespace SmartMicrobus.Infrastructure.Data.Configuration
@@ -19,6 +18,7 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
                 .WithMany()
                 .HasForeignKey(q => q.RouteId)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.HasIndex(q => new { q.StationId, q.RouteId }).IsUnique();
         }
     }
 }

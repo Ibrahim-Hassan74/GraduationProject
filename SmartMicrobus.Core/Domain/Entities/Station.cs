@@ -1,19 +1,16 @@
-﻿
-
-namespace SmartMicrobus.Core.Domain.Entities
+﻿namespace SmartMicrobus.Core.Domain.Entities
 {
-    public class Station
+    public class Station : BaseEntity<Guid>
     {
-        public Guid Id { get; set; }
+        public string NameAr { get; set; } = null!;
+        public string NameEn { get; set; } = null!;
 
-        public string Name { get; set; } = null!;
-
-        public string City { get; set; } = null!;
+        public string CityAr { get; set; } = null!;
+        public string CityEn { get; set; } = null!;
 
         public bool IsActive { get; set; } = true;
 
-        // Navigation
         public ICollection<Route> Routes { get; set; } = new List<Route>();
+        public ICollection<Queue> Queues { get; set; } = new List<Queue>();
     }
-
 }

@@ -1,11 +1,7 @@
-﻿
-
-namespace SmartMicrobus.Core.Domain.Entities
+﻿namespace SmartMicrobus.Core.Domain.Entities
 {
-    public class Queue
+    public class Queue : BaseEntity<Guid>
     {
-        public Guid Id { get; set; }
-
         public Guid StationId { get; set; }
         public Station Station { get; set; } = null!;
 
@@ -14,5 +10,4 @@ namespace SmartMicrobus.Core.Domain.Entities
 
         public ICollection<QueueItem> Items { get; set; } = new List<QueueItem>();
     }
-
 }
