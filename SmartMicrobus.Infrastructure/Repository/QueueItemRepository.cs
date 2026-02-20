@@ -1,5 +1,6 @@
-
+using Microsoft.EntityFrameworkCore;
 using SmartMicrobus.Core.Domain.Entities;
+using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Infrastructure.Data;
 
@@ -7,8 +8,82 @@ namespace SmartMicrobus.Infrastructure.Repository
 {
     public class QueueItemRepository : GenericRepository<QueueItem>, IQueueItemRepository
     {
+        private readonly ApplicationDbContext _context;
         public QueueItemRepository(ApplicationDbContext context) : base(context)
         {
+            _context = context;
+        }
+        public async Task<QueueItem?> GetActiveByDriverIdAsync(Guid driverId)
+        {
+            return await _context.QueueItems
+                .Include(x => x.Queue)
+                    .ThenInclude(q => q.Route)
+                    .Include(x => x.Driver)
+                    .ThenInclude(u => u.ApplicationUser)
+                .FirstOrDefaultAsync(x =>
+                    x.DriverId == driverId &&
+                    (x.Status == QueueStatus.Waiting ||
+                     x.Status == QueueStatus.YourTurn));
+        }
+
+        public async Task<bool> ExistsActiveByDriverIdAsync(Guid driverId)
+        {
+            return await _context.QueueItems
+                .AnyAsync(x =>
+                    x.DriverId == driverId &&
+                    (x.Status == QueueStatus.Waiting ||
+                     x.Status == QueueStatus.YourTurn));
+        }
+
+        public async Task<int> GetLastPositionAsync(Guid queueId)
+        {
+            var last = await _context.QueueItems
+                .Where(x => x.QueueId == queueId)
+                .OrderByDescending(x => x.Position)
+                .Select(x => x.Position)
+                .FirstOrDefaultAsync();
+
+            return last;
+        }
+
+        public async Task<int> CountDriversBeforeAsync(Guid queueId, int position)
+        {
+            return await _context.QueueItems
+                .Where(x =>
+                    x.QueueId == queueId &&
+                    x.Position < position &&
+                    x.Status == QueueStatus.Waiting)
+                .CountAsync();
+        }
+
+        public async Task<int> CountActiveAsync(Guid queueId)
+        {
+            return await _context.QueueItems
+                .Where(x =>
+                    x.QueueId == queueId &&
+                    x.Status == QueueStatus.Waiting)
+                .CountAsync();
+        }
+
+        public async Task<QueueItem?> GetFirstInQueueAsync(Guid queueId)
+        {
+            return await _context.QueueItems
+                .Where(x =>
+                    x.QueueId == queueId &&
+                    x.Status == QueueStatus.Waiting)
+                .OrderBy(x => x.Position)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<QueueItem>> GetActiveQueueItemsAsync(Guid queueId)
+        {
+            return await _context.QueueItems
+                .Include(x => x.Driver)
+                .Where(x =>
+                    x.QueueId == queueId &&
+                    x.Status == QueueStatus.Waiting)
+                .OrderBy(x => x.Position)
+                .ToListAsync();
         }
     }
 }

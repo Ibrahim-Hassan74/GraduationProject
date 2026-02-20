@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Domain\Options\" />
-    <Folder Include="Mapping\" />
   </ItemGroup>
 
   <ItemGroup>
