@@ -11,11 +11,19 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
         {
             builder.HasKey(r => r.Id);
 
-            builder.Property(r => r.From)
+            builder.Property(r => r.FromAr)
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.Property(r => r.To)
+            builder.Property(r => r.ToAr)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            builder.Property(r => r.FromEn)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            builder.Property(r => r.ToEn)
                 .IsRequired()
                 .HasMaxLength(100);
 

@@ -98,5 +98,16 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .OrderBy(x => x.Position)
                 .ToListAsync();
         }
+        public async Task<List<QueueItem>> GetAllActiveBeforeDateAsync(DateTimeOffset date)
+        {
+            return await _context.QueueItems
+                .Include(x => x.Driver)
+                .Include(x => x.Queue)
+                .Where(x =>
+                    (x.Status == QueueStatus.Waiting ||
+                     x.Status == QueueStatus.YourTurn) &&
+                    x.JoinedAt < date)
+                .ToListAsync();
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using SmartMicrobus.Core.DTO.Common;
 
-namespace SmartMicrobus.Core.ServiceContracts.Driver
+namespace SmartMicrobus.Core.ServiceContracts.Drivers
 {
     public interface IDriverService
     {
@@ -8,13 +8,13 @@ namespace SmartMicrobus.Core.ServiceContracts.Driver
 
         Task<ApiResponse> GetDriversBeforeMeAsync(Guid driverId);
 
-        Task<ApiResponse> GetQueueByRouteAsync(Guid stationId, Guid routeId);
+        Task<ApiResponse> GetMyQueueAsync(Guid driverId);
 
         Task<ApiResponse> StartTripAsync(Guid driverId);
 
         Task<ApiResponse> EndTripAsync(Guid driverId);
 
-        Task<ApiResponse> ResetDailyQueueAsync();
+        Task ResetDailyQueueAsync();
     }
 
 }

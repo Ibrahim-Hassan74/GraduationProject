@@ -16,6 +16,7 @@ namespace SmartMicrobus.Infrastructure.Repository
         public async Task<Trip?> GetActiveTripAsync(Guid driverId)
         {
             return await _context.Trips
+                .Include(x => x.Route)
                 .FirstOrDefaultAsync(x =>
                     x.DriverId == driverId &&
                     x.Status == TripStatus.Started);
