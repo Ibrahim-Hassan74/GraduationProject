@@ -24,12 +24,17 @@ namespace SmartMicrobus.Core.Services.Driver
             _mapper = mapper;
         }
 
-        public Task EndTripAsync(Guid driverId)
+        public Task<Guid> CheckInAtGateAsync(string qrCode, Guid stationId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Guid> EnterQueueAsync(string qrCode, Guid stationId)
+        public Task<bool> CheckOutAtGateAsync(string qrCode)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> EndTripAsync(Guid driverId)
         {
             throw new NotImplementedException();
         }
@@ -39,12 +44,17 @@ namespace SmartMicrobus.Core.Services.Driver
             throw new NotImplementedException();
         }
 
-        public Task<List<QueueItemDTO>> GetMyQueueAsync(Guid driverId)
+        public Task<List<QueueItemDTO>> GetDriversBeforeMeAsync(Guid driverId)
         {
             throw new NotImplementedException();
         }
 
-        public Task LeaveQueueAsync(Guid driverId)
+        public Task<List<QueueItemDTO>> GetQueueByRouteAsync(Guid stationId, Guid routeId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ResetDailyQueueAsync()
         {
             throw new NotImplementedException();
         }

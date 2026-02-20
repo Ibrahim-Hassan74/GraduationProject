@@ -85,5 +85,18 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .OrderBy(x => x.Position)
                 .ToListAsync();
         }
+
+        public async Task<List<QueueItem>> GetItemsBeforeAsync(Guid queueId, int currentPosition)
+        {
+            return await _context.QueueItems
+                .Include(x => x.Driver)
+                .ThenInclude(u => u.ApplicationUser)
+                .Include(x => x.Microbus)
+                .Where(x => x.QueueId == queueId &&
+                            x.Position < currentPosition &&
+                            x.Status == QueueStatus.Waiting)
+                .OrderBy(x => x.Position)
+                .ToListAsync();
+        }
     }
 }
