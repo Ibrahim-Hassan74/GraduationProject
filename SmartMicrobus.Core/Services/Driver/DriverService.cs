@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SmartMicrobus.Core.Domain.Entities;
+using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Queue;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.RepositoryContracts;
@@ -24,42 +25,32 @@ namespace SmartMicrobus.Core.Services.Driver
             _mapper = mapper;
         }
 
-        public Task<Guid> CheckInAtGateAsync(string qrCode, Guid stationId)
+        public Task<ApiResponse> EndTripAsync(Guid driverId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> CheckOutAtGateAsync(string qrCode)
+        public Task<ApiResponse> GetDashboardAsync(Guid driverId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> EndTripAsync(Guid driverId)
+        public Task<ApiResponse> GetDriversBeforeMeAsync(Guid driverId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<DriverDashboardDTO> GetDashboardAsync(Guid driverId)
+        public Task<ApiResponse> GetQueueByRouteAsync(Guid stationId, Guid routeId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<QueueItemDTO>> GetDriversBeforeMeAsync(Guid driverId)
+        public Task<ApiResponse> ResetDailyQueueAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task<List<QueueItemDTO>> GetQueueByRouteAsync(Guid stationId, Guid routeId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> ResetDailyQueueAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Guid> StartTripAsync(Guid driverId)
+        public Task<ApiResponse> StartTripAsync(Guid driverId)
         {
             throw new NotImplementedException();
         }

@@ -18,5 +18,6 @@ namespace SmartMicrobus.Core.RepositoryContracts
         Task<QueueItem?> GetFirstInQueueAsync(Guid queueId);
 
         Task<List<QueueItem>> GetActiveQueueItemsAsync(Guid queueId);
+        Task<List<QueueItem>> GetItemsBeforeAsync(Guid queueId, int currentPosition);
     }
 }

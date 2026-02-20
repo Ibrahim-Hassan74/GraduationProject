@@ -1,24 +1,20 @@
-﻿using SmartMicrobus.Core.DTO.Queue;
+﻿using SmartMicrobus.Core.DTO.Common;
 
 namespace SmartMicrobus.Core.ServiceContracts.Driver
 {
     public interface IDriverService
     {
-        Task<Guid> CheckInAtGateAsync(string qrCode, Guid stationId);
+        Task<ApiResponse> GetDashboardAsync(Guid driverId);
 
-        Task<bool> CheckOutAtGateAsync(string qrCode);
+        Task<ApiResponse> GetDriversBeforeMeAsync(Guid driverId);
 
-        Task<DriverDashboardDTO> GetDashboardAsync(Guid driverId);
+        Task<ApiResponse> GetQueueByRouteAsync(Guid stationId, Guid routeId);
 
-        Task<List<QueueItemDTO>> GetDriversBeforeMeAsync(Guid driverId);
+        Task<ApiResponse> StartTripAsync(Guid driverId);
 
-        Task<List<QueueItemDTO>> GetQueueByRouteAsync(Guid stationId, Guid routeId);
+        Task<ApiResponse> EndTripAsync(Guid driverId);
 
-        Task<Guid> StartTripAsync(Guid driverId);
-
-        Task<bool> EndTripAsync(Guid driverId);
-
-        Task<bool> ResetDailyQueueAsync();
+        Task<ApiResponse> ResetDailyQueueAsync();
     }
 
 }

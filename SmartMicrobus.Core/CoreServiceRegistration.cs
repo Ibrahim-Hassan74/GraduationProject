@@ -9,9 +9,11 @@ using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Driver;
+using SmartMicrobus.Core.ServiceContracts.Staff;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Core.Services.Common;
 using SmartMicrobus.Core.Services.Driver;
+using SmartMicrobus.Core.Services.Staff;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -84,6 +86,7 @@ namespace SmartMicrobus.Core
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IDriverService, DriverService>();
+            services.AddScoped<IStaffService, StaffService>();
 
             return services;
         }
