@@ -1,4 +1,5 @@
-﻿using SmartMicrobus.Core.RepositoryContracts;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Infrastructure.Data;
 
 namespace SmartMicrobus.Infrastructure.Repository
@@ -8,9 +9,7 @@ namespace SmartMicrobus.Infrastructure.Repository
         private readonly ApplicationDbContext _context;
         public IPhotoRepository PhotoRepository { get; }
         public IDriverRepository DriverRepository { get; }
-        public IPassengerRepository PassengerRepository { get; }
-
-      
+        public IPassengerRepository PassengerRepository { get; }     
         public IMicrobusRepository MicrobusRepository { get; }
         public ITripRepository TripRepository { get; }
         public IQueueRepository QueueRepository { get; }
@@ -24,7 +23,6 @@ namespace SmartMicrobus.Infrastructure.Repository
             PhotoRepository = new PhotoRepository(_context);
             DriverRepository = new DriverRepository(_context);
             PassengerRepository = new PassengerRepository(_context);
-
             MicrobusRepository = new MicrobusRepository(_context);
             TripRepository = new TripRepository(_context);
             QueueRepository = new QueueRepository(_context);
@@ -36,6 +34,22 @@ namespace SmartMicrobus.Infrastructure.Repository
         public async Task<int> CompleteAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task ExecuteInTransactionAsync(Func<Task> action)
+        {
+            await using var tran = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await action();
+                await _context.SaveChangesAsync();
+                await tran.CommitAsync();
+            }
+            catch
+            {
+                await tran.RollbackAsync();
+                throw;
+            }
         }
     }
 }
