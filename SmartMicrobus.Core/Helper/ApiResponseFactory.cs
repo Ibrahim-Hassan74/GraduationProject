@@ -53,6 +53,17 @@ namespace SmartMicrobus.Core.Helper
                 Success = false
             };
         }
+        private static ApiResponseWithData<T> Create<T>(
+        int statusCode,
+        string message,
+        List<string>? errors = null)
+        {
+            return new ApiResponseWithData<T>(message, default!)
+            {
+                Success = false,
+                StatusCode = statusCode
+            };
+        }
 
         /// <summary>
         /// Creates a 400 Bad Request response.
@@ -125,6 +136,21 @@ namespace SmartMicrobus.Core.Helper
         /// </summary>
         public static ApiResponse RequestTimeout(string message = "Request Timeout", List<string>? errors = null)
             => Create(408, message, errors);
+
+        public static ApiResponseWithData<T> NotFound<T>(string message = "Not Found")
+         => Create<T>(404, message);
+
+        public static ApiResponseWithData<T> BadRequest<T>(string message = "Bad Request")
+            => Create<T>(400, message);
+
+        public static ApiResponseWithData<T> Unauthorized<T>(string message = "Unauthorized")
+            => Create<T>(401, message);
+
+        public static ApiResponseWithData<T> Forbidden<T>(string message = "Forbidden")
+            => Create<T>(403, message);
+
+        public static ApiResponseWithData<T> InternalServerError<T>(string message = "Internal Server Error")
+            => Create<T>(500, message);
 
         /// <summary>
         /// Generates query parameters for authentication redirect.
