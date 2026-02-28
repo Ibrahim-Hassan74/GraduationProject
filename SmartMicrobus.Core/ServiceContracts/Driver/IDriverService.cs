@@ -1,14 +1,15 @@
 ﻿using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Queue;
 
 namespace SmartMicrobus.Core.ServiceContracts.Drivers
 {
     public interface IDriverService
     {
-        Task<ApiResponse> GetDashboardAsync(Guid driverId);
+        Task<ApiResponseWithData<DriverDashboardDTO>> GetDashboardAsync(Guid driverId);
 
-        Task<ApiResponse> GetDriversBeforeMeAsync(Guid driverId);
+        Task<ApiResponseWithData<int>> GetDriversBeforeMeAsync(Guid driverId);
 
-        Task<ApiResponse> GetMyQueueAsync(Guid driverId);
+        Task<ApiResponseWithData<IEnumerable<QueueItemResponse>>> GetMyQueueAsync(Guid driverId);
 
         Task<ApiResponse> StartTripAsync(Guid driverId);
 
