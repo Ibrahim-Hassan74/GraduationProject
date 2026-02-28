@@ -1,11 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using SmartMicrobus.Core.Domain.Entities;
+﻿using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
-using SmartMicrobus.Core.DTO.Queue;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
-using SmartMicrobus.Core.ServiceContracts.Queue;
 using SmartMicrobus.Core.ServiceContracts.Staff;
 
 namespace SmartMicrobus.Core.Services.Staff
@@ -17,7 +14,7 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly IQueueRepository _queueRepository;
         private readonly IQueueItemRepository _queueItemRepository;
 
-        public StaffService(IUnitOfWork unitOfWork, IQueueService queueService)
+        public StaffService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _microbusRepository = _unitOfWork.MicrobusRepository;
@@ -54,8 +51,6 @@ namespace SmartMicrobus.Core.Services.Staff
             await _unitOfWork.QueueItemRepository.AddAsync(item);
 
             return ApiResponseFactory.Success("Scan processed.");
-
-
         }
 
       
