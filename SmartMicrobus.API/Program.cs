@@ -6,11 +6,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using SmartMicrobus.API.Filters;
+using SmartMicrobus.API.Hubs;
+using SmartMicrobus.API.Realtime;
 using SmartMicrobus.Core;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Account;
+using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Infrastructure;
 using SmartMicrobus.Infrastructure.Data;
@@ -24,6 +27,8 @@ builder.Configuration
     .AddJsonFile(Path.Combine(configPath, $"appsettings.{builder.Environment.EnvironmentName}.json"), optional: true);
 
 builder.Services.AddControllers();
+
+builder.Services.AddSignalR();
 
 builder.Services.AddHttpContextAccessor();
 
@@ -72,6 +77,8 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 });
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddScoped<IQueueNotificationService, SignalRQueueNotificationService>();
 
 builder.Services.AddSwaggerGen(options =>
 {
@@ -159,5 +166,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<DriverQueueHub>("/hubs/driver-queue");
 
 app.Run();
