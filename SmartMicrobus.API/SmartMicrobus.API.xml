@@ -14,5 +14,17 @@
             Constructor for CustomControllerBase, initializing the unit of work.
             </summary>
         </member>
+        <member name="T:SmartMicrobus.API.Middleware.ExceptionHandlingMiddlewareExtensions">
+            <summary>
+            Exception Handling Middleware Extensions
+            </summary>
+        </member>
+        <member name="M:SmartMicrobus.API.Middleware.ExceptionHandlingMiddlewareExtensions.UseExceptionHandlingMiddleware(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Use Exception Handling Middleware
+            </summary>
+            <param name="builder"></param>
+            <returns></returns>
+        </member>
     </members>
 </doc>
