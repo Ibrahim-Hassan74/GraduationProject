@@ -5,7 +5,6 @@ using SmartMicrobus.Core.DTO.Queue;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
-using SmartMicrobus.Core.ServiceContracts.Queue;
 using SmartMicrobus.Core.ServiceContracts.Staff;
 
 namespace SmartMicrobus.Core.Services.Staff
@@ -17,7 +16,7 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly IQueueRepository _queueRepository;
         private readonly IQueueItemRepository _queueItemRepository;
 
-        public StaffService(IUnitOfWork unitOfWork, IQueueService queueService)
+        public StaffService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _microbusRepository = _unitOfWork.MicrobusRepository;
