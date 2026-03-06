@@ -14,5 +14,28 @@
             Constructor for CustomControllerBase, initializing the unit of work.
             </summary>
         </member>
+        <member name="M:SmartMicrobus.API.Controllers.CustomControllerBase.ToActionResult(SmartMicrobus.Core.DTO.Common.ApiResponse)">
+            <summary>
+            Converts an ApiResponse object to an appropriate IActionResult based on its success status and HTTP status
+            code.
+            </summary>
+            <remarks>This method maps common HTTP status codes (400, 404, 401) to their respective
+            IActionResult types. For other status codes, a generic 500 Internal Server Error is returned.</remarks>
+            <param name="response">The ApiResponse to convert. Determines the result type and status code of the returned IActionResult.</param>
+            <returns>An IActionResult representing the outcome described by the ApiResponse. Returns Ok if successful; otherwise,
+            returns a result corresponding to the ApiResponse's status code.</returns>
+        </member>
+        <member name="T:SmartMicrobus.API.Middleware.ExceptionHandlingMiddlewareExtensions">
+            <summary>
+            Exception Handling Middleware Extensions
+            </summary>
+        </member>
+        <member name="M:SmartMicrobus.API.Middleware.ExceptionHandlingMiddlewareExtensions.UseExceptionHandlingMiddleware(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Use Exception Handling Middleware
+            </summary>
+            <param name="builder"></param>
+            <returns></returns>
+        </member>
     </members>
 </doc>

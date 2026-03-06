@@ -40,7 +40,7 @@ namespace SmartMicrobus.Core.Services.Drivers
             return ApiResponseFactory.Success("Trip ended successfully");
         }
 
-        public async Task<ApiResponse> GetDashboardAsync(Guid driverId)
+        public async Task<ApiResponseWithData<DriverDashboardDTO>> GetDashboardAsync(Guid driverId)
         {
             var activeTrip = await _tripRepository.GetActiveTripAsync(driverId);
 
@@ -72,13 +72,13 @@ namespace SmartMicrobus.Core.Services.Drivers
             return ApiResponseFactory.Success("Driver is currently in the queue", dashboard);
         }
 
-        public async Task<ApiResponse> GetDriversBeforeMeAsync(Guid driverId)
+        public async Task<ApiResponseWithData<int>> GetDriversBeforeMeAsync(Guid driverId)
         {
             var queueItem = await _queueItemRepository
                 .GetActiveByDriverIdAsync(driverId);
 
             if (queueItem == null)
-                return ApiResponseFactory.NotFound("Driver is not in queue.");
+                return ApiResponseFactory.NotFound<int>("Driver is not in queue.");
 
             var count = await _queueItemRepository
                 .CountDriversBeforeAsync(queueItem.QueueId, queueItem.Position);
@@ -86,20 +86,20 @@ namespace SmartMicrobus.Core.Services.Drivers
             return ApiResponseFactory.Success("Drivers count retrieved.", count);
         }
 
-        public async Task<ApiResponse> GetMyQueueAsync(Guid driverId)
+        public async Task<ApiResponseWithData<IEnumerable<QueueItemResponse>>> GetMyQueueAsync(Guid driverId)
         {
             var queueItem = await _queueItemRepository
                 .GetActiveByDriverIdAsync(driverId);
 
             if (queueItem == null)
-                return ApiResponseFactory.NotFound("Driver is not in any queue.");
+                return ApiResponseFactory.NotFound<IEnumerable<QueueItemResponse>>("Driver is not in any queue.");
 
             var items = await _queueItemRepository
                 .GetActiveQueueItemsAsync(queueItem.QueueId);
 
             var result = _mapper.Map<List<QueueItemResponse>>(items);
 
-            return ApiResponseFactory.Success("Queue retrieved successfully.", result);
+            return ApiResponseFactory.Success<IEnumerable<QueueItemResponse>>("Queue retrieved successfully.", result);
         }
 
         public async Task ResetDailyQueueAsync()
