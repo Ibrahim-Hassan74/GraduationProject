@@ -20,7 +20,7 @@ namespace SmartMicrobus.API.Controllers
             var response = await driverService.GetDashboardAsync(Guid.Parse(driverId!));
             if (!response.Success)
             {
-                return BadRequest(response.Message);
+                return BadRequest(response);
             }
             return Ok(response.Data);
         }
@@ -38,7 +38,7 @@ namespace SmartMicrobus.API.Controllers
 
             if (!response.Success)
             {
-                return BadRequest(response.Message);
+                return BadRequest(response);
             }
 
             return Ok(response.Data);
@@ -55,9 +55,9 @@ namespace SmartMicrobus.API.Controllers
             var response = await driverService.StartTripAsync(driverId);
             if (!response.Success)
             {
-                return BadRequest(response.Message);
+                return BadRequest(response);
             }
-            return Ok(response.Message);
+            return Ok(response);
         }
 
         [HttpPost]
@@ -71,9 +71,9 @@ namespace SmartMicrobus.API.Controllers
             var response = await driverService.EndTripAsync(driverId);
             if (!response.Success)
             {
-                return BadRequest(response.Message);
+                return BadRequest(response);
             }
-            return Ok(response.Message);
+            return Ok(response);
         }
     }
 }
