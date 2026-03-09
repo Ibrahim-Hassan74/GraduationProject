@@ -9,9 +9,9 @@ using System.Security.Claims;
 
 namespace SmartMicrobus.API.Controllers
 {
+    [Authorize(Roles = nameof(UserRole.Driver))]
     public class DriverController(IDriverService driverService, ILogger<DriverController> logger) : CustomControllerBase
     {
-        [Authorize(Roles = nameof(UserRole.Driver))]
         [HttpGet("get-current-postion")]
         public async Task<IActionResult> CurrentPosition()
         {
@@ -26,7 +26,6 @@ namespace SmartMicrobus.API.Controllers
         }
 
         [HttpGet("get-driver-queue")]
-
         public async Task<IActionResult> DriverQueue(Guid driverId)
         {
             if (driverId == Guid.Empty)
@@ -44,8 +43,7 @@ namespace SmartMicrobus.API.Controllers
             return Ok(response.Data);
         }
 
-        [HttpPost]
-        [Route("start-trip")]
+        [HttpPost("start-trip")]
         public async Task<IActionResult> StartTrip(Guid driverId)
         {
             if (driverId == Guid.Empty)
@@ -60,8 +58,7 @@ namespace SmartMicrobus.API.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
-        [Route("end-trip")]
+        [HttpPost("end-trip")]
         public async Task<IActionResult> EndTrip(Guid driverId)
         {
             if (driverId == Guid.Empty)

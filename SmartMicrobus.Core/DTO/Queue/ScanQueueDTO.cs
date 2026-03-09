@@ -11,4 +11,7 @@ namespace SmartMicrobus.Core.DTO.Queue
         public Guid StationId { get; set; }
 
     }
+
+    public record CheckInRequest(string QrCode, Guid StationId);
+    public record CheckOutRequest(string QrCode);
 }

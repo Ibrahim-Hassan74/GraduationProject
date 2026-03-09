@@ -1,8 +1,11 @@
-﻿using SmartMicrobus.Core.Domain.Entities;
+﻿using AutoMapper;
+using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Queue;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
+using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Staff;
 
 namespace SmartMicrobus.Core.Services.Staff
@@ -13,17 +16,20 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly IMicrobusRepository _microbusRepository;
         private readonly IQueueRepository _queueRepository;
         private readonly IQueueItemRepository _queueItemRepository;
+        private readonly IQueueNotificationService _queueNotificationService;
+        private readonly IMapper _mapper;
 
-        public StaffService(IUnitOfWork unitOfWork)
+        public StaffService(IUnitOfWork unitOfWork, IQueueNotificationService queueNotificationService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _microbusRepository = _unitOfWork.MicrobusRepository;
             _queueRepository = _unitOfWork.QueueRepository;
             _queueItemRepository = _unitOfWork.QueueItemRepository;
-
+            _queueNotificationService = queueNotificationService;
+            _mapper = mapper;
         }
 
-     
+
         public async Task<ApiResponse> CheckInAtGateAsync(string qrCode, Guid stationId)
         {
             var microbus = await _microbusRepository.GetByQrCodeAsync(qrCode);
@@ -50,6 +56,12 @@ namespace SmartMicrobus.Core.Services.Staff
             };
             await _unitOfWork.QueueItemRepository.AddAsync(item);
 
+            await _unitOfWork.CompleteAsync();
+
+            var queueResponse = _mapper.Map<QueueItemResponse>(item);
+
+            await _queueNotificationService.NotifyDriverAdded(microbus.DriverId, queueResponse);
+
             return ApiResponseFactory.Success("Scan processed.");
         }
 
@@ -69,6 +81,10 @@ namespace SmartMicrobus.Core.Services.Staff
             queueItem.LeftAt = DateTimeOffset.UtcNow;
 
             await _queueItemRepository.UpdateAsync(queueItem);
+
+            await _unitOfWork.CompleteAsync();
+
+            await _queueNotificationService.NotifyDriverRemoved(microbus.DriverId, queueItem.QueueId);
 
             return ApiResponseFactory.Success("Scan processed.");
         }

@@ -2,6 +2,8 @@
 {
     public class DriverDashboardDTO
     {
+        public Guid DriverId { get; set; }
+        public Guid QueueId { get; set; }
         public string Status { get; set; } = null!;
 
         public int? Position { get; set; }
