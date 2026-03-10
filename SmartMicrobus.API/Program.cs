@@ -1,21 +1,9 @@
 using SmartMicrobus.API.Hubs;
 using SmartMicrobus.API.Middleware;
 using SmartMicrobus.API.StartupExtensions;
-using Asp.Versioning;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
-using SmartMicrobus.API.Filters;
 using SmartMicrobus.Core;
 using SmartMicrobus.Infrastructure;
-using SmartMicrobus.Infrastructure.Data;
-using SmartMicrobus.Infrastructure.Repository;
-using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,32 +17,6 @@ builder.Services.ConfigureServices(builder.Configuration);
 builder.Services.ConfigureInfrastructure(builder.Configuration);
 
 builder.Services.ConfigureCore(builder.Configuration);
-
-builder.Services.AddHttpClient();
-
-
-
-builder.Services.AddLocalization();
-
-var supportedCultures = new[]
-{
-    new CultureInfo("ar"),
-    new CultureInfo("en")
-};
-
-builder.Services.Configure<RequestLocalizationOptions>(options =>
-{
-    options.DefaultRequestCulture = new RequestCulture("ar");
-
-    options.SupportedCultures = supportedCultures;
-    options.SupportedUICultures = supportedCultures;
-
-    options.RequestCultureProviders = new List<IRequestCultureProvider>
-    {
-        new AcceptLanguageHeaderRequestCultureProvider(), 
-        new QueryStringRequestCultureProvider()           //culture=ar
-    };
-});
 
 var app = builder.Build();
 
@@ -73,6 +35,8 @@ var localizationOptions = app.Services
 app.UseExceptionHandlingMiddleware();
 
 app.UseStaticFiles();
+
+//app.UseCors("AllowFrontend");
 
 app.UseCors("AllowAllOrigins");
 

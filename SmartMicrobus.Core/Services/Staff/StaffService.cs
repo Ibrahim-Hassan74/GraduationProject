@@ -58,9 +58,11 @@ namespace SmartMicrobus.Core.Services.Staff
 
             await _unitOfWork.CompleteAsync();
 
+            item = await _unitOfWork.QueueItemRepository.GetActiveByDriverIdAsync(item.DriverId);
+
             var queueResponse = _mapper.Map<QueueItemResponse>(item);
 
-            await _queueNotificationService.NotifyDriverAdded(microbus.DriverId, queueResponse);
+            await _queueNotificationService.NotifyDriverAdded(queue.Id, queueResponse);
 
             return ApiResponseFactory.Success("Scan processed.");
         }
@@ -84,7 +86,7 @@ namespace SmartMicrobus.Core.Services.Staff
 
             await _unitOfWork.CompleteAsync();
 
-            await _queueNotificationService.NotifyDriverRemoved(microbus.DriverId, queueItem.QueueId);
+            await _queueNotificationService.NotifyDriverRemoved(queueItem.QueueId, microbus.DriverId);
 
             return ApiResponseFactory.Success("Scan processed.");
         }

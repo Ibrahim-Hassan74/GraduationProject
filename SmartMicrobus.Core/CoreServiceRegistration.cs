@@ -45,12 +45,31 @@ namespace SmartMicrobus.Core
                 };
                 options.Events = new JwtBearerEvents
                 {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        var path = context.HttpContext.Request.Path;
+
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            path.StartsWithSegments("/hubs"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+
                     OnChallenge = context =>
                     {
                         context.HandleResponse();
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         context.Response.ContentType = "application/json";
-                        var result = JsonSerializer.Serialize(ApiResponseFactory.Unauthorized("You are not authorized."));
+
+                        var result = JsonSerializer.Serialize(
+                            ApiResponseFactory.Unauthorized("You are not authorized.")
+                        );
+
                         return context.Response.WriteAsync(result);
                     }
                 };

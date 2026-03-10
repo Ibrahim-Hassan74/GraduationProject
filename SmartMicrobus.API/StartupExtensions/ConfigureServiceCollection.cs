@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -13,6 +14,7 @@ using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Infrastructure.Data;
+using System.Globalization;
 
 namespace SmartMicrobus.API.StartupExtensions
 {
@@ -34,11 +36,42 @@ namespace SmartMicrobus.API.StartupExtensions
                     policybuilder => policybuilder.AllowAnyOrigin()
                                       .AllowAnyMethod()
                                       .AllowAnyHeader());
+
+                //options.AddPolicy("AllowFrontend", policy =>
+                //{
+                //    policy
+                //        .WithOrigins("http://localhost:5500")
+                //        .AllowAnyHeader()
+                //        .AllowAnyMethod()
+                //        .AllowCredentials();
+                //});
             });
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+            });
+
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+            var supportedCultures = new[]
+            {
+                new CultureInfo("ar"),
+                new CultureInfo("en")
+            };
+
+            services.Configure<RequestLocalizationOptions>(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture("ar");
+
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+
+                options.RequestCultureProviders = new List<IRequestCultureProvider>
+                {
+                    new AcceptLanguageHeaderRequestCultureProvider(),
+                    new QueryStringRequestCultureProvider()
+                };
             });
 
             services.AddIdentity<ApplicationUser, ApplicationRole>(options =>

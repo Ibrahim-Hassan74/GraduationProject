@@ -79,6 +79,7 @@ namespace SmartMicrobus.Infrastructure.Repository
         {
             return await _context.QueueItems
                 .Include(x => x.Driver)
+                .ThenInclude(y => y.ApplicationUser)
                 .Where(x =>
                     x.QueueId == queueId &&
                     x.Status == QueueStatus.Waiting)
