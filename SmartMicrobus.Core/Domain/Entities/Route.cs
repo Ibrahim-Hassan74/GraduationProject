@@ -13,6 +13,8 @@
         public Guid StationId { get; set; }
         public Station Station { get; set; } = null!;
 
+        public double DistanceKm { get; set; }
+
         public ICollection<Microbus> Microbuses { get; set; } = new List<Microbus>();
         public ICollection<Queue> Queues { get; set; } = new List<Queue>();
     }

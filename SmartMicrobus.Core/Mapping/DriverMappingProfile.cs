@@ -32,6 +32,27 @@ namespace SmartMicrobus.Core.Mapping
                            ? src.Queue.Route.ToAr
                            : src.Queue.Route.ToEn));
 
+
+            CreateMap<Trip, TripHistoryDTO>()
+                .ForMember(dest => dest.RouteFrom,
+                    opt => opt.MapFrom(src =>
+                        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                            ? src.Route.FromAr
+                            : src.Route.FromEn))
+
+                .ForMember(dest => dest.RouteTo,
+                    opt => opt.MapFrom(src =>
+                        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                            ? src.Route.ToAr
+                            : src.Route.ToEn))
+
+                .ForMember(dest => dest.Distance,
+                    opt => opt.MapFrom(src => src.DistanceKm))
+                .ForMember(dest => dest.Amount,
+                    opt => opt.MapFrom(src => src.TotalAmount))
+
+                ;
+
         }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SmartMicrobus.Core.DTO.Common;
-using SmartMicrobus.Core.DTO.Queue;
 using SmartMicrobus.Core.Enums;
-using SmartMicrobus.Core.ServiceContracts;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
 using System.Security.Claims;
 
@@ -70,6 +67,15 @@ namespace SmartMicrobus.API.Controllers
             {
                 return BadRequest(response);
             }
+            return Ok(response);
+        }
+
+        [HttpGet("history")]
+        public async Task<IActionResult> GetDriverHistory([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        {
+            var driverId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var response = await driverService.GetDriverHistoryAsync(Guid.Parse(driverId!), fromDate, toDate);
             return Ok(response);
         }
     }

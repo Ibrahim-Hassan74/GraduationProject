@@ -16,6 +16,7 @@ namespace SmartMicrobus.Core.ServiceContracts.Drivers
         Task<ApiResponse> EndTripAsync(Guid driverId);
 
         Task ResetDailyQueueAsync();
+        Task<ApiResponseWithData<List<TripHistoryDTO>>> GetDriverHistoryAsync(Guid driverId, DateTime? fromDate, DateTime? toDate);
     }
 
 }

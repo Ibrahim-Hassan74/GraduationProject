@@ -16,6 +16,10 @@ namespace SmartMicrobus.Core.Domain.Entities
         public DateTimeOffset StartedAt { get; set; }
         public DateTimeOffset? EndedAt { get; set; }
 
+        public int PassengerCount { get; set; }
+        public double DistanceKm { get; set; }
+        public decimal TotalAmount { get; set; }
+
         public TripStatus Status { get; set; }
     }
 }

@@ -13,5 +13,7 @@
 
         public Guid DriverId { get; set; }
         public Driver Driver { get; set; } = null!;
+
+        public int PassengerCount { get; set; }
     }
 }

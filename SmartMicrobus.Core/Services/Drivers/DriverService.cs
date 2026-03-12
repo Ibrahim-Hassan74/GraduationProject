@@ -181,5 +181,33 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             return ApiResponseFactory.Success("Trip started successfully.");
         }
+
+        public async Task<ApiResponseWithData<List<TripHistoryDTO>>> GetDriverHistoryAsync(Guid driverId, DateTime? fromDate, DateTime? toDate)
+        {
+            DateTime from;
+            DateTime to;
+
+            if (!fromDate.HasValue && !toDate.HasValue)
+            {
+                from = DateTime.Today;
+                to = DateTime.Today.AddDays(1);
+            }
+            else
+            {
+                from = fromDate ?? DateTime.MinValue;
+                to = toDate ?? DateTime.MaxValue;
+            }
+
+            var trips = await _tripRepository.GetDriverTripsAsync(driverId, from, to);
+
+            if (trips == null || !trips.Any())
+            {
+                return ApiResponseFactory.Success("No trips found for the selected period", new List<TripHistoryDTO>());
+            }
+
+            var history = _mapper.Map<List<TripHistoryDTO>>(trips);
+
+            return ApiResponseFactory.Success("Driver trip history retrieved successfully", history);
+        }
     }
 }

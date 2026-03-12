@@ -21,5 +21,17 @@ namespace SmartMicrobus.Infrastructure.Repository
                     x.DriverId == driverId &&
                     x.Status == TripStatus.Started);
         }
+        public async Task<List<Trip>?> GetDriverTripsAsync(Guid driverId, DateTime from, DateTime to)
+        {
+            return await _context.Trips
+                .Include(x => x.Route)
+                .Include(x => x.Microbus)
+                .Where(x => x.Microbus.DriverId == driverId &&
+                            x.StartedAt >= from &&
+                            x.StartedAt < to &&
+                            x.Status == TripStatus.Completed)
+                .OrderByDescending(x => x.StartedAt)
+                .ToListAsync();
+        }
     }
 }
