@@ -16,6 +16,7 @@ namespace SmartMicrobus.Infrastructure.Repository
         {
             return await _context.Microbuses
                 .Include(x => x.Route)
+                .Include(x => x.Driver)
                 .FirstOrDefaultAsync(x => x.QrCode == qrCode);
         }
     }

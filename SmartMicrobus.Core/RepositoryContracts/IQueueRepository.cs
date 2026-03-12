@@ -6,5 +6,6 @@ namespace SmartMicrobus.Core.RepositoryContracts
     {
         Task<Queue?> GetByStationAndRouteAsync(Guid stationId, Guid routeId);
         Task<Queue?> GetByIdWithItemsAsync(Guid queueId);
+        Task<Queue> GetOrCreateQueueAsync(Guid routeId, Guid stationId);
     }
 }

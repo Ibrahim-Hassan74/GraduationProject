@@ -38,7 +38,7 @@ namespace SmartMicrobus.Infrastructure.Repository
         public async Task<int> GetLastPositionAsync(Guid queueId)
         {
             var last = await _context.QueueItems
-                .Where(x => x.QueueId == queueId)
+                .Where(x => x.QueueId == queueId && x.Status == QueueStatus.Waiting)
                 .OrderByDescending(x => x.Position)
                 .Select(x => x.Position)
                 .FirstOrDefaultAsync();

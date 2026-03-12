@@ -18,8 +18,13 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly IQueueItemRepository _queueItemRepository;
         private readonly IQueueNotificationService _queueNotificationService;
         private readonly IMapper _mapper;
+        private readonly IQrTokenService _qrTokenService;
+        private readonly ITripRepository _tripRepository;
 
-        public StaffService(IUnitOfWork unitOfWork, IQueueNotificationService queueNotificationService, IMapper mapper)
+        public StaffService(IUnitOfWork unitOfWork,
+            IQueueNotificationService queueNotificationService,
+            IMapper mapper,
+            IQrTokenService qrTokenService)
         {
             _unitOfWork = unitOfWork;
             _microbusRepository = _unitOfWork.MicrobusRepository;
@@ -27,85 +32,106 @@ namespace SmartMicrobus.Core.Services.Staff
             _queueItemRepository = _unitOfWork.QueueItemRepository;
             _queueNotificationService = queueNotificationService;
             _mapper = mapper;
+            _qrTokenService = qrTokenService;
+            _tripRepository = _unitOfWork.TripRepository;
         }
-
 
         public async Task<ApiResponse> CheckInAtGateAsync(string qrCode, Guid stationId)
         {
-            var microbus = await _microbusRepository.GetByQrCodeAsync(qrCode);
-            if (microbus == null)
-                return ApiResponseFactory.NotFound("Microbus not found.");
+            var payload = _qrTokenService.DecryptToken(qrCode);
 
-            var queue = await GetOrCreateQueueAsync(microbus.RouteId, stationId);
+            if (payload == null)
+                return ApiResponseFactory.BadRequest("Invalid or expired QR code.");
 
-
-            var lastPosition = await _queueItemRepository.GetLastPositionAsync(queue.Id);
-
-            var existing = await _unitOfWork.QueueItemRepository.GetActiveByDriverIdAsync(microbus.DriverId);
+            var existing = await _queueItemRepository.GetActiveByDriverIdAsync(payload.DriverId);
 
             if (existing != null)
-                return ApiResponseFactory.BadRequest("Microbus is in waiting queue. Use leave-waiting to start trip when its turn.");
+                return ApiResponseFactory.BadRequest("Microbus is already in queue.");
+
+            var lastPosition = await _queueItemRepository.GetLastPositionAsync(payload.QueueId);
+
+            #region end active trip if exists
+            var activeTrip = await _tripRepository.GetActiveTripAsync(payload.DriverId);
+
+            if (activeTrip != null)
+            {
+                activeTrip.Status = TripStatus.Completed;
+                activeTrip.EndedAt = DateTimeOffset.UtcNow;
+
+                await _tripRepository.UpdateAsync(activeTrip);
+            }
+            #endregion
 
             var item = new QueueItem
             {
-                QueueId = queue.Id,
-                DriverId = microbus.DriverId,
-                MicrobusId = microbus.Id,
+                QueueId = payload.QueueId,
+                DriverId = payload.DriverId,
+                MicrobusId = payload.MicrobusId,
                 Position = lastPosition + 1,
                 Status = QueueStatus.Waiting
             };
-            await _unitOfWork.QueueItemRepository.AddAsync(item);
+
+            await _queueItemRepository.AddAsync(item);
 
             await _unitOfWork.CompleteAsync();
 
-            item = await _unitOfWork.QueueItemRepository.GetActiveByDriverIdAsync(item.DriverId);
+            item = await _queueItemRepository.GetActiveByDriverIdAsync(item.DriverId);
 
             var queueResponse = _mapper.Map<QueueItemResponse>(item);
 
-            await _queueNotificationService.NotifyDriverAdded(queue.Id, queueResponse);
+            await _queueNotificationService.NotifyDriverAdded(payload.QueueId, queueResponse);
 
             return ApiResponseFactory.Success("Scan processed.");
         }
 
-      
         public async Task<ApiResponse> CheckOutAtGateAsync(string qrCode)
         {
-            var microbus = await _microbusRepository.GetByQrCodeAsync(qrCode);
-            if (microbus == null)
-                return ApiResponseFactory.NotFound("Microbus not found.");
+            var payload = _qrTokenService.DecryptToken(qrCode);
 
-            var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(microbus.DriverId);
+            if (payload == null)
+                return ApiResponseFactory.BadRequest("Invalid or expired QR code.");
+
+            var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(payload.DriverId);
 
             if (queueItem == null)
                 return ApiResponseFactory.BadRequest("Driver not in queue");
-             
-            queueItem.Status = QueueStatus.Skipped;
+
+            //var first = await _queueItemRepository
+            //    .GetFirstInQueueAsync(queueItem.QueueId);
+
+            //if (first?.Id != queueItem.Id)
+            //    return ApiResponseFactory.Conflict("It is not your turn.");
+
+            var microbus = await _microbusRepository.GetByIdAsync(queueItem.MicrobusId, x => x.Route);
+
+            if (microbus == null)
+                return ApiResponseFactory.NotFound("Microbus not found.");
+
+            var trip = new Trip
+            {
+                DriverId = payload.DriverId,
+                MicrobusId = queueItem.MicrobusId,
+                RouteId = microbus.RouteId,
+                StartedAt = DateTimeOffset.UtcNow,
+                Status = TripStatus.Started,
+                PassengerCount = microbus.PassengerCount,
+                TotalAmount = microbus.PassengerCount * microbus.Route.Price,
+                DistanceKm = microbus.Route.DistanceKm
+            };
+
+            await _tripRepository.AddAsync(trip);
+
+            queueItem.Status = QueueStatus.InTrip;
+
             queueItem.LeftAt = DateTimeOffset.UtcNow;
 
             await _queueItemRepository.UpdateAsync(queueItem);
 
             await _unitOfWork.CompleteAsync();
 
-            await _queueNotificationService.NotifyDriverRemoved(queueItem.QueueId, microbus.DriverId);
+            await _queueNotificationService.NotifyDriverRemoved(queueItem.QueueId, payload.DriverId);
 
             return ApiResponseFactory.Success("Scan processed.");
-        }
-
-        private async Task<Domain.Entities.Queue> GetOrCreateQueueAsync(Guid routeId, Guid stationId)
-        {
-            var queue = await _queueRepository.GetByStationAndRouteAsync(stationId, routeId);
-            if (queue != null) return queue;
-
-            var newQueue = new Domain.Entities.Queue
-            {
-                RouteId = routeId,
-                StationId = stationId
-            };
-
-            newQueue = await _queueRepository.AddAsync(newQueue);
-            await _unitOfWork.CompleteAsync();
-
-            return newQueue;
         }
     }
 }

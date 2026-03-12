@@ -30,8 +30,8 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
                 .HasForeignKey(q => q.DriverId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(q => new { q.QueueId, q.Position })
-                .IsUnique();
+            //builder.HasIndex(q => new { q.QueueId, q.Position })
+            //    .IsUnique();
         }
     }
 }

@@ -29,5 +29,22 @@ namespace SmartMicrobus.Infrastructure.Repository
                     .ThenInclude(i => i.Driver)
                 .FirstOrDefaultAsync(q => q.Id == queueId);
         }
+        public async Task<Queue> GetOrCreateQueueAsync(Guid routeId, Guid stationId)
+        {
+            var queue = await GetByStationAndRouteAsync(stationId, routeId);
+            if (queue != null) return queue;
+
+            var newQueue = new Queue
+            {
+                RouteId = routeId,
+                StationId = stationId
+            };
+
+            newQueue = await AddAsync(newQueue);
+
+            await _context.SaveChangesAsync();
+
+            return newQueue;
+        }
     }
 }
