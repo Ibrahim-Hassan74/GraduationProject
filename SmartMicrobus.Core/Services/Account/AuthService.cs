@@ -12,6 +12,7 @@ using SmartMicrobus.Core.ServiceContracts.Common;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using SmartMicrobus.Core.Enums;
+using AutoMapper;
 
 namespace SmartMicrobus.Core.Services.Account
 {
@@ -28,7 +29,7 @@ namespace SmartMicrobus.Core.Services.Account
         private readonly IDriverRepository _driverRepository;
         private readonly IPassengerRepository _passangerRepository;
         private readonly IOtpService _otpService;
-
+        private readonly IMapper _mapper;
         public AuthService(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IJwtService jwtService,
@@ -36,7 +37,8 @@ namespace SmartMicrobus.Core.Services.Account
             IUnitOfWork unitOfWork,
             IImageService imageService,
             IOtpService otpService,
-            RoleManager<ApplicationRole> roleManager)
+            RoleManager<ApplicationRole> roleManager,
+            IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -48,6 +50,7 @@ namespace SmartMicrobus.Core.Services.Account
             _passangerRepository = _unitOfWork.PassengerRepository;
             _otpService = otpService;
             _roleManager = roleManager;
+            _mapper = mapper;
         }
 
         // Parse stored token format:
@@ -540,6 +543,16 @@ namespace SmartMicrobus.Core.Services.Account
                 await _roleManager.CreateAsync(new ApplicationRole { Name = roleName });
 
             await _userManager.AddToRoleAsync(user, roleName);
+        }
+
+        public async Task<ApplicationUserResponse> GetUserByIdAsync(string userId)
+        {
+            var user = await _userManager.Users.Include(u => u.Photo).FirstOrDefaultAsync(x => x.Id == Guid.Parse(userId));
+            if (user == null) return null;
+
+            var response = _mapper.Map<ApplicationUserResponse>(user);
+            response.Roles = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+            return response;
         }
     }
 }

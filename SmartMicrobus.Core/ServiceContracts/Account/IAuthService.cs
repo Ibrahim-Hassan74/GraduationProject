@@ -20,5 +20,6 @@ namespace SmartMicrobus.Core.ServiceContracts.Account
         Task<ApiResponse> ResendConfirmationAccountAsync(string phone);
         Task<ApiResponse> UploadUserPhotoAsync(Guid userId, UploadUserPhotoDTO dto);
         Task<ApiResponse> DeleteUserPhotoAsync(Guid userId);
+        Task<ApplicationUserResponse> GetUserByIdAsync(string userId);
     }
 }

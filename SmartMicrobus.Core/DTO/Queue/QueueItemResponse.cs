@@ -6,5 +6,6 @@
         public string DriverName { get; set; } = string.Empty;
         public int Position { get; set; }
         public string Status { get; set; } = string.Empty;
+        public string PlateNumber { get; set; }
     }
 }

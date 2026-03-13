@@ -156,5 +156,19 @@ namespace SmartMicrobus.API.Controllers
             return StatusCode(response.StatusCode, response);
         }
 
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest(ApiResponseFactory.BadRequest("User ID not found in claims."));
+
+            var userResponse = await _authService.GetUserByIdAsync(userId);
+            if (userResponse == null)
+                return NotFound(ApiResponseFactory.NotFound("User not found."));
+
+            return Ok(userResponse);
+        }
     }
 }

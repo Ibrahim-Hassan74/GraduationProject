@@ -25,7 +25,12 @@ namespace SmartMicrobus.Core.Mapping
                             ? src.Driver.ApplicationUser.DisplayName
                             : ""))
                 .ForMember(dest => dest.Status,
-                    opt => opt.MapFrom(src => src.Status.ToString()));
+                    opt => opt.MapFrom(src => src.Status.ToString()))
+                .ForMember(dest => dest.PlateNumber,
+                    opt => opt.MapFrom(src =>
+                        src.Microbus != null
+                            ? src.Microbus.PlateNumber
+                            : ""));
 
 
         }
