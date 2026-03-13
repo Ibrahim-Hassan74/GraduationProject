@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.Enums;
+using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
 using System.Security.Claims;
 
@@ -71,12 +74,21 @@ namespace SmartMicrobus.API.Controllers
         }
 
         [HttpGet("history")]
-        public async Task<IActionResult> GetDriverHistory([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        public async Task<IActionResult> GetDriverHistory([FromQuery] DriverHistoryRequest request)
         {
             var driverId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var response = await driverService.GetDriverHistoryAsync(Guid.Parse(driverId!), fromDate, toDate);
-            return Ok(response);
+            var response = await driverService.GetDriverHistoryAsync(Guid.Parse(driverId!), request);
+
+            var result = response as ApiResponseWithData<DriverHistoryResponse>;
+            if(!response.Success || result.Data is null) 
+            {
+                return NotFound(ApiResponseFactory.NotFound(result?.Message ?? "No trips found for the selected period"));
+            }
+
+            var pagination = new Pagination<DriverHistoryResponse>(request.PageNumber, request.PageSize, result.Data.TotalCount, result.Data);
+
+            return Ok(pagination);
         }
     }
 }

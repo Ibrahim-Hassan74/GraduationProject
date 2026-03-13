@@ -1,6 +1,4 @@
-﻿
-
-using SmartMicrobus.Core.Enums;
+﻿using SmartMicrobus.Core.Enums;
 
 namespace SmartMicrobus.Core.DTO.Queue
 {
@@ -12,8 +10,8 @@ namespace SmartMicrobus.Core.DTO.Queue
 
         public string RouteTo { get; set; }
 
-        public DateTimeOffset StartedAt { get; set; }
-        public DateTimeOffset? EndedAt { get; set; }
+        public string StartedAt { get; set; }
+        public string? EndedAt { get; set; }
 
         public int PassengerCount { get; set; }
 

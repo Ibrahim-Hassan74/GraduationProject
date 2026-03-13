@@ -1,4 +1,5 @@
 ﻿using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Queue;
 
 namespace SmartMicrobus.Core.ServiceContracts.Drivers
@@ -16,7 +17,7 @@ namespace SmartMicrobus.Core.ServiceContracts.Drivers
         Task<ApiResponse> EndTripAsync(Guid driverId);
 
         Task ResetDailyQueueAsync();
-        Task<ApiResponseWithData<List<TripHistoryDTO>>> GetDriverHistoryAsync(Guid driverId, DateTime? fromDate, DateTime? toDate);
+        Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request);
     }
 
 }

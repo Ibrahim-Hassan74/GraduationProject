@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Queue;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
@@ -46,12 +47,8 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             if (activeTrip != null)
             {
-                return ApiResponseFactory.Success("Driver is currently on a trip", new DriverDashboardDTO
-                {
-                    Status = "InTrip",
-                    RouteFrom = activeTrip.Route.FromAr,
-                    RouteTo = activeTrip.Route.ToAr
-                });
+                var driver = _mapper.Map<DriverDashboardDTO>(activeTrip);
+                return ApiResponseFactory.Success("Driver is currently on a trip", driver);
             }
 
             var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
@@ -182,32 +179,33 @@ namespace SmartMicrobus.Core.Services.Drivers
             return ApiResponseFactory.Success("Trip started successfully.");
         }
 
-        public async Task<ApiResponseWithData<List<TripHistoryDTO>>> GetDriverHistoryAsync(Guid driverId, DateTime? fromDate, DateTime? toDate)
+        public async Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request)
         {
             DateTime from;
             DateTime to;
 
-            if (!fromDate.HasValue && !toDate.HasValue)
+            if (!request.FromDate.HasValue && !request.ToDate.HasValue)
             {
                 from = DateTime.Today;
                 to = DateTime.Today.AddDays(1);
             }
             else
             {
-                from = fromDate ?? DateTime.MinValue;
-                to = toDate ?? DateTime.MaxValue;
+                from = request.FromDate ?? DateTime.MinValue;
+                to = request.ToDate ?? DateTime.MaxValue;
             }
 
-            var trips = await _tripRepository.GetDriverTripsAsync(driverId, from, to);
+            var tripsHistory = await _tripRepository.GetDriverTripsAsync(driverId, request);
 
-            if (trips == null || !trips.Any())
+            if (tripsHistory == null || !tripsHistory.Trips.Any())
             {
-                return ApiResponseFactory.Success("No trips found for the selected period", new List<TripHistoryDTO>());
+                return ApiResponseFactory.NotFound("No trips found for the selected period");
             }
 
-            var history = _mapper.Map<List<TripHistoryDTO>>(trips);
+            var history = _mapper.Map<List<TripHistoryDTO>>(tripsHistory.Trips);
+            var response = new DriverHistoryResponse(tripsHistory.TotalAmount, history, tripsHistory.TotalCount);
 
-            return ApiResponseFactory.Success("Driver trip history retrieved successfully", history);
+            return ApiResponseFactory.Success("Driver trip history retrieved successfully", response);
         }
     }
 }

@@ -50,7 +50,10 @@ namespace SmartMicrobus.Core.Mapping
                     opt => opt.MapFrom(src => src.DistanceKm))
                 .ForMember(dest => dest.Amount,
                     opt => opt.MapFrom(src => src.TotalAmount))
-
+                .ForMember(dest => dest.StartedAt,
+                    opt => opt.MapFrom(src => src.StartedAt.ToString("yyyy MM dd hh:mm")))
+                .ForMember(dest => dest.EndedAt,
+                    opt => opt.MapFrom(src => src.EndedAt.HasValue ? src.EndedAt.Value.ToString("yyyy MM dd hh:mm") : null))
                 ;
 
         }
