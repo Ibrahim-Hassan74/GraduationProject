@@ -15,5 +15,7 @@
         public Driver Driver { get; set; } = null!;
 
         public int PassengerCount { get; set; }
+        public string Model { get; set; } = null!;
+        public string Color { get; set; } = null!;
     }
 }
