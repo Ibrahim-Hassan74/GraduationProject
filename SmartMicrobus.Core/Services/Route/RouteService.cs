@@ -29,10 +29,12 @@ namespace SmartMicrobus.Core.Services.Route
 
             if (routes == null || !routes.Any())
                 return ApiResponseFactory.NotFound("No routes found.");
+
             var isArabic = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? true : false;
-            var result = routes.Select(r =>
-                isArabic ? r.FromAr : r.FromEn
-            ).Distinct().ToList();
+
+            var result = routes.Select(r => new RouteLocationResponse() { 
+                CityName = isArabic ? r.FromAr : r.FromEn 
+            }).Distinct().ToList();
 
             return ApiResponseFactory.Success("Routes retrieved successfully", result);
         }
@@ -45,9 +47,9 @@ namespace SmartMicrobus.Core.Services.Route
             var routes = await _routeRepository.GetRoutesByFromAsync(from);
 
             if (!routes.Any())
-                return ApiResponseFactory.NotFound("No destinations found for the specified origin.");
+                return ApiResponseFactory.Success("No destinations found for the specified origin.", new List<DestinationResponse>());
 
-            var result = _mapper.Map<DestinationResponse>(routes);
+            var result = _mapper.Map<List<DestinationResponse>>(routes);
 
             return ApiResponseFactory.Success("Destinations retrieved.", result);
         }
@@ -60,7 +62,7 @@ namespace SmartMicrobus.Core.Services.Route
             var queues = await _queueItemRepository.GetMicrobusesAtStationAsync(routeId);
 
             if (!queues.Any())
-                return ApiResponseFactory.NotFound("No microbuses at station for the specified route.");
+                return ApiResponseFactory.Success("No microbuses at station for the specified route.", new List<MicrobusAtStationResponse>());
 
             var responses = _mapper.Map<List<MicrobusAtStationResponse>>(queues);
 
@@ -76,7 +78,7 @@ namespace SmartMicrobus.Core.Services.Route
             var trips = await _tripRepository.GetMicrobusesOnTheWayAsync(routeId);
 
             if (trips == null || !trips.Any())
-                return ApiResponseFactory.NotFound("No microbuses on the way for the specified route.");
+                return ApiResponseFactory.Success("No microbuses on the way for the specified route.", new List<MicrobusOnTheWayResponse>());
 
             var responses = _mapper.Map<List<MicrobusOnTheWayResponse>>(trips);
 
@@ -92,7 +94,7 @@ namespace SmartMicrobus.Core.Services.Route
             var route = await _routeRepository.GetByIdAsync(routeId);
 
             if (route == null)
-                return ApiResponseFactory.NotFound("Route not found.");
+                return ApiResponseFactory.Success("Route not found.", new RouteSummaryResponse());
 
             var onTheWay = await _tripRepository.GetMicrobusesOnTheWayCountAsync(routeId);
 
