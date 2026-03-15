@@ -51,5 +51,24 @@ namespace SmartMicrobus.Infrastructure.Repository
 
             return trips.Skip(skipAmount).Take(pageSize);
         }
+
+        public async Task<List<Trip>> GetMicrobusesOnTheWayAsync(Guid routeId)
+        {
+            return await _context.Trips
+                .Include(t => t.Driver)
+                    .ThenInclude(d => d.Microbus)
+                .Include(t => t.Driver)
+                    .ThenInclude(x => x.ApplicationUser)
+                .Where(t => t.RouteId == routeId && t.Status == TripStatus.Started)
+                .ToListAsync();
+        }
+        public async Task<int> GetMicrobusesOnTheWayCountAsync(Guid routeId)
+        {
+            return await _context.Trips
+                .CountAsync(t =>
+                    t.RouteId == routeId &&
+                    t.Status == TripStatus.Started);
+        }
+
     }
 }

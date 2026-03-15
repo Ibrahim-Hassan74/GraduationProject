@@ -111,5 +111,25 @@ namespace SmartMicrobus.Infrastructure.Repository
                     x.JoinedAt < date)
                 .ToListAsync();
         }
+
+        public async Task<List<QueueItem>> GetMicrobusesAtStationAsync(Guid routeId)
+        {
+            return await _context.QueueItems
+                .Include(q => q.Driver)
+                    .ThenInclude(d => d.Microbus)
+                .Include(q => q.Driver)
+                .ThenInclude(x=> x.ApplicationUser)
+                .Include(q => q.Queue)
+                .Where(q => q.Queue.RouteId == routeId && q.Status == QueueStatus.Waiting)
+                .OrderBy(q => q.Position)
+                .ToListAsync();
+        }
+        public async Task<int> GetMicrobusesAtStationCountAsync(Guid routeId)
+        {
+            return await _context.QueueItems
+                .CountAsync(q =>
+                    q.Queue.RouteId == routeId &&
+                    q.Status == QueueStatus.Waiting);
+        }
     }
 }
