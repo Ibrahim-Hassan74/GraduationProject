@@ -3,6 +3,7 @@ using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Queue;
+using SmartMicrobus.Core.DTO.Trip;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
@@ -47,26 +48,46 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             if (activeTrip != null)
             {
-                var driver = _mapper.Map<DriverDashboardDTO>(activeTrip);
-                return ApiResponseFactory.Success("Driver is currently on a trip", driver);
+                var tripDto = _mapper.Map<TripDashboardDTO>(activeTrip);
+
+                var dashboard = new DriverDashboardDTO
+                {
+                    DriverId = driverId,
+                    Status = DriverDashboardStatus.OnTrip.ToString(),
+                    Trip = tripDto
+                };
+
+                return ApiResponseFactory.Success("Driver is currently on a trip", dashboard);
             }
 
             var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
 
             if (queueItem == null)
             {
-                return ApiResponseFactory.Success("Driver is currently available", new DriverDashboardDTO
-                {
-                    Status = "Available"
-                });
+                return ApiResponseFactory.Success("Driver is currently available",
+                    new DriverDashboardDTO
+                    {
+                        DriverId = driverId,
+                        Status = DriverDashboardStatus.Available.ToString()
+                    });
             }
 
-            var dashboard = _mapper.Map<DriverDashboardDTO>(queueItem);
+            var queueDto = _mapper.Map<QueueDashboardDTO>(queueItem);
 
-            dashboard.DriversBefore = await _queueItemRepository.CountDriversBeforeAsync(queueItem.QueueId, queueItem.Position);
-            dashboard.TotalDrivers = await _queueItemRepository.CountActiveAsync(queueItem.QueueId);
+            queueDto.DriversBefore =
+                await _queueItemRepository.CountDriversBeforeAsync(queueItem.QueueId, queueItem.Position);
 
-            return ApiResponseFactory.Success("Driver is currently in the queue", dashboard);
+            queueDto.TotalDrivers =
+                await _queueItemRepository.CountActiveAsync(queueItem.QueueId);
+
+            var dashboardResult = new DriverDashboardDTO
+            {
+                DriverId = driverId,
+                Status = DriverDashboardStatus.InQueue.ToString(),
+                Queue = queueDto
+            };
+
+            return ApiResponseFactory.Success("Driver is currently in the queue", dashboardResult);
         }
 
         public async Task<ApiResponseWithData<int>> GetDriversBeforeMeAsync(Guid driverId)

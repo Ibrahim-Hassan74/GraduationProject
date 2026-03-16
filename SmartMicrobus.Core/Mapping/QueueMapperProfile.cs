@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Queue;
+using System.Globalization;
 
 namespace SmartMicrobus.Core.Mapping
 {
@@ -32,6 +33,25 @@ namespace SmartMicrobus.Core.Mapping
                             ? src.Microbus.PlateNumber
                             : ""));
 
+
+            CreateMap<QueueItem, QueueDashboardDTO>()
+                .ForMember(dest => dest.QueueId,
+                    opt => opt.MapFrom(src => src.QueueId))
+
+                .ForMember(dest => dest.Position,
+                    opt => opt.MapFrom(src => src.Position))
+
+                .ForMember(dest => dest.RouteFrom,
+                    opt => opt.MapFrom(src =>
+                        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                            ? src.Queue.Route.FromAr
+                            : src.Queue.Route.FromEn))
+
+                .ForMember(dest => dest.RouteTo,
+                    opt => opt.MapFrom(src =>
+                        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                            ? src.Queue.Route.ToAr
+                            : src.Queue.Route.ToEn));
 
         }
     }
