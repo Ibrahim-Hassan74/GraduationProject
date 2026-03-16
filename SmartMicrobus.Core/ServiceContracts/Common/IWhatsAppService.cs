@@ -2,6 +2,6 @@
 {
     public interface IWhatsAppService
     {
-        Task<bool> SendOTPAsync(string phone, string code);
+        Task<bool> SendOTPAsync(string phone, string code, string templateName);
     }
 }

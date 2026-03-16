@@ -5,9 +5,9 @@ using SmartMicrobus.Core.ServiceContracts.Route;
 
 namespace SmartMicrobus.API.Controllers
 {
-    public class RouteController(IRouteService routeService) : CustomControllerBase
+    public class RoutesController(IRoutesService routeService) : CustomControllerBase
     {
-        private readonly IRouteService _routeService = routeService;
+        private readonly IRoutesService _routeService = routeService;
         [HttpGet]
         public async Task<IActionResult> GetAllRoutes()
         {

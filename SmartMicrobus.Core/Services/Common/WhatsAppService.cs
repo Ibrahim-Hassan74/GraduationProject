@@ -21,7 +21,7 @@ namespace SmartMicrobus.Core.Services.Common
             _settings = settings.Value;
         }
 
-        public async Task<bool> SendOTPAsync(string phone, string code)
+        public async Task<bool> SendOTPAsync(string phone, string code, string templateName)
         {
             var payload = new WhatsAppTemplatePayload
             {
@@ -30,7 +30,7 @@ namespace SmartMicrobus.Core.Services.Common
                 type = "template",
                 template = new WhatsAppTemplate
                 {
-                    name = _settings.TemplateName,
+                    name = templateName,
                     language = new WhatsAppLanguage { code = "ar_eg" },
                     components = new List<WhatsAppComponent>
                     {

@@ -17,5 +17,6 @@
 
         public ICollection<Microbus> Microbuses { get; set; } = new List<Microbus>();
         public ICollection<Queue> Queues { get; set; } = new List<Queue>();
+        public ICollection<FavoriteRoute> FavoriteRoutes { get; set; } = new List<FavoriteRoute>();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace SmartMicrobus.Core.ServiceContracts.Route
 {
-    public interface IRouteService
+    public interface IRoutesService
     {
         Task<ApiResponse> GetAllRoutesAsync(); // return List<RouteLocationResponse>
 

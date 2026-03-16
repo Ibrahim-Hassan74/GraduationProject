@@ -109,7 +109,8 @@ namespace SmartMicrobus.Core
             services.AddScoped<IDriverService, DriverService>();
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<IQrTokenService, QrTokenService>();
-            services.AddScoped<IRouteService, RouteService>();
+            services.AddScoped<IRoutesService, RoutesService>();
+            services.AddScoped<IFavoriteRouteService, FavoriteRouteService>();
 
             return services;
         }

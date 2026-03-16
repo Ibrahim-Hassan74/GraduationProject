@@ -37,9 +37,18 @@ namespace SmartMicrobus.API.Controllers
             return response.StatusCode switch
             {
                 400 => BadRequest(response),
-                404 => NotFound(response),
                 401 => Unauthorized(response),
-                _ => StatusCode(500, response)
+                403 => StatusCode(StatusCodes.Status403Forbidden, response),
+                404 => NotFound(response),
+                408 => StatusCode(StatusCodes.Status408RequestTimeout, response),
+                409 => Conflict(response),
+                410 => StatusCode(StatusCodes.Status410Gone, response),
+                415 => StatusCode(StatusCodes.Status415UnsupportedMediaType, response),
+                429 => StatusCode(StatusCodes.Status429TooManyRequests, response),
+                500 => StatusCode(StatusCodes.Status500InternalServerError, response),
+                501 => StatusCode(StatusCodes.Status501NotImplemented, response),
+                503 => StatusCode(StatusCodes.Status503ServiceUnavailable, response),
+                _ => StatusCode(response.StatusCode, response)
             };
         }
     }

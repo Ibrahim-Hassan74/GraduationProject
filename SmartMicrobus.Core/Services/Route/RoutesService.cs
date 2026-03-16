@@ -8,14 +8,14 @@ using System.Globalization;
 
 namespace SmartMicrobus.Core.Services.Route
 {
-    public class RouteService : IRouteService
+    public class RoutesService : IRoutesService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRouteRepository _routeRepository;
         private readonly ITripRepository _tripRepository;
         private readonly IMapper _mapper;
         private readonly IQueueItemRepository _queueItemRepository;
-        public RouteService(IUnitOfWork unitOfWork, IMapper mapper)
+        public RoutesService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -28,12 +28,13 @@ namespace SmartMicrobus.Core.Services.Route
             var routes = await _routeRepository.GetAllAsync();
 
             if (routes == null || !routes.Any())
-                return ApiResponseFactory.NotFound("No routes found.");
+                return ApiResponseFactory.Success("No routes found.", new List<RouteLocationResponse>());
 
             var isArabic = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? true : false;
 
-            var result = routes.Select(r => new RouteLocationResponse() { 
-                CityName = isArabic ? r.FromAr : r.FromEn 
+            var result = routes.Select(r => new RouteLocationResponse()
+            {
+                CityName = isArabic ? r.FromAr : r.FromEn
             }).Distinct().ToList();
 
             return ApiResponseFactory.Success("Routes retrieved successfully", result);
@@ -85,7 +86,7 @@ namespace SmartMicrobus.Core.Services.Route
             return ApiResponseFactory.Success("Microbuses on the way retrieved.", responses);
         }
 
-       
+
         public async Task<ApiResponse> GetRouteSearchResultAsync(Guid routeId)
         {
             if (routeId == Guid.Empty)
@@ -100,7 +101,7 @@ namespace SmartMicrobus.Core.Services.Route
 
             var onQueues = await _queueItemRepository.GetMicrobusesAtStationCountAsync(routeId);
 
-          
+
 
             var summary = new RouteSummaryResponse
             {

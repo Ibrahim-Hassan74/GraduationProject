@@ -5,5 +5,6 @@ namespace SmartMicrobus.Core.Domain.Entities
     public class Passenger : BaseEntity<Guid>
     {
         public ApplicationUser ApplicationUser { get; set; }
+        public ICollection<FavoriteRoute> FavoriteRoutes { get; set; } = new List<FavoriteRoute>();
     }
 }
