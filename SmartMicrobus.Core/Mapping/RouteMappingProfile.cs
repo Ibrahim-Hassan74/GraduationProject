@@ -20,41 +20,25 @@ namespace SmartMicrobus.Core.Mapping
                .ForMember(dest => dest.RouteId,
                    opt => opt.MapFrom(src => src.Id));
 
-            CreateMap<QueueItem, MicrobusAtStationResponse>()
-               .ForMember(dest => dest.DriverName,
-                   opt => opt.MapFrom(src => src.Driver.ApplicationUser.DisplayName))
-               .ForMember(dest => dest.DriverId,
-                   opt => opt.MapFrom(src => src.Driver.ApplicationUser.Id))
-               .ForMember(dest => dest.PlateNumber,
-                   opt => opt.MapFrom(src => src.Microbus.PlateNumber))
-               .ForMember(dest => dest.Status,
-                   opt => opt.MapFrom(src => src.Status.ToString()))
-               .ForMember(dest => dest.PassengerCount,
-                   opt => opt.MapFrom(src => src.Microbus.PassengerCount))
-               .ForMember(dest => dest.Model,
-                   opt => opt.MapFrom(src => src.Microbus.Model))
-               .ForMember(dest => dest.Color,
-                   opt => opt.MapFrom(src => src.Microbus.Color));
 
-            CreateMap<Trip, MicrobusOnTheWayResponse>()
-                .ForMember(dest => dest.DriverName,
-                    opt => opt.MapFrom(src => src.Driver.ApplicationUser.DisplayName))
-                .ForMember(dest => dest.Status,
-                    opt => opt.MapFrom(src => src.Status.ToString()))
+            CreateMap<FavoriteRoute, FavoriteRouteResponse>()
+            .ForMember(dest => dest.From,
+                opt => opt.MapFrom(src =>
+                    CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                        ? src.Route.FromAr
+                        : src.Route.FromEn))
 
-                .ForMember(dest => dest.PlateNumber,
-                    opt => opt.MapFrom(src => src.Microbus.PlateNumber))
-                 .ForMember(dest => dest.PassengerCount,
-                   opt => opt.MapFrom(src => src.Microbus.PassengerCount))
-                .ForMember(dest => dest.Model,
-                    opt => opt.MapFrom(src => src.Microbus.Model))
-                .ForMember(dest => dest.Color,
-                    opt => opt.MapFrom(src => src.Microbus.Color))
+            .ForMember(dest => dest.To,
+                opt => opt.MapFrom(src =>
+                    CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                        ? src.Route.ToAr
+                        : src.Route.ToEn))
 
-                .ForMember(dest => dest.Position,
-                    opt => opt.Ignore())
-                .ForMember(dest => dest.EstimatedArrivalMinutes,
-                    opt => opt.Ignore());
+            .ForMember(dest => dest.Price,
+                opt => opt.MapFrom(src => src.Route.Price));
+
+
+          
 
         }
     }

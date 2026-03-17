@@ -24,6 +24,14 @@ namespace SmartMicrobus.API.Controllers
             return Ok(data);
         }
 
+        [HttpGet("{routeId}/is-favorite")]
+        public async Task<IActionResult> IsFavorite(Guid routeId)
+        {
+            var passengerId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var result = await _favoriteRouteService.IsFavoriteAsync(passengerId,routeId);           
+                return ToActionResult(result);
+        }
+
         [HttpPost("{routeId}")]
         public async Task<IActionResult> AddToFavorites(Guid routeId)
         {
