@@ -43,14 +43,24 @@ namespace SmartMicrobus.Core.Services.Staff
             if (payload == null)
                 return ApiResponseFactory.BadRequest("Invalid or expired QR code.");
 
+            // 1. Check if already in queue
             var existing = await _queueItemRepository.GetActiveByDriverIdAsync(payload.DriverId);
 
             if (existing != null)
                 return ApiResponseFactory.BadRequest("Microbus is already in queue.");
 
-            var lastPosition = await _queueItemRepository.GetLastPositionAsync(payload.QueueId);
+            var routeId = payload.RouteId;
 
-            #region end active trip if exists
+            // 3. Get Queue based on Station + Route
+            var queue = await _queueRepository.GetByStationAndRouteAsync(stationId, routeId);
+
+            if (queue == null)
+                return ApiResponseFactory.BadRequest("No queue found for this route at this station.");
+
+            // 4. Get last position
+            var position = await _queueItemRepository.GetNextPositionAsync(queue.Id);
+
+            #region End active trip if exists
             var activeTrip = await _tripRepository.GetActiveTripAsync(payload.DriverId);
 
             if (activeTrip != null)
@@ -62,12 +72,13 @@ namespace SmartMicrobus.Core.Services.Staff
             }
             #endregion
 
+            // 5. Add new QueueItem
             var item = new QueueItem
             {
-                QueueId = payload.QueueId,
+                QueueId = queue.Id,
                 DriverId = payload.DriverId,
                 MicrobusId = payload.MicrobusId,
-                Position = lastPosition + 1,
+                Position = position,
                 Status = QueueStatus.Waiting
             };
 
@@ -79,7 +90,7 @@ namespace SmartMicrobus.Core.Services.Staff
 
             var queueResponse = _mapper.Map<QueueItemResponse>(item);
 
-            await _queueNotificationService.NotifyDriverAdded(payload.QueueId, queueResponse);
+            await _queueNotificationService.NotifyDriverAdded(queue.Id, queueResponse);
 
             return ApiResponseFactory.Success("Scan processed.");
         }

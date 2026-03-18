@@ -131,5 +131,14 @@ namespace SmartMicrobus.Infrastructure.Repository
                     q.Queue.RouteId == routeId &&
                     q.Status == QueueStatus.Waiting);
         }
+
+        public async Task<int> GetNextPositionAsync(Guid queueId)
+        {
+            var max = await _context.QueueItems
+                .Where(q => q.QueueId == queueId && q.Status == QueueStatus.Waiting)
+                .MaxAsync(q => (int?)q.Position);
+
+            return (max ?? 0) + 1;
+        }
     }
 }

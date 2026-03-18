@@ -17,7 +17,7 @@ namespace SmartMicrobus.API.Controllers
         {
             var passengerId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var result = await _favoriteRouteService.GetFavoriteRoutesAsync(passengerId);
-            if(!result.Success)
+            if (!result.Success)
                 return ToActionResult(result);
 
             var data = (result as ApiResponseWithData<List<FavoriteRouteResponse>>)?.Data;
@@ -28,8 +28,8 @@ namespace SmartMicrobus.API.Controllers
         public async Task<IActionResult> IsFavorite(Guid routeId)
         {
             var passengerId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var result = await _favoriteRouteService.IsFavoriteAsync(passengerId,routeId);           
-                return ToActionResult(result);
+            var result = await _favoriteRouteService.IsFavoriteAsync(passengerId, routeId);
+            return ToActionResult(result);
         }
 
         [HttpPost("{routeId}")]
