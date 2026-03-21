@@ -10,6 +10,9 @@ namespace SmartMicrobus.Core.Domain.Entities
         public Guid MicrobusId { get; set; }
         public Microbus Microbus { get; set; } = null!;
 
+        public Guid StationId { get; set; }
+        public Station Station { get; set; } = null!;
+        
         public Guid RouteId { get; set; }
         public Route Route { get; set; } = null!;
 
