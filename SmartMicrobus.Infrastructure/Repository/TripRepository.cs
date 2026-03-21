@@ -70,5 +70,17 @@ namespace SmartMicrobus.Infrastructure.Repository
                     t.Status == TripStatus.Started);
         }
 
+        public async Task<List<Trip>> GetStationTripsAsync(Guid routeId, Guid stationId)
+        {
+            return await _context.Trips
+                .Include(x => x.Route)
+                .Include(x => x.Microbus)
+                    .ThenInclude(x => x.Driver)
+                .Where(x => x.RouteId == routeId
+                         && x.StationId == stationId
+                         && x.StartedAt.Date < DateTime.Today
+                         && x.Status == TripStatus.Completed)
+                .ToListAsync();
+        }
     }
 }
