@@ -1,6 +1,6 @@
 namespace SmartMicrobus.Core.Domain.Entities
 {
-    public class DriverReportReason
+    public class DriverReportReason : BaseEntity<Guid>
     {
         public Guid DriverReportId { get; set; }
         public DriverReport DriverReport { get; set; } = null!;

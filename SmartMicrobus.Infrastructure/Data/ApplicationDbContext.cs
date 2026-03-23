@@ -32,10 +32,10 @@ namespace SmartMicrobus.Infrastructure.Data
         public virtual DbSet<QueueItem> QueueItems { get; set; }
 
         public virtual DbSet<Trip> Trips { get; set; }
-        public virtual DbSet<SmartMicrobus.Core.Domain.Entities.FavoriteRoute> FavoriteRoute { get; set; }
-        public virtual DbSet<SmartMicrobus.Core.Domain.Entities.DriverReport> DriverReports { get; set; }
-        public virtual DbSet<SmartMicrobus.Core.Domain.Entities.ReportReason> ReportReasons { get; set; }
-        public virtual DbSet<SmartMicrobus.Core.Domain.Entities.DriverReportReason> DriverReportReasons { get; set; }
+        public virtual DbSet<FavoriteRoute> FavoriteRoute { get; set; }
+        public virtual DbSet<DriverReport> DriverReports { get; set; }
+        public virtual DbSet<ReportReason> ReportReasons { get; set; }
+        public virtual DbSet<DriverReportReason> DriverReportReasons { get; set; }
         public virtual DbSet<FavoriteRoute> FavoriteRoutes { get; set; }
     }   
 }

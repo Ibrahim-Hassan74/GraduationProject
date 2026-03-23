@@ -10,17 +10,19 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<Microbus> builder)
         {
-                builder.HasKey(m => m.Id);
+            builder.HasKey(m => m.Id);
 
-                builder.Property(m => m.PlateNumber)
-                    .IsRequired()
-                    .HasMaxLength(20);
+            builder.Property(m => m.PlateNumber)
+                .IsRequired()
+                .HasMaxLength(20);
 
-                builder.HasOne(m => m.Route)
-                    .WithMany()
-                    .HasForeignKey(m => m.RouteId)
-                    .OnDelete(DeleteBehavior.Restrict);
-           
+            builder.HasIndex(m => m.PlateNumber).IsUnique();
+
+            builder.HasOne(m => m.Route)
+                .WithMany()
+                .HasForeignKey(m => m.RouteId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }
