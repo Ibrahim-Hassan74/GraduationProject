@@ -20,6 +20,7 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly IMapper _mapper;
         private readonly IQrTokenService _qrTokenService;
         private readonly ITripRepository _tripRepository;
+        private readonly IRouteRepository _routeRepository;
 
         public StaffService(IUnitOfWork unitOfWork,
             IQueueNotificationService queueNotificationService,
@@ -34,6 +35,7 @@ namespace SmartMicrobus.Core.Services.Staff
             _mapper = mapper;
             _qrTokenService = qrTokenService;
             _tripRepository = _unitOfWork.TripRepository;
+            _routeRepository = _unitOfWork.RouteRepository;
         }
 
         public async Task<ApiResponse> CheckInAtGateAsync(string qrCode, Guid stationId)
@@ -49,15 +51,25 @@ namespace SmartMicrobus.Core.Services.Staff
             if (existing != null)
                 return ApiResponseFactory.BadRequest("Microbus is already in queue.");
 
-            var routeId = payload.RouteId;
+            // 2. Get routes (both directions)
+            var routes = await _routeRepository.GetRoutesByLineAsync(payload.RouteId);
 
-            // 3. Get Queue based on Station + Route
-            var queue = await _queueRepository.GetByStationAndRouteAsync(stationId, routeId);
+            if (routes == null || !routes.Any())
+                return ApiResponseFactory.BadRequest("No routes found.");
+
+            // 3. Pick route based on station
+            var route = routes.FirstOrDefault(r => r.StationId == stationId);
+
+            if (route == null)
+                return ApiResponseFactory.BadRequest("This microbus cannot start from this station.");
+
+            // 4. Get Queue
+            var queue = await _queueRepository.GetByStationAndRouteAsync(stationId, route.Id);
 
             if (queue == null)
                 return ApiResponseFactory.BadRequest("No queue found for this route at this station.");
 
-            // 4. Get last position
+            // 5. Get position
             var position = await _queueItemRepository.GetNextPositionAsync(queue.Id);
 
             #region End active trip if exists
@@ -72,7 +84,7 @@ namespace SmartMicrobus.Core.Services.Staff
             }
             #endregion
 
-            // 5. Add new QueueItem
+            // 6. Add QueueItem
             var item = new QueueItem
             {
                 QueueId = queue.Id,
@@ -83,9 +95,9 @@ namespace SmartMicrobus.Core.Services.Staff
             };
 
             await _queueItemRepository.AddAsync(item);
-
             await _unitOfWork.CompleteAsync();
 
+            // 7. Reload
             item = await _queueItemRepository.GetActiveByDriverIdAsync(item.DriverId);
 
             var queueResponse = _mapper.Map<QueueItemResponse>(item);
@@ -127,7 +139,8 @@ namespace SmartMicrobus.Core.Services.Staff
                 Status = TripStatus.Started,
                 PassengerCount = microbus.PassengerCount,
                 TotalAmount = microbus.PassengerCount * microbus.Route.Price,
-                DistanceKm = microbus.Route.DistanceKm
+                DistanceKm = microbus.Route.DistanceKm,
+                StationId = microbus.Route.StationId
             };
 
             await _tripRepository.AddAsync(trip);

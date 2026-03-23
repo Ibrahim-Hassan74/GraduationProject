@@ -34,6 +34,11 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
                 .WithMany(s => s.Routes)
                 .HasForeignKey(r => r.StationId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasIndex(r => new { r.FromEn, r.ToEn })
+                .IsUnique();
+            builder.HasIndex(r => new { r.FromAr, r.ToAr })
+                .IsUnique();
         }
     }
 }

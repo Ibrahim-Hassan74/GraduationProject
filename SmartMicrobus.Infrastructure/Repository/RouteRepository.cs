@@ -31,5 +31,24 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .OrderBy(c => c)
                 .ToListAsync();
         }
+
+        public async Task<List<Route>> GetRoutesByLineAsync(Guid routeId)
+        {
+            var baseRoute = await _context.Routes
+                .FirstOrDefaultAsync(r => r.Id == routeId);
+
+            if (baseRoute == null)
+                return new List<Route>();
+
+            var from = baseRoute.FromEn.Trim();
+            var to = baseRoute.ToEn.Trim();
+
+            return await _context.Routes
+                .Where(r =>
+                    (r.FromEn == from && r.ToEn == to) ||
+                    (r.FromEn == to && r.ToEn == from)
+                )
+                .ToListAsync();
+        }
     }
 }

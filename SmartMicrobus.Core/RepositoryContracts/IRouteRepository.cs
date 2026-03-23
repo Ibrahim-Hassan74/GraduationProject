@@ -7,5 +7,6 @@ namespace SmartMicrobus.Core.RepositoryContracts
     {
         Task<List<Route>> GetRoutesByFromAsync(string from);
         Task<List<string>> GetDistinctFromCitiesAsync(bool isArabic);
+        Task<List<Route>> GetRoutesByLineAsync(Guid routeId);
     }
 }
