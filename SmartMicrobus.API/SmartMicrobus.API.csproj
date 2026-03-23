@@ -19,13 +19,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SmartMicrobus.Core\SmartMicrobus.Core.csproj" />
-    <ProjectReference Include="..\SmartMicrobus.Infrastructure\SmartMicrobus.Infrastructure.csproj" />
+    <Folder Include="Resources\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Resources\" />
-    <Folder Include="wwwroot\" />
+    <ProjectReference Include="..\SmartMicrobus.Core\SmartMicrobus.Core.csproj" />
+    <ProjectReference Include="..\SmartMicrobus.Infrastructure\SmartMicrobus.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -34,7 +34,7 @@ namespace SmartMicrobus.Core.Services.Report
             if (driver is null)
                 return ApiResponseFactory.NotFound("Invalid plate number");
 
-            var recentReports = await _reportRepository.HasRecentReportAsync(passengerId, plate);
+            var recentReports = await _reportRepository.HasRecentReportAsync(passengerId, request.PlateNumber);
 
             if (recentReports)
                 return ApiResponseFactory.Conflict("You have already reported this driver recently.");
@@ -48,7 +48,7 @@ namespace SmartMicrobus.Core.Services.Report
                 Id = Guid.NewGuid(),
                 PassengerId = passengerId,
                 DriverId = driver?.Id,
-                PlateNumber = plate,
+                PlateNumber = request.PlateNumber,
                 Description = request.Description,
                 CreatedAt = DateTimeOffset.UtcNow
             };
