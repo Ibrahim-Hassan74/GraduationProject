@@ -25,17 +25,17 @@ namespace SmartMicrobus.Core.Services.Route
         }
         public async Task<ApiResponse> GetAllRoutesAsync()
         {
-            var routes = await _routeRepository.GetAllAsync();
+            var isArabic = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar";
 
-            if (routes == null || !routes.Any())
+            var cities = await _routeRepository.GetDistinctFromCitiesAsync(isArabic);
+
+            if (cities == null || !cities.Any())
                 return ApiResponseFactory.Success("No routes found.", new List<RouteLocationResponse>());
 
-            var isArabic = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? true : false;
-
-            var result = routes.Select(r => new RouteLocationResponse()
+            var result = cities.Select(c => new RouteLocationResponse
             {
-                CityName = isArabic ? r.FromAr : r.FromEn
-            }).Distinct().ToList();
+                CityName = c
+            }).ToList();
 
             return ApiResponseFactory.Success("Routes retrieved successfully", result);
         }
