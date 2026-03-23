@@ -15,6 +15,7 @@ namespace SmartMicrobus.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
         }
         public virtual DbSet<Driver> Drivers { get; set; }
         public virtual DbSet<Passenger> Passangers { get; set; }
@@ -31,6 +32,10 @@ namespace SmartMicrobus.Infrastructure.Data
         public virtual DbSet<QueueItem> QueueItems { get; set; }
 
         public virtual DbSet<Trip> Trips { get; set; }
+        public virtual DbSet<FavoriteRoute> FavoriteRoute { get; set; }
+        public virtual DbSet<DriverReport> DriverReports { get; set; }
+        public virtual DbSet<ReportReason> ReportReasons { get; set; }
+        public virtual DbSet<DriverReportReason> DriverReportReasons { get; set; }
         public virtual DbSet<FavoriteRoute> FavoriteRoutes { get; set; }
     }   
 }

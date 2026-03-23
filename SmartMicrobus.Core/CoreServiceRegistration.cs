@@ -9,11 +9,13 @@ using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
+using SmartMicrobus.Core.ServiceContracts.Report;
 using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.ServiceContracts.Staff;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Core.Services.Common;
 using SmartMicrobus.Core.Services.Drivers;
+using SmartMicrobus.Core.Services.Report;
 using SmartMicrobus.Core.Services.Route;
 using SmartMicrobus.Core.Services.Staff;
 using System.Security.Claims;
@@ -111,6 +113,7 @@ namespace SmartMicrobus.Core
             services.AddScoped<IQrTokenService, QrTokenService>();
             services.AddScoped<IRoutesService, RoutesService>();
             services.AddScoped<IFavoriteRouteService, FavoriteRouteService>();
+            services.AddScoped<IReportService, ReportService>();
 
             return services;
         }
