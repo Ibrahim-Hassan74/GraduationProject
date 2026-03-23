@@ -4,13 +4,14 @@ using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.ServiceContracts.Driver;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
 using System.Security.Claims;
 
 namespace SmartMicrobus.API.Controllers
 {
     [Authorize(Roles = nameof(UserRole.Driver))]
-    public class DriverController(IDriverService driverService, ILogger<DriverController> logger) : CustomControllerBase
+    public class DriverController(IDriverService driverService, ITripService tripService, ILogger<DriverController> logger) : CustomControllerBase
     {
         [HttpGet("get-current-postion")]
         public async Task<IActionResult> CurrentPosition()
@@ -50,7 +51,7 @@ namespace SmartMicrobus.API.Controllers
             {
                 return BadRequest("Driver ID is required");
             }
-            var response = await driverService.StartTripAsync(driverId);
+            var response = await tripService.StartTripAsync(driverId);
             if (!response.Success)
             {
                 return BadRequest(response);
@@ -65,7 +66,7 @@ namespace SmartMicrobus.API.Controllers
             {
                 return BadRequest("Driver ID is required");
             }
-            var response = await driverService.EndTripAsync(driverId);
+            var response = await tripService.EndTripAsync(driverId);
             if (!response.Success)
             {
                 return BadRequest(response);
@@ -78,7 +79,7 @@ namespace SmartMicrobus.API.Controllers
         {
             var driverId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var response = await driverService.GetDriverHistoryAsync(Guid.Parse(driverId!), request);
+            var response = await tripService.GetDriverHistoryAsync(Guid.Parse(driverId!), request);
 
             var result = response as ApiResponseWithData<DriverHistoryResponse>;
             if(!response.Success || result.Data is null) 
