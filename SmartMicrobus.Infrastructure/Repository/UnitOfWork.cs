@@ -16,6 +16,8 @@ namespace SmartMicrobus.Infrastructure.Repository
         public IQueueItemRepository QueueItemRepository { get; }
         public IRouteRepository RouteRepository { get; }
         public IStationRepository StationRepository { get; }
+        public IReportRepository ReportRepository { get; }
+        public IReportReasonRepository ReportReasonRepository { get; }
         public IFavoriteRouteRepository FavoriteRouteRepository { get; }
 
         public UnitOfWork(ApplicationDbContext context)
@@ -30,6 +32,8 @@ namespace SmartMicrobus.Infrastructure.Repository
             QueueItemRepository = new QueueItemRepository(_context);
             RouteRepository = new RouteRepository(_context);
             StationRepository = new StationRepository(_context);
+            ReportRepository = new ReportRepository(_context);
+            ReportReasonRepository = new ReportReasonRepository(_context);
             FavoriteRouteRepository = new FavoriteRouteRepository(_context); 
         }
 

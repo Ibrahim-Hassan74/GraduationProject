@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SmartMicrobus.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using SmartMicrobus.Infrastructure.Data;
 namespace SmartMicrobus.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260323061051_AddReportTables")]
+    partial class AddReportTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -257,9 +260,6 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DriverId")
-                        .IsUnique();
-
-                    b.HasIndex("PlateNumber")
                         .IsUnique();
 
                     b.HasIndex("RouteId");

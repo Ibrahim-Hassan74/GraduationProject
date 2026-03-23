@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Infrastructure.Data;
+using System.Linq.Expressions;
 
 namespace SmartMicrobus.Infrastructure.Repository
 {
@@ -18,6 +19,15 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .Include(x => x.Route)
                 .Include(x => x.Driver)
                 .FirstOrDefaultAsync(x => x.QrCode == qrCode);
+        }
+        public async Task<Driver?> GetDriverAsync(string plateNumber)
+        {
+            plateNumber = plateNumber.Trim().ToLower();
+
+            return await _context.Microbuses
+                .Where(m => m.PlateNumber != null && m.PlateNumber.ToLower() == plateNumber)
+                .Select(m => m.Driver)
+                .FirstOrDefaultAsync();
         }
     }
 }
