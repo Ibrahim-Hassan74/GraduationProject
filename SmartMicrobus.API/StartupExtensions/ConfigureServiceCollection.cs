@@ -122,6 +122,29 @@ namespace SmartMicrobus.API.StartupExtensions
                     Scheme = "Bearer"
                 });
 
+                options.AddSecurityDefinition("Accept-Language", new OpenApiSecurityScheme
+                {
+                    Description = "Specify the request language. Supported values: 'ar' or 'en'.",
+                    Name = "Accept-Language",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Accept-Language"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
