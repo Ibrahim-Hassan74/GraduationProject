@@ -54,6 +54,21 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>ResetPasswordDTO.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\DTO\Driver\DriverValidationMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DriverValidationMessages.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\DTO\Report\ReportValidationMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ReportValidationMessages.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\DTO\Staff\StaffValidationMessages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StaffValidationMessages.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -80,6 +95,18 @@
     <EmbeddedResource Update="Resources\DTO\Account\ResetPasswordDTO.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ResetPasswordDTO.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\DTO\Driver\DriverValidationMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>DriverValidationMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\DTO\Report\ReportValidationMessages.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>ReportValidationMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\DTO\Staff\StaffValidationMessages.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>StaffValidationMessages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
