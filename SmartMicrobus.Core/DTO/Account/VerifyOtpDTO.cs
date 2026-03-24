@@ -5,12 +5,17 @@ namespace SmartMicrobus.Core.DTO.Account
 {
     public class VerifyOtpDTO
     {
-        [Phone(ErrorMessage = "Phone number is invalid.")]
-        [EgyptianPhone]
+        [Required(ErrorMessageResourceName = "RequiredPhoneNumber",
+                  ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
+        [EgyptianPhone(ErrorMessageResourceName = "InvalidPhoneNumber",
+                       ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
         public string PhoneNumber { get; set; } = null!;
 
-        [Required(ErrorMessage = "OTP is required.")]
-        [RegularExpression(@"^\d{6}$", ErrorMessage = "OTP must be 6 digits.")]
+        [Required(ErrorMessageResourceName = "RequiredOtp",
+                  ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
+        [RegularExpression(@"^\d{6}$",
+            ErrorMessageResourceName = "InvalidOtp",
+            ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
         public string Otp { get; set; } = null!;
     }
 }

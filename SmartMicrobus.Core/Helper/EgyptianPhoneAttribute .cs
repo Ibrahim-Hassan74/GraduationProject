@@ -7,32 +7,57 @@ namespace SmartMicrobus.Core.Helper
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
-            var phoneNumber = value as string;
+            if (value is not string phoneNumber || string.IsNullOrWhiteSpace(phoneNumber))
+            {
+                return ValidationResult.Success; // required attribute do this validation
+            }
 
             var normalizedPhone = NormalizePhone(phoneNumber);
+
             if (normalizedPhone is null)
-                return new ValidationResult("Phone number must be a valid Egyptian number starting with +20 or 20 and contain 10 digits after the country code.");
+            {
+                return new ValidationResult(GetErrorMessage(validationContext));
+            }
 
-            var property = validationContext.ObjectType
-            .GetProperty(validationContext.MemberName!);
-
-            property?.SetValue(validationContext.ObjectInstance, normalizedPhone);
+            SetNormalizedValue(validationContext, normalizedPhone);
 
             return ValidationResult.Success;
-
         }
 
-        private static string? NormalizePhone(string? phone)
+        private static string? NormalizePhone(string phone)
         {
-            if (string.IsNullOrWhiteSpace(phone))
-                return null;
-
             var cleaned = Regex.Replace(phone, @"\D", "");
+
             if (string.IsNullOrEmpty(cleaned))
                 return null;
 
-            var last9 = cleaned.Length > 9 ? cleaned[^9..] : cleaned;
-            return "201" + last9;
+            var last9Digits = cleaned.Length >= 9 ? cleaned[^9..] : null;
+
+            if (last9Digits is null || last9Digits.Length != 9)
+                return null;
+
+            return $"201{last9Digits}";
+        }
+
+        private static void SetNormalizedValue(ValidationContext context, string normalizedValue)
+        {
+            var property = context.ObjectType.GetProperty(context.MemberName!);
+
+            if (property != null && property.CanWrite)
+            {
+                property.SetValue(context.ObjectInstance, normalizedValue);
+            }
+        }
+
+        private string GetErrorMessage(ValidationContext context)
+        {
+            if (!string.IsNullOrEmpty(ErrorMessageResourceName))
+            {
+                return FormatErrorMessage(context.DisplayName);
+            }
+
+            return ErrorMessage ??
+                   "Invalid Egyptian phone number format.";
         }
     }
 }
