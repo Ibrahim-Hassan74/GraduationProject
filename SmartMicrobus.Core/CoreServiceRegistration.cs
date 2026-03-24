@@ -8,6 +8,7 @@ using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
+using SmartMicrobus.Core.ServiceContracts.Driver;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
 using SmartMicrobus.Core.ServiceContracts.Report;
 using SmartMicrobus.Core.ServiceContracts.Route;
@@ -114,6 +115,7 @@ namespace SmartMicrobus.Core
             services.AddScoped<IRoutesService, RoutesService>();
             services.AddScoped<IFavoriteRouteService, FavoriteRouteService>();
             services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<ITripService, TripService>();
 
             return services;
         }
