@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
@@ -13,18 +14,20 @@ namespace SmartMicrobus.Core.Services.Drivers
     public class TripService(IQueueItemRepository _queueItemRepository, ITripRepository _tripRepository,
         IUnitOfWork _unitOfWork, IMapper _mapper) : ITripService
     {
+
+        private readonly IStringLocalizer<TripService> _localizer;
         public async Task<ApiResponse> StartTripAsync(Guid driverId)
         {
             var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
 
             if (queueItem == null)
-                return ApiResponseFactory.NotFound("Driver not in queue.");
+                return ApiResponseFactory.NotFound(_localizer["DriverNotInQueue"]);
 
             var first = await _queueItemRepository
                 .GetFirstInQueueAsync(queueItem.QueueId);
 
             if (first?.Id != queueItem.Id)
-                return ApiResponseFactory.Conflict("It is not your turn.");
+                return ApiResponseFactory.Conflict(_localizer["NotYourTurn"]);
 
             var trip = new Trip
             {
@@ -39,26 +42,27 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             queueItem.Status = QueueStatus.InTrip;
             queueItem.LeftAt = DateTimeOffset.UtcNow;
+
             await _queueItemRepository.UpdateAsync(queueItem);
             await _unitOfWork.CompleteAsync();
 
-            return ApiResponseFactory.Success("Trip started successfully.");
+            return ApiResponseFactory.Success(_localizer["TripStartedSuccessfully"]);
         }
+
         public async Task<ApiResponse> EndTripAsync(Guid driverId)
         {
             var trip = await _tripRepository.GetActiveTripAsync(driverId);
 
             if (trip == null)
-                return ApiResponseFactory.Failure("No active trip found for the driver", 404);
+                return ApiResponseFactory.Failure(_localizer["NoActiveTripFound"], 404);
 
             trip.Status = TripStatus.Completed;
             trip.EndedAt = DateTimeOffset.UtcNow;
 
             await _tripRepository.UpdateAsync(trip);
-
             await _unitOfWork.CompleteAsync();
 
-            return ApiResponseFactory.Success("Trip ended successfully");
+            return ApiResponseFactory.Success(_localizer["TripEndedSuccessfully"]);
         }
 
         public async Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request)
@@ -80,14 +84,16 @@ namespace SmartMicrobus.Core.Services.Drivers
             var tripsHistory = await _tripRepository.GetDriverTripsAsync(driverId, request);
 
             if (tripsHistory == null || !tripsHistory.Trips.Any())
-            {
-                return ApiResponseFactory.NotFound("No trips found for the selected period");
-            }
+                return ApiResponseFactory.NotFound(_localizer["NoTripsFoundForPeriod"]);
 
             var history = _mapper.Map<List<TripHistoryDTO>>(tripsHistory.Trips);
-            var response = new DriverHistoryResponse(tripsHistory.TotalAmount, history, tripsHistory.TotalCount);
 
-            return ApiResponseFactory.Success("Driver trip history retrieved successfully", response);
+            var response = new DriverHistoryResponse(
+                tripsHistory.TotalAmount,
+                history,
+                tripsHistory.TotalCount);
+
+            return ApiResponseFactory.Success(_localizer["DriverTripHistoryRetrieved"], response);
         }
     }
 }

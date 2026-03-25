@@ -29,11 +29,6 @@ namespace SmartMicrobus.API.Controllers
         [HttpGet("get-driver-queue")]
         public async Task<IActionResult> DriverQueue(Guid driverId)
         {
-            if (driverId == Guid.Empty)
-            {
-                return BadRequest("Driver ID is required");
-            }
-
             var response = await driverService.GetMyQueueAsync(driverId);
 
             if (!response.Success)
@@ -47,10 +42,6 @@ namespace SmartMicrobus.API.Controllers
         [HttpPost("start-trip")]
         public async Task<IActionResult> StartTrip(Guid driverId)
         {
-            if (driverId == Guid.Empty)
-            {
-                return BadRequest("Driver ID is required");
-            }
             var response = await tripService.StartTripAsync(driverId);
             if (!response.Success)
             {
@@ -62,10 +53,6 @@ namespace SmartMicrobus.API.Controllers
         [HttpPost("end-trip")]
         public async Task<IActionResult> EndTrip(Guid driverId)
         {
-            if (driverId == Guid.Empty)
-            {
-                return BadRequest("Driver ID is required");
-            }
             var response = await tripService.EndTripAsync(driverId);
             if (!response.Success)
             {
@@ -82,9 +69,9 @@ namespace SmartMicrobus.API.Controllers
             var response = await tripService.GetDriverHistoryAsync(Guid.Parse(driverId!), request);
 
             var result = response as ApiResponseWithData<DriverHistoryResponse>;
-            if(!response.Success || result.Data is null) 
+            if (!response.Success || result.Data is null)
             {
-                return NotFound(ApiResponseFactory.NotFound(result?.Message ?? "No trips found for the selected period"));
+                return NotFound(ApiResponseFactory.NotFound(response.Message!));
             }
 
             var pagination = new Pagination<DriverHistoryResponse>(request.PageNumber, request.PageSize, result.Data.TotalCount, result.Data);
