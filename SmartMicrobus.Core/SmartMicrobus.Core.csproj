@@ -29,6 +29,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>DriverService.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Services\Drivers\TripService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TripService.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Services\Route\FavoriteRouteService.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -45,6 +50,10 @@
     <EmbeddedResource Update="Resources\Services\Drivers\DriverService.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>DriverService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Drivers\TripService.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>TripService.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Services\Route\FavoriteRouteService.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
