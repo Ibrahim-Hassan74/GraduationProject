@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.DTO.Common;
@@ -16,11 +17,13 @@ namespace SmartMicrobus.Core.Services.Common
     {
         private readonly IConfiguration _configuration;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IStringLocalizer<JwtService> _localizer;
 
-        public JwtService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
+        public JwtService(IConfiguration configuration, UserManager<ApplicationUser> userManager, IStringLocalizer<JwtService> localizer)
         {
             _configuration = configuration;
             _userManager = userManager;
+            _localizer = localizer;
         }
 
         /// <inheritdoc/>
@@ -90,7 +93,7 @@ namespace SmartMicrobus.Core.Services.Common
                 RefreshTokenExpirationDateTime = refreshTokenExpiry,
                 StatusCode = 200,
                 Success = true,
-                Message = "Token generated successfully"
+                Message = _localizer["Token_Generated_Success"]
             };
         }
 
@@ -127,7 +130,9 @@ namespace SmartMicrobus.Core.Services.Common
             if (securityToken is not JwtSecurityToken jwtSecurityToken ||
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new SecurityTokenException("Invalid token");
+                throw new SecurityTokenException(
+                    _localizer["Token_Invalid"]
+                );
             }
 
             return claimsPrincipal;

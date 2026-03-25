@@ -1,18 +1,19 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.DTO.Account;
 using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.Enums;
+using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Account;
-using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using System.Security.Claims;
-using SmartMicrobus.Core.Enums;
-using AutoMapper;
-using Microsoft.Extensions.Configuration;
 
 namespace SmartMicrobus.Core.Services.Account
 {
@@ -31,6 +32,7 @@ namespace SmartMicrobus.Core.Services.Account
         private readonly IOtpService _otpService;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly IStringLocalizer<AuthService> _localizer;
         public AuthService(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IJwtService jwtService,
@@ -40,7 +42,8 @@ namespace SmartMicrobus.Core.Services.Account
             IOtpService otpService,
             RoleManager<ApplicationRole> roleManager,
             IMapper mapper,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IStringLocalizer<AuthService> localizer)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -54,6 +57,7 @@ namespace SmartMicrobus.Core.Services.Account
             _roleManager = roleManager;
             _mapper = mapper;
             _configuration = configuration;
+            _localizer = localizer;
         }
 
         // Parse stored token format:
@@ -71,7 +75,11 @@ namespace SmartMicrobus.Core.Services.Account
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
-                return ApiResponseFactory.Failure("Failed to register driver.", 400, [.. result.Errors.Select(e => e.Description)]);
+                return ApiResponseFactory.Failure(
+                    _localizer["RegisterDriver_Failed"],
+                    400,
+                    [.. result.Errors.Select(e => e.Description)]
+                );
             }
 
             await EnsureRoleExistsAndAssignAsync(user, UserRole.Driver.ToString());
@@ -79,23 +87,32 @@ namespace SmartMicrobus.Core.Services.Account
             try
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
-                var ok = await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otp, _configuration["WhatsAppTemplates:ConfirmAccount"]);
+                var ok = await _whatsAppService.SendOTPAsync(
+                    user.PhoneNumber!,
+                    otp,
+                    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                );
 
                 if (!ok)
                 {
                     await _otpService.ClearOtpAsync(user);
-                    throw new Exception("WhatsApp service returned false.");
+                    throw new Exception(_localizer["WhatsApp_Send_Failed"]);
                 }
-
             }
             catch (Exception ex)
             {
                 if (ex.Message.StartsWith("OTP_COOLDOWN"))
                 {
                     var seconds = ex.Message.Split(':')[1];
-                    return ApiResponseFactory.TooManyRequests($"Please wait {seconds} seconds.");
+
+                    return ApiResponseFactory.TooManyRequests(
+                        _localizer["OTP_Cooldown", seconds]
+                    );
                 }
-                return ApiResponseFactory.InternalServerError("Failed to send OTP. Please try again later.");
+
+                return ApiResponseFactory.InternalServerError(
+                    _localizer["OTP_Send_Failed"]
+                );
             }
 
             var driver = new Driver
@@ -106,7 +123,10 @@ namespace SmartMicrobus.Core.Services.Account
 
             await _driverRepository.AddAsync(driver);
             await _unitOfWork.CompleteAsync();
-            return ApiResponseFactory.Success("Driver registered successfully.");
+
+            return ApiResponseFactory.Success(
+                _localizer["RegisterDriver_Success"]
+            );
         }
 
         public async Task<ApiResponse> RegisterPassengerAsync(RegisterPassengerDTO dto)
@@ -121,7 +141,11 @@ namespace SmartMicrobus.Core.Services.Account
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
             {
-                return ApiResponseFactory.Failure("Failed to register passenger.", 400, [.. result.Errors.Select(e => e.Description)]);
+                return ApiResponseFactory.Failure(
+                    _localizer["RegisterPassenger_Failed"],
+                    400,
+                    [.. result.Errors.Select(e => e.Description)]
+                );
             }
 
             await EnsureRoleExistsAndAssignAsync(user, UserRole.Passenger.ToString());
@@ -129,75 +153,101 @@ namespace SmartMicrobus.Core.Services.Account
             try
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
-                var ok = await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otp, _configuration["WhatsAppTemplates:ConfirmAccount"]);
+                var ok = await _whatsAppService.SendOTPAsync(
+                    user.PhoneNumber!,
+                    otp,
+                    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                );
+
                 if (!ok)
                 {
                     await _otpService.ClearOtpAsync(user);
-                    throw new Exception("WhatsApp service returned false.");
+                    throw new Exception(_localizer["WhatsApp_Send_Failed"]);
                 }
             }
             catch (Exception ex)
             {
-                //log the error
-                //Console.WriteLine($"{ex.Message},\n {ex.InnerException}");
+
                 if (ex.Message.StartsWith("OTP_COOLDOWN"))
                 {
                     var seconds = ex.Message.Split(':')[1];
-                    return ApiResponseFactory.TooManyRequests($"Please wait {seconds} seconds.");
+
+                    return ApiResponseFactory.TooManyRequests(
+                        _localizer["OTP_Cooldown", seconds]
+                    );
                 }
-                return ApiResponseFactory.InternalServerError("Failed to send OTP. Please try again later.");
+
+                return ApiResponseFactory.InternalServerError(
+                    _localizer["OTP_Send_Failed"]
+                );
             }
 
             var passenger = new Passenger
             {
                 Id = user.Id,
             };
-            var response = await _passangerRepository.AddAsync(passenger);
 
+            await _passangerRepository.AddAsync(passenger);
             await _unitOfWork.CompleteAsync();
 
-            return ApiResponseFactory.Success("Passenger registered successfully.");
+            return ApiResponseFactory.Success(
+                _localizer["RegisterPassenger_Success"]
+            );
         }
 
         public async Task<ApiResponse> LoginAsync(LoginDTO loginDTO)
         {
             if (loginDTO is null)
-                return ApiResponseFactory.BadRequest("Login data is required.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["Login_Data_Required"]
+                );
 
             var validationResult = ValidationHelper.ModelValidation(loginDTO);
             if (!validationResult.Success)
                 return validationResult;
-
 
             var user = await _userManager.Users
                 .SingleOrDefaultAsync(u => u.PhoneNumber == loginDTO.PhoneNumber);
 
             if (user is null)
             {
-                return ApiResponseFactory.Unauthorized("Invalid phone number or password.");
+                return ApiResponseFactory.Unauthorized(
+                    _localizer["Login_Invalid_Credentials"]
+                );
             }
 
             if (!user.PhoneNumberConfirmed)
             {
-                return ApiResponseFactory.Unauthorized("Phone number not confirmed. Please confirm your account before logging in.");
+                return ApiResponseFactory.Unauthorized(
+                    _localizer["Login_Phone_Not_Confirmed"]
+                );
             }
 
-            var signInResult = await _signInManager.CheckPasswordSignInAsync(user, loginDTO.Password, lockoutOnFailure: true);
+            var signInResult = await _signInManager.CheckPasswordSignInAsync(
+                user,
+                loginDTO.Password,
+                lockoutOnFailure: true
+            );
 
             if (signInResult.IsLockedOut)
             {
-                return ApiResponseFactory.Forbidden("User account is locked. Please try again later or contact support.");
+                return ApiResponseFactory.Forbidden(
+                    _localizer["Login_User_Locked"]
+                );
             }
 
             if (signInResult.IsNotAllowed)
             {
-                return ApiResponseFactory.Forbidden("User is not allowed to sign in.");
+                return ApiResponseFactory.Forbidden(
+                    _localizer["Login_Not_Allowed"]
+                );
             }
-
 
             if (!signInResult.Succeeded)
             {
-                return ApiResponseFactory.Unauthorized("Invalid phone number or password.");
+                return ApiResponseFactory.Unauthorized(
+                    _localizer["Login_Invalid_Credentials"]
+                );
             }
 
             var jwtResponse = await _jwtService.CreateJwtToken(user, loginDTO.RememberMe) as ApiSuccessResponse;
@@ -213,88 +263,134 @@ namespace SmartMicrobus.Core.Services.Account
         public async Task<ApiResponse> VerifyOtpAsync(VerifyOtpDTO dto)
         {
             if (dto is null)
-                return ApiResponseFactory.BadRequest("Data is required.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["VerifyOtp_Data_Required"]
+                );
 
             var validationResult = ValidationHelper.ModelValidation(dto);
             if (!validationResult.Success)
                 return validationResult;
 
-            var user = await _userManager.Users.SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+            var user = await _userManager.Users
+                .SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+
             if (user is null)
-                return ApiResponseFactory.BadRequest("Invalid phone number or OTP.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["VerifyOtp_Invalid_Data"]
+                );
 
             if (!user.PhoneNumberConfirmed)
             {
-                return ApiResponseFactory.Unauthorized("Phone number not confirmed. Please confirm your account before resetting password.");
+                return ApiResponseFactory.Unauthorized(
+                    _localizer["VerifyOtp_Phone_Not_Confirmed_Reset"]
+                );
             }
 
             var verifyResult = await _otpService.VerifyOtpAsync(user, dto.Otp);
 
             if (!verifyResult)
-                return ApiResponseFactory.BadRequest("No OTP found or it has expired.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["VerifyOtp_Not_Found_Or_Expired"]
+                );
 
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-            return ApiResponseFactory.Success("OTP verified successfully.", new VerifyOtpResponse { Token = resetToken, UserId = user.Id.ToString() });
+            return ApiResponseFactory.Success(
+                _localizer["VerifyOtp_Success"],
+                new VerifyOtpResponse
+                {
+                    Token = resetToken,
+                    UserId = user.Id.ToString()
+                }
+            );
         }
 
         public async Task<ApiResponse> ConfirmAccountAsync(ConfirmAccountDTO dto)
         {
             if (dto is null)
-                return ApiResponseFactory.BadRequest("Confirmation data is required.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["ConfirmAccount_Data_Required"]
+                );
 
             var validationResult = ValidationHelper.ModelValidation(dto);
             if (!validationResult.Success)
                 return validationResult;
 
-            var user = await _userManager.Users.SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+            var user = await _userManager.Users
+                .SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+
             if (user is null)
-                return ApiResponseFactory.BadRequest("Invalid phone number or OTP.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["VerifyOtp_Invalid_Data"]
+                );
 
             if (user.PhoneNumberConfirmed)
-                return ApiResponseFactory.BadRequest("Account already confirmed.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["ConfirmAccount_Already_Confirmed"]
+                );
 
             var ok = await _otpService.VerifyOtpAsync(user, dto.Otp);
 
             if (!ok)
-                return ApiResponseFactory.BadRequest("Invalid or expired OTP.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["ConfirmAccount_Invalid_Or_Expired_Otp"]
+                );
 
             user.PhoneNumberConfirmed = true;
+
             var updateResult = await _userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
             {
-                return ApiResponseFactory.Failure("Failed to confirm account.", 400, updateResult.Errors.Select(e => e.Description).ToArray());
+                return ApiResponseFactory.Failure(
+                    _localizer["ConfirmAccount_Failed"],
+                    400,
+                    updateResult.Errors.Select(e => e.Description).ToArray()
+                );
             }
 
-            return ApiResponseFactory.Success("Account confirmed successfully.");
+            return ApiResponseFactory.Success(
+                _localizer["ConfirmAccount_Success"]
+            );
         }
 
         public async Task<ApiResponse> ForgotPasswordAsync(ForgotPasswordDTO dto)
         {
             if (dto is null || string.IsNullOrWhiteSpace(dto.PhoneNumber))
-                return ApiResponseFactory.BadRequest("Phone number is required.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["ForgotPassword_Phone_Required"]
+                );
 
-            var user = await _userManager.Users.SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+            var user = await _userManager.Users
+                .SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
 
             if (user is null)
             {
-                return ApiResponseFactory.NotFound("No account found with this phone number.");
+                return ApiResponseFactory.NotFound(
+                    _localizer["ForgotPassword_User_Not_Found"]
+                );
             }
 
             if (!user.PhoneNumberConfirmed)
             {
-                return ApiResponseFactory.Unauthorized("Phone number not confirmed. Please confirm your account before resetting password.");
+                return ApiResponseFactory.Unauthorized(
+                    _localizer["VerifyOtp_Phone_Not_Confirmed_Reset"]
+                );
             }
 
             try
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
-                var ok = await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otp, _configuration["WhatsAppTemplates:ResetPassword"]);
+
+                var ok = await _whatsAppService.SendOTPAsync(
+                    user.PhoneNumber!,
+                    otp,
+                    _configuration["WhatsAppTemplates:ResetPassword"]
+                );
 
                 if (!ok)
                 {
                     await _otpService.ClearOtpAsync(user);
-                    throw new Exception("WhatsApp service returned false.");
+                    throw new Exception(_localizer["WhatsApp_Send_Failed"]);
                 }
             }
             catch (Exception ex)
@@ -302,31 +398,44 @@ namespace SmartMicrobus.Core.Services.Account
                 if (ex.Message.StartsWith("OTP_COOLDOWN"))
                 {
                     var seconds = ex.Message.Split(':')[1];
-                    return ApiResponseFactory.TooManyRequests($"Please wait {seconds} seconds.");
+
+                    return ApiResponseFactory.TooManyRequests(
+                        _localizer["OTP_Cooldown", seconds]
+                    );
                 }
 
-                return ApiResponseFactory.InternalServerError("Failed to send OTP. Please try again later.");
+                return ApiResponseFactory.InternalServerError(
+                    _localizer["OTP_Send_Failed"]
+                );
             }
 
-            return ApiResponseFactory.Success("If an account with the provided phone number exists, an OTP has been sent.");
+            return ApiResponseFactory.Success(
+                _localizer["ForgotPassword_Success_Generic"]
+            );
         }
 
         public async Task<ApiResponse> LogoutAsync(Guid userId)
         {
             if (userId == Guid.Empty)
-                return ApiResponseFactory.BadRequest("UserId is required.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["Logout_UserId_Required"]
+                );
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
+
             if (user != null)
             {
                 user.RefreshToken = null;
                 user.RefreshTokenExpirationDateTime = DateTimeOffset.MinValue;
+
                 await _userManager.UpdateAsync(user);
             }
 
             await _signInManager.SignOutAsync();
 
-            return ApiResponseFactory.Success("Logged out successfully.");
+            return ApiResponseFactory.Success(
+                _localizer["Logout_Success"]
+            );
         }
 
         public async Task<ApiResponse> RefreshTokenAsync(TokenModel model)
@@ -341,33 +450,55 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 principal = _jwtService.GetPrincipalFromJwtToken(model.Token);
             }
-            catch (SecurityTokenException ex)
+            catch (SecurityTokenException)
             {
-                return ApiResponseFactory.Failure("Invalid token.", 400, "Access token is invalid.");
+                return ApiResponseFactory.Failure(
+                    _localizer["RefreshToken_Invalid_Token"],
+                    400,
+                    _localizer["RefreshToken_Access_Invalid"]
+                );
             }
 
             if (principal is null)
-                return ApiResponseFactory.Failure("Invalid token.", 400, "Access token is invalid.");
+                return ApiResponseFactory.Failure(
+                    _localizer["RefreshToken_Invalid_Token"],
+                    400,
+                    _localizer["RefreshToken_Access_Invalid"]
+                );
 
             var phone = principal.FindFirstValue(ClaimTypes.MobilePhone);
-            if (string.IsNullOrWhiteSpace(phone))
-                return ApiResponseFactory.Failure("Invalid token.", 400, "Email claim is missing in token.");
 
-            var user = await _userManager.Users.SingleOrDefaultAsync(x => x.PhoneNumber == phone);
+            if (string.IsNullOrWhiteSpace(phone))
+                return ApiResponseFactory.Failure(
+                    _localizer["RefreshToken_Invalid_Token"],
+                    400,
+                    _localizer["RefreshToken_Claim_Missing"]
+                );
+
+            var user = await _userManager.Users
+                .SingleOrDefaultAsync(x => x.PhoneNumber == phone);
+
             if (user is null)
-                return ApiResponseFactory.Failure("User not found.", 404, "User does not exist.");
+                return ApiResponseFactory.Failure(
+                    _localizer["RefreshToken_User_Not_Found"],
+                    404,
+                    _localizer["RefreshToken_User_Not_Exist"]
+                );
 
             if (user.RefreshToken != model.RefreshToken ||
                 user.RefreshTokenExpirationDateTime <= DateTimeOffset.UtcNow)
             {
-                return ApiResponseFactory.Failure("Invalid refresh token.", 400, "Refresh token is invalid or expired.");
+                return ApiResponseFactory.Failure(
+                    _localizer["RefreshToken_Invalid_Refresh"],
+                    400,
+                    _localizer["RefreshToken_Invalid_Or_Expired"]
+                );
             }
 
-
-            bool rememberMe = bool.TryParse(principal.FindFirst("remember_me")?.Value, out var rm) && rm;
+            bool rememberMe =
+                bool.TryParse(principal.FindFirst("remember_me")?.Value, out var rm) && rm;
 
             var authResponse = await _jwtService.CreateJwtToken(user, rememberMe) as ApiSuccessResponse;
-
 
             // Rotate refresh token
             user.RefreshToken = authResponse?.RefreshToken;
@@ -377,7 +508,7 @@ namespace SmartMicrobus.Core.Services.Account
 
             authResponse.Success = true;
             authResponse.StatusCode = 200;
-            authResponse.Message = "Token refreshed successfully.";
+            authResponse.Message = _localizer["RefreshToken_Success"];
 
             return authResponse;
         }
@@ -385,27 +516,34 @@ namespace SmartMicrobus.Core.Services.Account
         public async Task<ApiResponse> ResendConfirmationAccountAsync(string phone)
         {
             if (string.IsNullOrWhiteSpace(phone))
-                return ApiResponseFactory.BadRequest("Phone number is required.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["ForgotPassword_Phone_Required"]
+                );
 
-            var user = await _userManager.Users.SingleOrDefaultAsync(u => u.PhoneNumber == phone);
+            var user = await _userManager.Users
+                .SingleOrDefaultAsync(u => u.PhoneNumber == phone);
 
-            if (user is null)
+            if (user is null || user.PhoneNumberConfirmed)
             {
-                return ApiResponseFactory.NotFound("No account found with this phone number.");
+                return ApiResponseFactory.Success(
+                    _localizer["ResendConfirmation_Success_Generic"]
+                );
             }
-
-            if (user.PhoneNumberConfirmed)
-                return ApiResponseFactory.BadRequest("Account already confirmed.");
-
 
             try
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
-                var result = await _whatsAppService.SendOTPAsync(user.PhoneNumber!, otp, _configuration["WhatsAppTemplates:ConfirmAccount"]);
+
+                var result = await _whatsAppService.SendOTPAsync(
+                    user.PhoneNumber!,
+                    otp,
+                    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                );
+
                 if (!result)
                 {
                     await _otpService.ClearOtpAsync(user);
-                    throw new Exception();
+                    throw new Exception(_localizer["WhatsApp_Send_Failed"]);
                 }
             }
             catch (Exception ex)
@@ -413,39 +551,66 @@ namespace SmartMicrobus.Core.Services.Account
                 if (ex.Message.StartsWith("OTP_COOLDOWN"))
                 {
                     var seconds = ex.Message.Split(':')[1];
-                    return ApiResponseFactory.TooManyRequests($"Please wait {seconds} seconds.");
+
+                    return ApiResponseFactory.TooManyRequests(
+                        _localizer["OTP_Cooldown", seconds]
+                    );
                 }
-                return ApiResponseFactory.InternalServerError("Failed to send OTP. Please try again later.");
+
+                return ApiResponseFactory.InternalServerError(
+                    _localizer["OTP_Send_Failed"] 
+                );
             }
 
-            return ApiResponseFactory.Success("If an account with the provided phone number exists, an OTP has been sent.");
+            return ApiResponseFactory.Success(
+                _localizer["ResendConfirmation_Success_Generic"]
+            );
         }
 
         public async Task<ApiResponse> ResetPasswordAsync(ResetPasswordDTO dto)
         {
             if (dto is null)
-                return ApiResponseFactory.BadRequest("Reset data is required.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["ResetPassword_Data_Required"]
+                );
 
             var validationResult = ValidationHelper.ModelValidation(dto);
             if (!validationResult.Success)
                 return validationResult;
 
             var user = await _userManager.FindByIdAsync(dto.UserId.ToString());
+
             if (user is null)
-                return ApiResponseFactory.NotFound("User not found.");
+                return ApiResponseFactory.NotFound(
+                    _localizer["RefreshToken_User_Not_Found"]
+                );
 
-            if(!user.PhoneNumberConfirmed)
-                return ApiResponseFactory.Unauthorized("Phone number not confirmed. Please confirm your account before resetting password.");
+            if (!user.PhoneNumberConfirmed)
+                return ApiResponseFactory.Unauthorized(
+                    _localizer["VerifyOtp_Phone_Not_Confirmed_Reset"]
+                );
 
-            var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
+            var result = await _userManager.ResetPasswordAsync(
+                user,
+                dto.Token,
+                dto.NewPassword
+            );
 
             if (!result.Succeeded)
             {
-                var errors = result.Errors.Select(e => e.Description).ToList();
-                return ApiResponseFactory.BadRequest("Failed to reset password.", errors);
+                var errors = result.Errors
+                    .Select(e => e.Description)
+                    .ToList();
+
+                return ApiResponseFactory.BadRequest(
+                    _localizer["ResetPassword_Failed"],
+                    errors
+                );
             }
 
-            return ApiResponseFactory.Success("Password has been reset successfully.");
+            return ApiResponseFactory.Success(
+                _localizer["ResetPassword_Success"]
+            );
         }
 
         public Task<ApiResponse> UpdateUserProfileAsync(UpdateUserDTO dto)
@@ -459,17 +624,26 @@ namespace SmartMicrobus.Core.Services.Account
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
-                return ApiResponseFactory.NotFound("User not found.");
+                return ApiResponseFactory.NotFound(
+                    _localizer["RefreshToken_User_Not_Found"]
+                );
 
             var file = dto.File;
+
             if (file == null || file.Length == 0)
-                return ApiResponseFactory.BadRequest("No file provided.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["UploadPhoto_No_File"]
+                );
 
             if (!file.ContentType.StartsWith("image/"))
-                return ApiResponseFactory.BadRequest("Invalid image type.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["UploadPhoto_Invalid_Type"]
+                );
 
             if (file.Length > 5 * 1024 * 1024)
-                return ApiResponseFactory.BadRequest("Image size exceeds limit.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["UploadPhoto_Size_Exceeded"]
+                );
 
             if (user.Photo != null)
             {
@@ -478,7 +652,9 @@ namespace SmartMicrobus.Core.Services.Account
                 user.Photo = null;
             }
 
-            var folderName = user.PhoneNumber?.Replace(" ", "").ToLowerInvariant();
+            var folderName = user.PhoneNumber?
+                .Replace(" ", "")
+                .ToLowerInvariant();
 
             var imagePath = await _imageService.SaveUserAvatarAsync(
                 file,
@@ -495,7 +671,9 @@ namespace SmartMicrobus.Core.Services.Account
             await _unitOfWork.CompleteAsync();
             await _userManager.UpdateAsync(user);
 
-            return ApiResponseFactory.Success("User photo uploaded successfully.");
+            return ApiResponseFactory.Success(
+                _localizer["UploadPhoto_Success"]
+            );
         }
 
         public async Task<ApiResponse> DeleteAccountAsync(string userId)
@@ -503,14 +681,22 @@ namespace SmartMicrobus.Core.Services.Account
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
-                return ApiResponseFactory.NotFound("User not found");
+                return ApiResponseFactory.NotFound(
+                    _localizer["RefreshToken_User_Not_Found"]
+                );
 
             var deleted = await _userManager.DeleteAsync(user);
 
             if (!deleted.Succeeded)
-                return ApiResponseFactory.Failure("Failed to delete account", 400, deleted.Errors.Select(e => e.Description).ToArray());
+                return ApiResponseFactory.Failure(
+                    _localizer["DeleteAccount_Failed"],
+                    400,
+                    deleted.Errors.Select(e => e.Description).ToArray()
+                );
 
-            return ApiResponseFactory.Success("Account deleted successfully");
+            return ApiResponseFactory.Success(
+                _localizer["DeleteAccount_Success"]
+            );
         }
 
         public async Task<ApiResponse> DeleteUserPhotoAsync(Guid userId)
@@ -520,10 +706,14 @@ namespace SmartMicrobus.Core.Services.Account
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
-                return ApiResponseFactory.NotFound("User not found.");
+                return ApiResponseFactory.NotFound(
+                    _localizer["RefreshToken_User_Not_Found"]
+                );
 
             if (user.Photo == null)
-                return ApiResponseFactory.BadRequest("User has no photo to delete.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["DeleteUserPhoto_Not_Found"]
+                );
 
             _imageService.DeleteImageAsync(user.Photo.ImageName);
             await _unitOfWork.PhotoRepository.DeleteAsync(user.Photo.Id);
@@ -531,8 +721,9 @@ namespace SmartMicrobus.Core.Services.Account
 
             await _unitOfWork.CompleteAsync();
             await _userManager.UpdateAsync(user);
-
-            return ApiResponseFactory.Success("User photo deleted successfully.");
+            return ApiResponseFactory.Success(
+                _localizer["DeleteUserPhoto_Success"]
+            );
         }
 
         public Task<ApiResponse> ExternalLoginCallbackAsync(string remoteError = "")
