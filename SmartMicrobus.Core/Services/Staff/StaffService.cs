@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Queue;
@@ -21,6 +22,7 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly IQrTokenService _qrTokenService;
         private readonly ITripRepository _tripRepository;
         private readonly IRouteRepository _routeRepository;
+        private readonly IStringLocalizer<StaffService> _localizer;
 
         public StaffService(IUnitOfWork unitOfWork,
             IQueueNotificationService queueNotificationService,
@@ -43,19 +45,25 @@ namespace SmartMicrobus.Core.Services.Staff
             var payload = _qrTokenService.DecryptToken(qrCode);
 
             if (payload == null)
-                return ApiResponseFactory.BadRequest("Invalid or expired QR code.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["Queue_Invalid_QR"]
+                );
 
             // 1. Check if already in queue
             var existing = await _queueItemRepository.GetActiveByDriverIdAsync(payload.DriverId);
 
             if (existing != null)
-                return ApiResponseFactory.BadRequest("Microbus is already in queue.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["Queue_Already_In_Queue"]
+                );
 
             // 2. Get routes (both directions)
             var routes = await _routeRepository.GetRoutesByLineAsync(payload.RouteId);
 
             if (routes == null || !routes.Any())
-                return ApiResponseFactory.BadRequest("No routes found.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["Queue_Invalid_Start_Station"]
+                );
 
             // 3. Pick route based on station
             var route = routes.FirstOrDefault(r => r.StationId == stationId);
@@ -67,8 +75,9 @@ namespace SmartMicrobus.Core.Services.Staff
             var queue = await _queueRepository.GetByStationAndRouteAsync(stationId, route.Id);
 
             if (queue == null)
-                return ApiResponseFactory.BadRequest("No queue found for this route at this station.");
-
+                return ApiResponseFactory.BadRequest(
+                    _localizer["Queue_Not_Found"]
+                );
             // 5. Get position
             var position = await _queueItemRepository.GetNextPositionAsync(queue.Id);
 
@@ -104,7 +113,9 @@ namespace SmartMicrobus.Core.Services.Staff
 
             await _queueNotificationService.NotifyDriverAdded(queue.Id, queueResponse);
 
-            return ApiResponseFactory.Success("Scan processed.");
+            return ApiResponseFactory.Success(
+                _localizer["Queue_Scan_Success"]
+            );
         }
 
         public async Task<ApiResponse> CheckOutAtGateAsync(string qrCode)
@@ -112,12 +123,16 @@ namespace SmartMicrobus.Core.Services.Staff
             var payload = _qrTokenService.DecryptToken(qrCode);
 
             if (payload == null)
-                return ApiResponseFactory.BadRequest("Invalid or expired QR code.");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["Queue_Invalid_QR"]
+                );
 
             var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(payload.DriverId);
 
             if (queueItem == null)
-                return ApiResponseFactory.BadRequest("Driver not in queue");
+                return ApiResponseFactory.BadRequest(
+                    _localizer["Queue_Driver_Not_In_Queue"]
+                );
 
             //var first = await _queueItemRepository
             //    .GetFirstInQueueAsync(queueItem.QueueId);
@@ -128,7 +143,9 @@ namespace SmartMicrobus.Core.Services.Staff
             var microbus = await _microbusRepository.GetByIdAsync(queueItem.MicrobusId, x => x.Route);
 
             if (microbus == null)
-                return ApiResponseFactory.NotFound("Microbus not found.");
+                return ApiResponseFactory.NotFound(
+                    _localizer["Queue_Microbus_Not_Found"]
+                );
 
             var trip = new Trip
             {
@@ -155,7 +172,9 @@ namespace SmartMicrobus.Core.Services.Staff
 
             await _queueNotificationService.NotifyDriverRemoved(queueItem.QueueId, payload.DriverId);
 
-            return ApiResponseFactory.Success("Scan processed.");
+            return ApiResponseFactory.Success(
+                _localizer["Queue_Scan_Success"]
+            );
         }
     }
 }
