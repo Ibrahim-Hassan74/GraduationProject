@@ -1,3 +1,5 @@
+using SmartMicrobus.Core.Enums;
+
 namespace SmartMicrobus.Core.Domain.Entities
 {
     public class DriverReport : BaseEntity<Guid>
@@ -13,6 +15,8 @@ namespace SmartMicrobus.Core.Domain.Entities
         public string? Description { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+
+        public ReportStatus Status { get; set; } = ReportStatus.Pending;
 
         public ICollection<DriverReportReason> Reasons { get; set; } = new List<DriverReportReason>();
     }
