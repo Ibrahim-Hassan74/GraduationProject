@@ -59,5 +59,194 @@ namespace SmartMicrobus.API.Resources {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The record you attempted to edit was modified by another user..
+        /// </summary>
+        public static string ConcurrencyFailure {
+            get {
+                return ResourceManager.GetString("ConcurrencyFailure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An unknown failure has occurred..
+        /// </summary>
+        public static string DefaultError {
+            get {
+                return ResourceManager.GetString("DefaultError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email &apos;{0}&apos; is already taken..
+        /// </summary>
+        public static string DuplicateEmail {
+            get {
+                return ResourceManager.GetString("DuplicateEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Role name &apos;{0}&apos; already exists..
+        /// </summary>
+        public static string DuplicateRoleName {
+            get {
+                return ResourceManager.GetString("DuplicateRoleName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number &apos;{0}&apos; already exists..
+        /// </summary>
+        public static string DuplicateUserName {
+            get {
+                return ResourceManager.GetString("DuplicateUserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email &apos;{0}&apos; is invalid..
+        /// </summary>
+        public static string InvalidEmail {
+            get {
+                return ResourceManager.GetString("InvalidEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Role name &apos;{0}&apos; is invalid..
+        /// </summary>
+        public static string InvalidRoleName {
+            get {
+                return ResourceManager.GetString("InvalidRoleName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid token..
+        /// </summary>
+        public static string InvalidToken {
+            get {
+                return ResourceManager.GetString("InvalidToken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The number &apos;{0}&apos; is invalid..
+        /// </summary>
+        public static string InvalidUserName {
+            get {
+                return ResourceManager.GetString("InvalidUserName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This login is already associated with another account..
+        /// </summary>
+        public static string LoginAlreadyAssociated {
+            get {
+                return ResourceManager.GetString("LoginAlreadyAssociated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Incorrect password..
+        /// </summary>
+        public static string PasswordMismatch {
+            get {
+                return ResourceManager.GetString("PasswordMismatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain at least one digit..
+        /// </summary>
+        public static string PasswordRequiresDigit {
+            get {
+                return ResourceManager.GetString("PasswordRequiresDigit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain a lowercase letter..
+        /// </summary>
+        public static string PasswordRequiresLower {
+            get {
+                return ResourceManager.GetString("PasswordRequiresLower", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain a non-alphanumeric character..
+        /// </summary>
+        public static string PasswordRequiresNonAlphanumeric {
+            get {
+                return ResourceManager.GetString("PasswordRequiresNonAlphanumeric", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain at least {0} unique characters..
+        /// </summary>
+        public static string PasswordRequiresUniqueChars {
+            get {
+                return ResourceManager.GetString("PasswordRequiresUniqueChars", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must contain an uppercase letter..
+        /// </summary>
+        public static string PasswordRequiresUpper {
+            get {
+                return ResourceManager.GetString("PasswordRequiresUpper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password must be at least {0} characters..
+        /// </summary>
+        public static string PasswordTooShort {
+            get {
+                return ResourceManager.GetString("PasswordTooShort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User already has a password..
+        /// </summary>
+        public static string UserAlreadyHasPassword {
+            get {
+                return ResourceManager.GetString("UserAlreadyHasPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User is already in role &apos;{0}&apos;..
+        /// </summary>
+        public static string UserAlreadyInRole {
+            get {
+                return ResourceManager.GetString("UserAlreadyInRole", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lockout is not enabled for this user..
+        /// </summary>
+        public static string UserLockoutNotEnabled {
+            get {
+                return ResourceManager.GetString("UserLockoutNotEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User is not in role &apos;{0}&apos;..
+        /// </summary>
+        public static string UserNotInRole {
+            get {
+                return ResourceManager.GetString("UserNotInRole", resourceCulture);
+            }
+        }
     }
 }
