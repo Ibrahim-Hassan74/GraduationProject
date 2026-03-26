@@ -121,4 +121,52 @@
 <data name="Report_Reasons_Retrieved" xml:space="preserve">
   <value>تم استرجاع الأسباب بنجاح.</value>
 </data>
+
+<data name="ReportsRetrieved" xml:space="preserve">
+  <value>تم استرجاع البلاغات بنجاح</value>
+</data>
+
+<data name="ReportRetrieved" xml:space="preserve">
+  <value>تم استرجاع البلاغ بنجاح</value>
+</data>
+
+<data name="ReportNotFound" xml:space="preserve">
+  <value>البلاغ غير موجود</value>
+</data>
+
+<data name="UnauthorizedAccessReport" xml:space="preserve">
+  <value>غير مصرح لك بالوصول إلى هذا البلاغ</value>
+</data>
+
+<data name="UnauthorizedUpdateReport" xml:space="preserve">
+  <value>غير مصرح لك بتعديل هذا البلاغ</value>
+</data>
+
+<data name="UnauthorizedDeleteReport" xml:space="preserve">
+  <value>غير مصرح لك بحذف هذا البلاغ</value>
+</data>
+
+<data name="ReportUpdateOnlyPending" xml:space="preserve">
+  <value>يمكن تعديل البلاغات قيد المراجعة فقط</value>
+</data>
+
+<data name="ReportDeleteOnlyPending" xml:space="preserve">
+  <value>يمكن حذف البلاغات قيد المراجعة فقط</value>
+</data>
+
+<data name="InvalidPlateNumber" xml:space="preserve">
+  <value>رقم اللوحة غير صحيح</value>
+</data>
+
+<data name="InvalidReasons" xml:space="preserve">
+  <value>سبب أو أكثر غير صحيح</value>
+</data>
+
+<data name="ReportUpdated" xml:space="preserve">
+  <value>تم تحديث البلاغ بنجاح</value>
+</data>
+
+<data name="ReportDeleted" xml:space="preserve">
+  <value>تم حذف البلاغ بنجاح</value>
+</data>
 </root>

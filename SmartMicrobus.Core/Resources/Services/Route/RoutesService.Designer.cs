@@ -61,7 +61,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Destinations retrieved..
+        ///   Looks up a localized string similar to Destinations retrieved successfully..
         /// </summary>
         public static string DestinationsRetrieved {
             get {
@@ -70,7 +70,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to From value is required..
+        ///   Looks up a localized string similar to &apos;From&apos; value is required..
         /// </summary>
         public static string FromValueRequired {
             get {
@@ -79,7 +79,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Microbuses at station retrieved..
+        ///   Looks up a localized string similar to Microbuses at station retrieved successfully..
         /// </summary>
         public static string MicrobusesAtStationRetrieved {
             get {
@@ -88,7 +88,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Microbuses on the way retrieved..
+        ///   Looks up a localized string similar to Microbuses on the way retrieved successfully..
         /// </summary>
         public static string MicrobusesOnTheWayRetrieved {
             get {
@@ -97,7 +97,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No destinations found for the specified origin..
+        ///   Looks up a localized string similar to No destinations found for the selected city..
         /// </summary>
         public static string NoDestinationsFound {
             get {
@@ -106,7 +106,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No microbuses at station for the specified route..
+        ///   Looks up a localized string similar to No microbuses available at the station for this route..
         /// </summary>
         public static string NoMicrobusesAtStation {
             get {
@@ -115,7 +115,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No microbuses on the way for the specified route..
+        ///   Looks up a localized string similar to No microbuses on the way for this route..
         /// </summary>
         public static string NoMicrobusesOnWay {
             get {
@@ -133,20 +133,11 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to RouteId is required..
+        ///   Looks up a localized string similar to Route ID is required..
         /// </summary>
         public static string RouteIdRequired {
             get {
                 return ResourceManager.GetString("RouteIdRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Route not found..
-        /// </summary>
-        public static string RouteNotFound {
-            get {
-                return ResourceManager.GetString("RouteNotFound", resourceCulture);
             }
         }
         
@@ -160,7 +151,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Route summary retrieved..
+        ///   Looks up a localized string similar to Route summary retrieved successfully..
         /// </summary>
         public static string RouteSummaryRetrieved {
             get {

@@ -61,20 +61,92 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to From.
+        ///   Looks up a localized string similar to Favorite route not found..
         /// </summary>
-        public static string From {
+        public static string FavoriteRouteNotFound {
             get {
-                return ResourceManager.GetString("From", resourceCulture);
+                return ResourceManager.GetString("FavoriteRouteNotFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To.
+        ///   Looks up a localized string similar to Favorite routes retrieved successfully..
         /// </summary>
-        public static string To {
+        public static string FavoriteRoutesRetrieved {
             get {
-                return ResourceManager.GetString("To", resourceCulture);
+                return ResourceManager.GetString("FavoriteRoutesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Favorite status retrieved successfully..
+        /// </summary>
+        public static string IsFavoriteRetrieved {
+            get {
+                return ResourceManager.GetString("IsFavoriteRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No favorite routes found..
+        /// </summary>
+        public static string NoFavoriteRoutesFound {
+            get {
+                return ResourceManager.GetString("NoFavoriteRoutesFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passenger ID and Route ID are required..
+        /// </summary>
+        public static string PassengerIdAndRouteIdRequired {
+            get {
+                return ResourceManager.GetString("PassengerIdAndRouteIdRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passenger ID is required..
+        /// </summary>
+        public static string PassengerIdRequired {
+            get {
+                return ResourceManager.GetString("PassengerIdRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Route added to favorites successfully..
+        /// </summary>
+        public static string RouteAddedToFavorites {
+            get {
+                return ResourceManager.GetString("RouteAddedToFavorites", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This route is already in favorites..
+        /// </summary>
+        public static string RouteAlreadyInFavorites {
+            get {
+                return ResourceManager.GetString("RouteAlreadyInFavorites", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Route not found..
+        /// </summary>
+        public static string RouteNotFound {
+            get {
+                return ResourceManager.GetString("RouteNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Route removed from favorites successfully..
+        /// </summary>
+        public static string RouteRemovedFromFavorites {
+            get {
+                return ResourceManager.GetString("RouteRemovedFromFavorites", resourceCulture);
             }
         }
     }

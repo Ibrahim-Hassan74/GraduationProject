@@ -22,7 +22,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class StaffService {
+    public class StaffService {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SmartMicrobus.Core.Resources.Services.Staff.StaffService", typeof(StaffService).Assembly);
@@ -51,7 +51,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         /// <summary>
         ///   Looks up a localized string similar to Microbus is already in queue..
         /// </summary>
-        internal static string Queue_Already_In_Queue {
+        public static string Queue_Already_In_Queue {
             get {
                 return ResourceManager.GetString("Queue_Already_In_Queue", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         /// <summary>
         ///   Looks up a localized string similar to Driver not in queue..
         /// </summary>
-        internal static string Queue_Driver_Not_In_Queue {
+        public static string Queue_Driver_Not_In_Queue {
             get {
                 return ResourceManager.GetString("Queue_Driver_Not_In_Queue", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         /// <summary>
         ///   Looks up a localized string similar to Invalid or expired QR code..
         /// </summary>
-        internal static string Queue_Invalid_QR {
+        public static string Queue_Invalid_QR {
             get {
                 return ResourceManager.GetString("Queue_Invalid_QR", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         /// <summary>
         ///   Looks up a localized string similar to This microbus cannot start from this station..
         /// </summary>
-        internal static string Queue_Invalid_Start_Station {
+        public static string Queue_Invalid_Start_Station {
             get {
                 return ResourceManager.GetString("Queue_Invalid_Start_Station", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         /// <summary>
         ///   Looks up a localized string similar to Microbus not found..
         /// </summary>
-        internal static string Queue_Microbus_Not_Found {
+        public static string Queue_Microbus_Not_Found {
             get {
                 return ResourceManager.GetString("Queue_Microbus_Not_Found", resourceCulture);
             }
@@ -108,7 +108,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         /// <summary>
         ///   Looks up a localized string similar to No routes found..
         /// </summary>
-        internal static string Queue_No_Routes {
+        public static string Queue_No_Routes {
             get {
                 return ResourceManager.GetString("Queue_No_Routes", resourceCulture);
             }
@@ -117,7 +117,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         /// <summary>
         ///   Looks up a localized string similar to No queue found for this route at this station..
         /// </summary>
-        internal static string Queue_Not_Found {
+        public static string Queue_Not_Found {
             get {
                 return ResourceManager.GetString("Queue_Not_Found", resourceCulture);
             }
@@ -126,7 +126,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         /// <summary>
         ///   Looks up a localized string similar to Scan processed successfully..
         /// </summary>
-        internal static string Queue_Scan_Success {
+        public static string Queue_Scan_Success {
             get {
                 return ResourceManager.GetString("Queue_Scan_Success", resourceCulture);
             }
