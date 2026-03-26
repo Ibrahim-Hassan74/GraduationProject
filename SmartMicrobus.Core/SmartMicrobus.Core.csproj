@@ -39,10 +39,30 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>JwtService.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Services\Drivers\DriverService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DriverService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Drivers\TripService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TripService.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Services\Report\ReportService.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ReportService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Route\FavoriteRouteService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FavoriteRouteService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Route\RoutesService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RoutesService.resx</DependentUpon>
     </Compile>
     <Compile Update="Resources\Services\Staff\StaffService.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -64,12 +84,28 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>JwtService.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Drivers\DriverService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>DriverService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Drivers\TripService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>TripService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Services\Report\ReportService.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ReportService.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Route\FavoriteRouteService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>FavoriteRouteService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Route\RoutesService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>RoutesService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Services\Staff\StaffService.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>StaffService.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>

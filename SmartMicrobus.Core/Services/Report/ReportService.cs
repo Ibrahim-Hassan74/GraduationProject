@@ -116,7 +116,7 @@ namespace SmartMicrobus.Core.Services.Report
                 PageSize = query.PageSize
             };
 
-            return ApiResponseFactory.Success("Reports retrieved successfully.", pagedResponse);
+            return ApiResponseFactory.Success(_localizer["ReportsRetrieved"], pagedResponse);
         }
 
         public async Task<ApiResponse> GetReportByIdAsync(Guid passengerId, Guid reportId)
@@ -124,14 +124,14 @@ namespace SmartMicrobus.Core.Services.Report
             var report = await _reportRepository.GetByIdWithReasonsAsync(reportId);
 
             if (report == null)
-                return ApiResponseFactory.NotFound("Report not found.");
-                       
+                return ApiResponseFactory.NotFound(_localizer["ReportNotFound"]);
+
             if (report.PassengerId != passengerId)
-                return ApiResponseFactory.Failure("You are not authorized to access this report.", 403);
+                return ApiResponseFactory.Failure(_localizer["UnauthorizedAccessReport"], 403);
 
             var reportResponse = _mapper.Map<ReportResponseWithDetails>(report);
 
-            return ApiResponseFactory.Success("Report retrieved successfully.", reportResponse);
+            return ApiResponseFactory.Success(_localizer["ReportRetrieved"], reportResponse);
         }
 
         public async Task<ApiResponse> UpdateReportAsync(Guid passengerId, Guid reportId, UpdateReportRequest request)
@@ -140,31 +140,31 @@ namespace SmartMicrobus.Core.Services.Report
             if (!validate.Success)
                 return validate;
 
-            var report = await _reportRepository.GetByIdAsync(reportId,x=>x.Reasons);
+            var report = await _reportRepository.GetByIdAsync(reportId, x => x.Reasons);
 
             if (report == null)
-                return ApiResponseFactory.NotFound("Report not found.");
+                return ApiResponseFactory.NotFound(_localizer["ReportNotFound"]);
 
-           
             if (report.PassengerId != passengerId)
-                return ApiResponseFactory.Failure("You are not authorized to update this report.", 403);
+                return ApiResponseFactory.Failure(_localizer["UnauthorizedUpdateReport"], 403);
 
             if (report.Status != ReportStatus.Pending)
-                return ApiResponseFactory.Conflict("You can only update reports that are in pending status.");
-                       
+                return ApiResponseFactory.Conflict(_localizer["ReportUpdateOnlyPending"]);
+
             var driver = await _unitOfWork.MicrobusRepository.GetDriverAsync(request.PlateNumber);
             if (driver is null)
-                return ApiResponseFactory.BadRequest("Invalid plate number.");
+                return ApiResponseFactory.BadRequest(_localizer["InvalidPlateNumber"]);
 
             var reasons = await _reasonRepository.GetByIdsAsync(request.ReasonIds);
             if (reasons == null || reasons.Count != request.ReasonIds.Count)
-                return ApiResponseFactory.BadRequest("One or more reasons are invalid.");
+                return ApiResponseFactory.BadRequest(_localizer["InvalidReasons"]);
 
-            report.PlateNumber = request.PlateNumber;
+            report.PlateNumber = request.PlateNumber.Trim().ToUpper();
             report.Description = request.Description;
-            report.DriverId = driver?.Id;
+            report.DriverId = driver.Id;
 
             report.Reasons.Clear();
+
             foreach (var reason in reasons)
             {
                 report.Reasons.Add(new DriverReportReason
@@ -178,7 +178,7 @@ namespace SmartMicrobus.Core.Services.Report
             await _reportRepository.UpdateAsync(report);
             await _unitOfWork.CompleteAsync();
 
-            return ApiResponseFactory.Success("Report updated successfully.");
+            return ApiResponseFactory.Success(_localizer["ReportUpdated"]);
         }
 
         public async Task<ApiResponse> DeleteReportAsync(Guid passengerId, Guid reportId)
@@ -186,18 +186,18 @@ namespace SmartMicrobus.Core.Services.Report
             var report = await _reportRepository.GetByIdAsync(reportId);
 
             if (report == null)
-                return ApiResponseFactory.NotFound("Report not found.");
+                return ApiResponseFactory.NotFound(_localizer["ReportNotFound"]);
 
             if (report.PassengerId != passengerId)
-                return ApiResponseFactory.Failure("You are not authorized to delete this report.", 403);
-                        
+                return ApiResponseFactory.Failure(_localizer["UnauthorizedDeleteReport"], 403);
+
             if (report.Status != ReportStatus.Pending)
-                return ApiResponseFactory.Conflict("You can only delete reports that are in pending status.");
+                return ApiResponseFactory.Conflict(_localizer["ReportDeleteOnlyPending"]);
 
             await _reportRepository.DeleteAsync(report.Id);
             await _unitOfWork.CompleteAsync();
 
-            return ApiResponseFactory.Success("Report deleted successfully.");
+            return ApiResponseFactory.Success(_localizer["ReportDeleted"]);
         }
     }
 }

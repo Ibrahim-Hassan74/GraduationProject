@@ -118,7 +118,7 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .Include(q => q.Driver)
                     .ThenInclude(d => d.Microbus)
                 .Include(q => q.Driver)
-                .ThenInclude(x=> x.ApplicationUser)
+                .ThenInclude(x => x.ApplicationUser)
                 .Include(q => q.Queue)
                 .Where(q => q.Queue.RouteId == routeId && q.Status == QueueStatus.Waiting)
                 .OrderBy(q => q.Position)

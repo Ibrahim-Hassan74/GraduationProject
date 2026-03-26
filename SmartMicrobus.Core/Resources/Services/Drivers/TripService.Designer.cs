@@ -22,7 +22,7 @@ namespace SmartMicrobus.Core.Resources.Services.Drivers {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class TripService {
+    public class TripService {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace SmartMicrobus.Core.Resources.Services.Drivers {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SmartMicrobus.Core.Resources.Services.Drivers.TripService", typeof(TripService).Assembly);
@@ -51,12 +51,75 @@ namespace SmartMicrobus.Core.Resources.Services.Drivers {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Driver not in queue..
+        /// </summary>
+        public static string DriverNotInQueue {
+            get {
+                return ResourceManager.GetString("DriverNotInQueue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Driver trip history retrieved successfully..
+        /// </summary>
+        public static string DriverTripHistoryRetrieved {
+            get {
+                return ResourceManager.GetString("DriverTripHistoryRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No active trip found for the driver..
+        /// </summary>
+        public static string NoActiveTripFound {
+            get {
+                return ResourceManager.GetString("NoActiveTripFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No trips found for the selected period..
+        /// </summary>
+        public static string NoTripsFoundForPeriod {
+            get {
+                return ResourceManager.GetString("NoTripsFoundForPeriod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to It is not your turn..
+        /// </summary>
+        public static string NotYourTurn {
+            get {
+                return ResourceManager.GetString("NotYourTurn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trip ended successfully..
+        /// </summary>
+        public static string TripEndedSuccessfully {
+            get {
+                return ResourceManager.GetString("TripEndedSuccessfully", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trip started successfully..
+        /// </summary>
+        public static string TripStartedSuccessfully {
+            get {
+                return ResourceManager.GetString("TripStartedSuccessfully", resourceCulture);
             }
         }
     }
