@@ -118,7 +118,7 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .Include(q => q.Driver)
                     .ThenInclude(d => d.Microbus)
                 .Include(q => q.Driver)
-                .ThenInclude(x=> x.ApplicationUser)
+                .ThenInclude(x => x.ApplicationUser)
                 .Include(q => q.Queue)
                 .Where(q => q.Queue.RouteId == routeId && q.Status == QueueStatus.Waiting)
                 .OrderBy(q => q.Position)
@@ -130,6 +130,15 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .CountAsync(q =>
                     q.Queue.RouteId == routeId &&
                     q.Status == QueueStatus.Waiting);
+        }
+
+        public async Task<int> GetNextPositionAsync(Guid queueId)
+        {
+            var max = await _context.QueueItems
+                .Where(q => q.QueueId == queueId && q.Status == QueueStatus.Waiting)
+                .MaxAsync(q => (int?)q.Position);
+
+            return (max ?? 0) + 1;
         }
     }
 }

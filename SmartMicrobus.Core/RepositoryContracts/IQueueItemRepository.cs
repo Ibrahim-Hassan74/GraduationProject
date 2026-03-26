@@ -23,6 +23,7 @@ namespace SmartMicrobus.Core.RepositoryContracts
 
         Task<List<QueueItem>> GetMicrobusesAtStationAsync(Guid routeId);
         Task<int> GetMicrobusesAtStationCountAsync(Guid routeId);
+        Task<int> GetNextPositionAsync(Guid queueId);
 
     }
 }
