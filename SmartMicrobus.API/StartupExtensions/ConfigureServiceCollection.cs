@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using SmartMicrobus.API.Filters;
+using SmartMicrobus.API.Identity;
 using SmartMicrobus.API.Realtime;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.Helper;
@@ -82,6 +83,7 @@ namespace SmartMicrobus.API.StartupExtensions
                 options.Password.RequireLowercase = true;
                 options.Password.RequireDigit = true;
             })
+                .AddErrorDescriber<CustomIdentityErrorDescriber>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders()
                 .AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()

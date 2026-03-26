@@ -59,5 +59,77 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Microbus is already in queue..
+        /// </summary>
+        internal static string Queue_Already_In_Queue {
+            get {
+                return ResourceManager.GetString("Queue_Already_In_Queue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Driver not in queue..
+        /// </summary>
+        internal static string Queue_Driver_Not_In_Queue {
+            get {
+                return ResourceManager.GetString("Queue_Driver_Not_In_Queue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid or expired QR code..
+        /// </summary>
+        internal static string Queue_Invalid_QR {
+            get {
+                return ResourceManager.GetString("Queue_Invalid_QR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This microbus cannot start from this station..
+        /// </summary>
+        internal static string Queue_Invalid_Start_Station {
+            get {
+                return ResourceManager.GetString("Queue_Invalid_Start_Station", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Microbus not found..
+        /// </summary>
+        internal static string Queue_Microbus_Not_Found {
+            get {
+                return ResourceManager.GetString("Queue_Microbus_Not_Found", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No routes found..
+        /// </summary>
+        internal static string Queue_No_Routes {
+            get {
+                return ResourceManager.GetString("Queue_No_Routes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No queue found for this route at this station..
+        /// </summary>
+        internal static string Queue_Not_Found {
+            get {
+                return ResourceManager.GetString("Queue_Not_Found", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Scan processed successfully..
+        /// </summary>
+        internal static string Queue_Scan_Success {
+            get {
+                return ResourceManager.GetString("Queue_Scan_Success", resourceCulture);
+            }
+        }
     }
 }

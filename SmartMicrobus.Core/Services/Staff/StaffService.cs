@@ -27,7 +27,8 @@ namespace SmartMicrobus.Core.Services.Staff
         public StaffService(IUnitOfWork unitOfWork,
             IQueueNotificationService queueNotificationService,
             IMapper mapper,
-            IQrTokenService qrTokenService)
+            IQrTokenService qrTokenService,
+            IStringLocalizer<StaffService> localizer)
         {
             _unitOfWork = unitOfWork;
             _microbusRepository = _unitOfWork.MicrobusRepository;
@@ -38,6 +39,7 @@ namespace SmartMicrobus.Core.Services.Staff
             _qrTokenService = qrTokenService;
             _tripRepository = _unitOfWork.TripRepository;
             _routeRepository = _unitOfWork.RouteRepository;
+            _localizer = localizer;
         }
 
         public async Task<ApiResponse> CheckInAtGateAsync(string qrCode, Guid stationId)
