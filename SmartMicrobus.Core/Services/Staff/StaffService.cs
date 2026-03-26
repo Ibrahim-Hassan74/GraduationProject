@@ -153,7 +153,7 @@ namespace SmartMicrobus.Core.Services.Staff
             {
                 DriverId = payload.DriverId,
                 MicrobusId = queueItem.MicrobusId,
-                RouteId = microbus.RouteId,
+                RouteId = queueItem.Queue.RouteId,
                 StartedAt = DateTimeOffset.UtcNow,
                 Status = TripStatus.Started,
                 PassengerCount = microbus.PassengerCount,
