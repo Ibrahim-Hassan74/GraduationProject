@@ -116,7 +116,8 @@ namespace SmartMicrobus.Core
             services.AddScoped<IFavoriteRouteService, FavoriteRouteService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<ITripService, TripService>();
-
+            services.AddScoped<DriverDashboardRealtimeService>();
+            
             return services;
         }
     }

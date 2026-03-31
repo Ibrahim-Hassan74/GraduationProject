@@ -11,7 +11,7 @@ using SmartMicrobus.API.Realtime;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
-using SmartMicrobus.Core.ServiceContracts.Common;
+using SmartMicrobus.Core.ServiceContracts.Notification;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Infrastructure.Data;
 using System.Globalization;
@@ -106,6 +106,8 @@ namespace SmartMicrobus.API.StartupExtensions
             services.AddScoped<IAuthService, AuthService>();
 
             services.AddScoped<IQueueNotificationService, SignalRQueueNotificationService>();
+
+            services.AddScoped<IDashboardNotificationService, SignalRDashboardNotificationService>();
             
             services.AddSwaggerGen(options =>
             {

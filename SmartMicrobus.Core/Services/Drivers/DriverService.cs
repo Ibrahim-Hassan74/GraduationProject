@@ -17,12 +17,14 @@ namespace SmartMicrobus.Core.Services.Drivers
         private readonly IQueueItemRepository _queueItemRepository;
         private readonly ITripRepository _tripRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDriverRepository _driverRepository;
         public DriverService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _queueItemRepository = unitOfWork.QueueItemRepository;
             _tripRepository = unitOfWork.TripRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _driverRepository = unitOfWork.DriverRepository;
         }
 
         public async Task<ApiResponse> EndTripAsync(Guid driverId)
@@ -227,6 +229,15 @@ namespace SmartMicrobus.Core.Services.Drivers
             var response = new DriverHistoryResponse(tripsHistory.TotalAmount, history, tripsHistory.TotalCount);
 
             return ApiResponseFactory.Success("Driver trip history retrieved successfully", response);
+        }
+
+        public async Task<ApiResponse> GetDriverByPlateNumber(string plateNumber)
+        {
+            var driver = await _driverRepository.GetDriverByPlateNumber(plateNumber);
+            if (driver == null)
+                return ApiResponseFactory.NotFound("No driver found for the given plate number.");
+            var driverInfo = _mapper.Map<DriverResponse>(driver);
+            return ApiResponseFactory.Success("Driver information retrieved successfully.", driverInfo);
         }
     }
 }

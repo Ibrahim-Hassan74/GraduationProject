@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
+using SmartMicrobus.Core.DTO.Route;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Driver;
@@ -82,7 +83,7 @@ namespace SmartMicrobus.API.Controllers
             var response = await tripService.GetDriverHistoryAsync(Guid.Parse(driverId!), request);
 
             var result = response as ApiResponseWithData<DriverHistoryResponse>;
-            if(!response.Success || result.Data is null) 
+            if (!response.Success || result.Data is null)
             {
                 return NotFound(ApiResponseFactory.NotFound(result?.Message ?? "No trips found for the selected period"));
             }
@@ -90,6 +91,18 @@ namespace SmartMicrobus.API.Controllers
             var pagination = new Pagination<DriverHistoryResponse>(request.PageNumber, request.PageSize, result.Data.TotalCount, result.Data);
 
             return Ok(pagination);
+        }
+
+        [HttpGet("get-by-plate-number")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDriverByPlateNumber([FromQuery] string plateNumber)
+        {
+            var response = await driverService.GetDriverByPlateNumber(plateNumber);
+            if (!response.Success)
+                return ToActionResult(response);
+
+            var result = response as ApiResponseWithData<DriverResponse>;
+            return Ok(result?.Data);
         }
     }
 }
