@@ -20,5 +20,35 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .Where(r => r.FromAr == from || r.FromEn == from)
                 .ToListAsync();
         }
+        public async Task<List<string>> GetDistinctFromCitiesAsync(bool isArabic)
+        {
+            return await _context.Routes
+                .Select(r => isArabic ? r.FromAr : r.FromEn)
+                .Where(c => !string.IsNullOrEmpty(c))
+                .Select(c => c.Trim())
+                .GroupBy(c => c.ToLower())
+                .Select(g => g.First())
+                .OrderBy(c => c)
+                .ToListAsync();
+        }
+
+        public async Task<List<Route>> GetRoutesByLineAsync(Guid routeId)
+        {
+            var baseRoute = await _context.Routes
+                .FirstOrDefaultAsync(r => r.Id == routeId);
+
+            if (baseRoute == null)
+                return new List<Route>();
+
+            var from = baseRoute.FromEn.Trim();
+            var to = baseRoute.ToEn.Trim();
+
+            return await _context.Routes
+                .Where(r =>
+                    (r.FromEn == from && r.ToEn == to) ||
+                    (r.FromEn == to && r.ToEn == from)
+                )
+                .ToListAsync();
+        }
     }
 }

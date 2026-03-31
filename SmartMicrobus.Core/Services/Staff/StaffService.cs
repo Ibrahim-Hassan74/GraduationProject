@@ -20,6 +20,7 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly IMapper _mapper;
         private readonly IQrTokenService _qrTokenService;
         private readonly ITripRepository _tripRepository;
+        private readonly IRouteRepository _routeRepository;
 
         public StaffService(IUnitOfWork unitOfWork,
             IQueueNotificationService queueNotificationService,
@@ -34,6 +35,7 @@ namespace SmartMicrobus.Core.Services.Staff
             _mapper = mapper;
             _qrTokenService = qrTokenService;
             _tripRepository = _unitOfWork.TripRepository;
+            _routeRepository = _unitOfWork.RouteRepository;
         }
 
         public async Task<ApiResponse> CheckInAtGateAsync(string qrCode, Guid stationId)
@@ -43,14 +45,34 @@ namespace SmartMicrobus.Core.Services.Staff
             if (payload == null)
                 return ApiResponseFactory.BadRequest("Invalid or expired QR code.");
 
+            // 1. Check if already in queue
             var existing = await _queueItemRepository.GetActiveByDriverIdAsync(payload.DriverId);
 
             if (existing != null)
                 return ApiResponseFactory.BadRequest("Microbus is already in queue.");
 
-            var lastPosition = await _queueItemRepository.GetLastPositionAsync(payload.QueueId);
+            // 2. Get routes (both directions)
+            var routes = await _routeRepository.GetRoutesByLineAsync(payload.RouteId);
 
-            #region end active trip if exists
+            if (routes == null || !routes.Any())
+                return ApiResponseFactory.BadRequest("No routes found.");
+
+            // 3. Pick route based on station
+            var route = routes.FirstOrDefault(r => r.StationId == stationId);
+
+            if (route == null)
+                return ApiResponseFactory.BadRequest("This microbus cannot start from this station.");
+
+            // 4. Get Queue
+            var queue = await _queueRepository.GetByStationAndRouteAsync(stationId, route.Id);
+
+            if (queue == null)
+                return ApiResponseFactory.BadRequest("No queue found for this route at this station.");
+
+            // 5. Get position
+            var position = await _queueItemRepository.GetNextPositionAsync(queue.Id);
+
+            #region End active trip if exists
             var activeTrip = await _tripRepository.GetActiveTripAsync(payload.DriverId);
 
             if (activeTrip != null)
@@ -62,24 +84,25 @@ namespace SmartMicrobus.Core.Services.Staff
             }
             #endregion
 
+            // 6. Add QueueItem
             var item = new QueueItem
             {
-                QueueId = payload.QueueId,
+                QueueId = queue.Id,
                 DriverId = payload.DriverId,
                 MicrobusId = payload.MicrobusId,
-                Position = lastPosition + 1,
+                Position = position,
                 Status = QueueStatus.Waiting
             };
 
             await _queueItemRepository.AddAsync(item);
-
             await _unitOfWork.CompleteAsync();
 
+            // 7. Reload
             item = await _queueItemRepository.GetActiveByDriverIdAsync(item.DriverId);
 
             var queueResponse = _mapper.Map<QueueItemResponse>(item);
 
-            await _queueNotificationService.NotifyDriverAdded(payload.QueueId, queueResponse);
+            await _queueNotificationService.NotifyDriverAdded(queue.Id, queueResponse);
 
             return ApiResponseFactory.Success("Scan processed.");
         }
@@ -111,12 +134,13 @@ namespace SmartMicrobus.Core.Services.Staff
             {
                 DriverId = payload.DriverId,
                 MicrobusId = queueItem.MicrobusId,
-                RouteId = microbus.RouteId,
+                RouteId = queueItem.Queue.RouteId,
                 StartedAt = DateTimeOffset.UtcNow,
                 Status = TripStatus.Started,
                 PassengerCount = microbus.PassengerCount,
                 TotalAmount = microbus.PassengerCount * microbus.Route.Price,
-                DistanceKm = microbus.Route.DistanceKm
+                DistanceKm = microbus.Route.DistanceKm,
+                StationId = microbus.Route.StationId
             };
 
             await _tripRepository.AddAsync(trip);
