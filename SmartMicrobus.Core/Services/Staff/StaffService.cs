@@ -7,7 +7,9 @@ using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Common;
+using SmartMicrobus.Core.ServiceContracts.Notification;
 using SmartMicrobus.Core.ServiceContracts.Staff;
+using SmartMicrobus.Core.Services.Common;
 
 namespace SmartMicrobus.Core.Services.Staff
 {
@@ -23,12 +25,14 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly ITripRepository _tripRepository;
         private readonly IRouteRepository _routeRepository;
         private readonly IStringLocalizer<StaffService> _localizer;
+        private readonly DriverDashboardRealtimeService _dashboardRealtimeService;
 
         public StaffService(IUnitOfWork unitOfWork,
             IQueueNotificationService queueNotificationService,
             IMapper mapper,
             IQrTokenService qrTokenService,
-            IStringLocalizer<StaffService> localizer)
+            IStringLocalizer<StaffService> localizer,
+            DriverDashboardRealtimeService dashboardRealtimeService)
         {
             _unitOfWork = unitOfWork;
             _microbusRepository = _unitOfWork.MicrobusRepository;
@@ -40,6 +44,7 @@ namespace SmartMicrobus.Core.Services.Staff
             _tripRepository = _unitOfWork.TripRepository;
             _routeRepository = _unitOfWork.RouteRepository;
             _localizer = localizer;
+            _dashboardRealtimeService = dashboardRealtimeService;
         }
 
         public async Task<ApiResponse> CheckInAtGateAsync(string qrCode, Guid stationId)
@@ -108,7 +113,10 @@ namespace SmartMicrobus.Core.Services.Staff
             await _queueItemRepository.AddAsync(item);
             await _unitOfWork.CompleteAsync();
 
-            // 7. Reload
+            // 7. Update dashboard
+            await _dashboardRealtimeService.PushDashboard(payload.DriverId);
+
+            // 8. Reload
             item = await _queueItemRepository.GetActiveByDriverIdAsync(item.DriverId);
 
             var queueResponse = _mapper.Map<QueueItemResponse>(item);
@@ -171,6 +179,8 @@ namespace SmartMicrobus.Core.Services.Staff
             await _queueItemRepository.UpdateAsync(queueItem);
 
             await _unitOfWork.CompleteAsync();
+
+            await _dashboardRealtimeService.PushDashboard(payload.DriverId);
 
             await _queueNotificationService.NotifyDriverRemoved(queueItem.QueueId, payload.DriverId);
 

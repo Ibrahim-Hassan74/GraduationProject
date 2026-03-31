@@ -61,6 +61,24 @@ namespace SmartMicrobus.Core.Resources.Services.Report {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid plate number..
+        /// </summary>
+        public static string InvalidPlateNumber {
+            get {
+                return ResourceManager.GetString("InvalidPlateNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to One or more reasons are invalid..
+        /// </summary>
+        public static string InvalidReasons {
+            get {
+                return ResourceManager.GetString("InvalidReasons", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You have already reported this driver recently..
         /// </summary>
         public static string Report_Already_Submitted {
@@ -111,6 +129,96 @@ namespace SmartMicrobus.Core.Resources.Services.Report {
         public static string Report_Submitted_Success {
             get {
                 return ResourceManager.GetString("Report_Submitted_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Report deleted successfully..
+        /// </summary>
+        public static string ReportDeleted {
+            get {
+                return ResourceManager.GetString("ReportDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can only delete reports that are in pending status..
+        /// </summary>
+        public static string ReportDeleteOnlyPending {
+            get {
+                return ResourceManager.GetString("ReportDeleteOnlyPending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Report not found..
+        /// </summary>
+        public static string ReportNotFound {
+            get {
+                return ResourceManager.GetString("ReportNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Report retrieved successfully..
+        /// </summary>
+        public static string ReportRetrieved {
+            get {
+                return ResourceManager.GetString("ReportRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reports retrieved successfully..
+        /// </summary>
+        public static string ReportsRetrieved {
+            get {
+                return ResourceManager.GetString("ReportsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Report updated successfully..
+        /// </summary>
+        public static string ReportUpdated {
+            get {
+                return ResourceManager.GetString("ReportUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You can only update reports that are in pending status..
+        /// </summary>
+        public static string ReportUpdateOnlyPending {
+            get {
+                return ResourceManager.GetString("ReportUpdateOnlyPending", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You are not authorized to access this report..
+        /// </summary>
+        public static string UnauthorizedAccessReport {
+            get {
+                return ResourceManager.GetString("UnauthorizedAccessReport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You are not authorized to delete this report..
+        /// </summary>
+        public static string UnauthorizedDeleteReport {
+            get {
+                return ResourceManager.GetString("UnauthorizedDeleteReport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You are not authorized to update this report..
+        /// </summary>
+        public static string UnauthorizedUpdateReport {
+            get {
+                return ResourceManager.GetString("UnauthorizedUpdateReport", resourceCulture);
             }
         }
     }

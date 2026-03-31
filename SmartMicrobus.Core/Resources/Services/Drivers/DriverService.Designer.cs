@@ -61,6 +61,24 @@ namespace SmartMicrobus.Core.Resources.Services.Drivers {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Driver information retrieved successfully..
+        /// </summary>
+        public static string Driver_Fetch_Success {
+            get {
+                return ResourceManager.GetString("Driver_Fetch_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No driver found for the given plate number..
+        /// </summary>
+        public static string Driver_Not_Found_By_Plate {
+            get {
+                return ResourceManager.GetString("Driver_Not_Found_By_Plate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The driver is currently available..
         /// </summary>
         public static string DriverAvailable {

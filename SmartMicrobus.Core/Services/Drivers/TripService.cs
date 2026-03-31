@@ -8,14 +8,16 @@ using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Driver;
+using SmartMicrobus.Core.Services.Common;
 
 namespace SmartMicrobus.Core.Services.Drivers
 {
-    public class TripService(IUnitOfWork _unitOfWork, IMapper _mapper, IStringLocalizer<TripService> localizer) : ITripService
+    public class TripService(IUnitOfWork _unitOfWork, IMapper _mapper, DriverDashboardRealtimeService driverDashboardRealtime, IStringLocalizer<TripService> localizer) : ITripService
     {
         private readonly IQueueItemRepository _queueItemRepository = _unitOfWork.QueueItemRepository;
         private readonly ITripRepository _tripRepository = _unitOfWork.TripRepository;
         private readonly IStringLocalizer<TripService> _localizer = localizer;
+        private readonly DriverDashboardRealtimeService _driverDashboardRealtime = driverDashboardRealtime;
         public async Task<ApiResponse> StartTripAsync(Guid driverId)
         {
             var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
@@ -61,6 +63,7 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             await _tripRepository.UpdateAsync(trip);
             await _unitOfWork.CompleteAsync();
+            await _driverDashboardRealtime.PushDashboard(driverId); 
 
             return ApiResponseFactory.Success(_localizer["TripEndedSuccessfully"]);
         }
