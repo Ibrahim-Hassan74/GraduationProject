@@ -10,9 +10,10 @@ using SmartMicrobus.Core.ServiceContracts.Driver;
 
 namespace SmartMicrobus.Core.Services.Drivers
 {
-    public class TripService(IQueueItemRepository _queueItemRepository, ITripRepository _tripRepository,
-        IUnitOfWork _unitOfWork, IMapper _mapper) : ITripService
+    public class TripService(IUnitOfWork _unitOfWork, IMapper _mapper) : ITripService
     {
+        private readonly IQueueItemRepository _queueItemRepository = _unitOfWork.QueueItemRepository;
+        private readonly ITripRepository _tripRepository = _unitOfWork.TripRepository;
         public async Task<ApiResponse> StartTripAsync(Guid driverId)
         {
             var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
