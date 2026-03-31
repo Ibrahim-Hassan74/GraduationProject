@@ -8,6 +8,7 @@ using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
+using SmartMicrobus.Core.ServiceContracts.Driver;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
 using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.ServiceContracts.Staff;
@@ -111,6 +112,8 @@ namespace SmartMicrobus.Core
             services.AddScoped<IQrTokenService, QrTokenService>();
             services.AddScoped<IRoutesService, RoutesService>();
             services.AddScoped<IFavoriteRouteService, FavoriteRouteService>();
+            services.AddScoped<DriverDashboardRealtimeService>();
+            services.AddScoped<ITripService, TripService>();
 
             return services;
         }

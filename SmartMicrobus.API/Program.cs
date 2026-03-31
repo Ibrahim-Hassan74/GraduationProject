@@ -52,4 +52,6 @@ app.MapControllers();
 
 app.MapHub<DriverQueueHub>("/hubs/driver-queue");
 
+app.MapHub<DriverDashboardHub>("/hubs/driver-dashboard");
+
 app.Run();
