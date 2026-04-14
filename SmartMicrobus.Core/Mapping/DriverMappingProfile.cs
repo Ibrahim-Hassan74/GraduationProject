@@ -124,6 +124,27 @@ namespace SmartMicrobus.Core.Mapping
                    opt => opt.MapFrom(src => src.Microbus.Color));
 
 
+
+            CreateMap<Trip, MicrobusOnTheWayResponse>()
+                .ForMember(dest => dest.DriverName,
+                    opt => opt.MapFrom(src => src.Driver.ApplicationUser.DisplayName))
+                .ForMember(dest => dest.Status,
+                    opt => opt.MapFrom(src => src.Status.ToString()))
+
+                .ForMember(dest => dest.PlateNumber,
+                    opt => opt.MapFrom(src => src.Microbus.PlateNumber))
+                 .ForMember(dest => dest.PassengerCount,
+                   opt => opt.MapFrom(src => src.Microbus.PassengerCount))
+                .ForMember(dest => dest.Model,
+                    opt => opt.MapFrom(src => src.Microbus.Model))
+                .ForMember(dest => dest.Color,
+                    opt => opt.MapFrom(src => src.Microbus.Color))
+
+                .ForMember(dest => dest.Position,
+                    opt => opt.Ignore())
+                .ForMember(dest => dest.EstimatedArrivalMinutes,
+                    opt => opt.Ignore());
+
         }
     }
 }
