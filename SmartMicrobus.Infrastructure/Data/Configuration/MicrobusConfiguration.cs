@@ -19,7 +19,7 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
             builder.HasIndex(m => m.PlateNumber).IsUnique();
 
             builder.HasOne(m => m.Route)
-                .WithMany()
+                .WithMany(r => r.Microbuses)
                 .HasForeignKey(m => m.RouteId)
                 .OnDelete(DeleteBehavior.Restrict);
 
