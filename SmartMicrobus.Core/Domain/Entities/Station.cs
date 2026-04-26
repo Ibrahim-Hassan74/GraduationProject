@@ -9,7 +9,9 @@
         public string CityEn { get; set; } = null!;
 
         public bool IsActive { get; set; } = true;
-
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+        public string? Address { get; set; }
         public ICollection<Route> Routes { get; set; } = new List<Route>();
         public ICollection<Queue> Queues { get; set; } = new List<Queue>();
     }

@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Route;
+using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.ServiceContracts.Route;
 
 namespace SmartMicrobus.API.Controllers
 {
-    public class RoutesController(IRoutesService routeService) : CustomControllerBase
+    public class RoutesController(IRoutesService routeService, IOsrmRouteService osrmRouteService) : CustomControllerBase
     {
         private readonly IRoutesService _routeService = routeService;
+        private readonly IOsrmRouteService _osrmRouteService = osrmRouteService;
         [HttpGet]
         public async Task<IActionResult> GetAllRoutes()
         {
@@ -60,6 +61,14 @@ namespace SmartMicrobus.API.Controllers
 
             var result = response as ApiResponseWithData<List<MicrobusOnTheWayResponse>>;
             return Ok(result?.Data);
+        }
+
+        [HttpGet("route")]
+        public async Task<IActionResult> GetRoute(double lat1, double lng1, double lat2, double lng2)
+        {
+            var result = await _osrmRouteService.GetRouteAsync(new RouteRequest() { StartLat = lat1, StartLng = lng1, EndLat = lat2, EndLng = lng2 });
+
+            return Ok(result);
         }
     }
 }
