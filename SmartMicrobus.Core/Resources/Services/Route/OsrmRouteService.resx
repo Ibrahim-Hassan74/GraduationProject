@@ -58,7 +58,7 @@
 			: using a System.ComponentModel.TypeConverter
 			: and then encoded with base64 encoding.
 	-->
-
+	
 	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
 		<xsd:element name="root" msdata:IsDataSet="true">
 			<xsd:complexType>
@@ -98,50 +98,7 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
-	<data name="Queue_Invalid_QR" xml:space="preserve">
-  <value>Invalid or expired QR code.</value>
-</data>
-
-	<data name="Queue_Already_In_Queue" xml:space="preserve">
-  <value>Microbus is already in queue.</value>
-</data>
-
-	<data name="Queue_No_Routes" xml:space="preserve">
-  <value>No routes found.</value>
-</data>
-
-	<data name="Queue_Invalid_Start_Station" xml:space="preserve">
-  <value>This microbus cannot start from this station.</value>
-</data>
-
-	<data name="Queue_Not_Found" xml:space="preserve">
-  <value>No queue found for this route at this station.</value>
-</data>
-
-	<data name="Queue_Scan_Success" xml:space="preserve">
-  <value>Scan processed successfully.</value>
-</data>
-
-	<data name="Queue_Driver_Not_In_Queue" xml:space="preserve">
-  <value>Driver not in queue.</value>
-</data>
-
-	<data name="Queue_Microbus_Not_Found" xml:space="preserve">
-  <value>Microbus not found.</value>
-</data>
-	<data name="InvalidRoute" xml:space="preserve">
-    <value>Invalid route</value>
-  </data>
-
-	<data name="MicrobusInvalidStartStation" xml:space="preserve">
-    <value>This microbus cannot start from this station</value>
-  </data>
-
-	<data name="RouteNotFound" xml:space="preserve">
-    <value>Route not found</value>
-  </data>
-
-	<data name="InvalidStationForRoute" xml:space="preserve">
-    <value>Invalid station for this route</value>
-  </data>
+	<data name="NoRoutesFound" xml:space="preserve">
+		<value>No routes found from OSRM</value>
+	</data>
 </root>

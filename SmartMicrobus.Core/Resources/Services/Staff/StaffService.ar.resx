@@ -58,7 +58,7 @@
 			: using a System.ComponentModel.TypeConverter
 			: and then encoded with base64 encoding.
 	-->
-	
+
 	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
 		<xsd:element name="root" msdata:IsDataSet="true">
 			<xsd:complexType>
@@ -102,31 +102,46 @@
   <value>رمز الباركود غير صالح أو منتهي الصلاحية.</value>
 </data>
 
-<data name="Queue_Already_In_Queue" xml:space="preserve">
+	<data name="Queue_Already_In_Queue" xml:space="preserve">
   <value>الميكروباص موجود بالفعل في الطابور.</value>
 </data>
 
-<data name="Queue_No_Routes" xml:space="preserve">
+	<data name="Queue_No_Routes" xml:space="preserve">
   <value>لا توجد مسارات متاحة.</value>
 </data>
 
-<data name="Queue_Invalid_Start_Station" xml:space="preserve">
+	<data name="Queue_Invalid_Start_Station" xml:space="preserve">
   <value>لا يمكن لهذا الميكروباص البدء من هذه المحطة.</value>
 </data>
 
-<data name="Queue_Not_Found" xml:space="preserve">
+	<data name="Queue_Not_Found" xml:space="preserve">
   <value>لا يوجد طابور لهذا المسار في هذه المحطة.</value>
 </data>
 
-<data name="Queue_Scan_Success" xml:space="preserve">
+	<data name="Queue_Scan_Success" xml:space="preserve">
   <value>تمت معالجة عملية المسح بنجاح.</value>
 </data>
 
-<data name="Queue_Driver_Not_In_Queue" xml:space="preserve">
+	<data name="Queue_Driver_Not_In_Queue" xml:space="preserve">
   <value>السائق غير موجود في الطابور.</value>
 </data>
 
-<data name="Queue_Microbus_Not_Found" xml:space="preserve">
+	<data name="Queue_Microbus_Not_Found" xml:space="preserve">
   <value>الميكروباص غير موجود.</value>
 </data>
+	<data name="InvalidRoute" xml:space="preserve">
+    <value>المسار غير صالح</value>
+  </data>
+
+	<data name="MicrobusInvalidStartStation" xml:space="preserve">
+    <value>هذا الميكروباص لا يمكنه البدء من هذه المحطة</value>
+  </data>
+
+	<data name="RouteNotFound" xml:space="preserve">
+    <value>المسار غير موجود</value>
+  </data>
+
+	<data name="InvalidStationForRoute" xml:space="preserve">
+    <value>المحطة غير صالحة لهذا المسار</value>
+  </data>
 </root>

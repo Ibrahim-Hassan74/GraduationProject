@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SmartMicrobus.Core.Resources.Services.Staff {
+namespace SmartMicrobus.Core.Resources.Services.Stations {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class StaffService {
+    public class StationsService {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal StaffService() {
+        internal StationsService() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SmartMicrobus.Core.Resources.Services.Staff.StaffService", typeof(StaffService).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SmartMicrobus.Core.Resources.Services.Stations.StationsService", typeof(StationsService).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,110 +61,83 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid route.
+        ///   Looks up a localized string similar to Invalid station ID.
         /// </summary>
-        public static string InvalidRoute {
+        public static string InvalidStationId {
             get {
-                return ResourceManager.GetString("InvalidRoute", resourceCulture);
+                return ResourceManager.GetString("InvalidStationId", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid station for this route.
+        ///   Looks up a localized string similar to Nearest station found successfully.
         /// </summary>
-        public static string InvalidStationForRoute {
+        public static string NearestStationFound {
             get {
-                return ResourceManager.GetString("InvalidStationForRoute", resourceCulture);
+                return ResourceManager.GetString("NearestStationFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This microbus cannot start from this station.
+        ///   Looks up a localized string similar to No stations found.
         /// </summary>
-        public static string MicrobusInvalidStartStation {
+        public static string NoStationsFound {
             get {
-                return ResourceManager.GetString("MicrobusInvalidStartStation", resourceCulture);
+                return ResourceManager.GetString("NoStationsFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Microbus is already in queue..
+        ///   Looks up a localized string similar to Route between stations retrieved successfully.
         /// </summary>
-        public static string Queue_Already_In_Queue {
+        public static string RouteBetweenStationsFound {
             get {
-                return ResourceManager.GetString("Queue_Already_In_Queue", resourceCulture);
+                return ResourceManager.GetString("RouteBetweenStationsFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Driver not in queue..
+        ///   Looks up a localized string similar to Station details with route retrieved successfully.
         /// </summary>
-        public static string Queue_Driver_Not_In_Queue {
+        public static string StationDetailsWithRouteFound {
             get {
-                return ResourceManager.GetString("Queue_Driver_Not_In_Queue", resourceCulture);
+                return ResourceManager.GetString("StationDetailsWithRouteFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid or expired QR code..
+        ///   Looks up a localized string similar to Station retrieved successfully.
         /// </summary>
-        public static string Queue_Invalid_QR {
+        public static string StationFound {
             get {
-                return ResourceManager.GetString("Queue_Invalid_QR", resourceCulture);
+                return ResourceManager.GetString("StationFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This microbus cannot start from this station..
+        ///   Looks up a localized string similar to Station not found.
         /// </summary>
-        public static string Queue_Invalid_Start_Station {
+        public static string StationNotFound {
             get {
-                return ResourceManager.GetString("Queue_Invalid_Start_Station", resourceCulture);
+                return ResourceManager.GetString("StationNotFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Microbus not found..
+        ///   Looks up a localized string similar to Stations retrieved successfully.
         /// </summary>
-        public static string Queue_Microbus_Not_Found {
+        public static string StationsFound {
             get {
-                return ResourceManager.GetString("Queue_Microbus_Not_Found", resourceCulture);
+                return ResourceManager.GetString("StationsFound", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No routes found..
+        ///   Looks up a localized string similar to One or both stations not found.
         /// </summary>
-        public static string Queue_No_Routes {
+        public static string StationsNotFound {
             get {
-                return ResourceManager.GetString("Queue_No_Routes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No queue found for this route at this station..
-        /// </summary>
-        public static string Queue_Not_Found {
-            get {
-                return ResourceManager.GetString("Queue_Not_Found", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Scan processed successfully..
-        /// </summary>
-        public static string Queue_Scan_Success {
-            get {
-                return ResourceManager.GetString("Queue_Scan_Success", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Route not found.
-        /// </summary>
-        public static string RouteNotFound {
-            get {
-                return ResourceManager.GetString("RouteNotFound", resourceCulture);
+                return ResourceManager.GetString("StationsNotFound", resourceCulture);
             }
         }
     }

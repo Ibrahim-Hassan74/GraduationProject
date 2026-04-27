@@ -18,6 +18,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="8.0.15" />
+    <PackageReference Include="NetTopologySuite" Version="2.6.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
   </ItemGroup>
 
@@ -57,6 +59,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>FavoriteRouteService.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Services\Route\OsrmRouteService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OsrmRouteService.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Services\Route\RoutesService.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -66,6 +73,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>StaffService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Stations\StationsService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StationsService.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -98,6 +110,10 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>FavoriteRouteService.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Route\OsrmRouteService.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>OsrmRouteService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Services\Route\RoutesService.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>RoutesService.Designer.cs</LastGenOutput>
@@ -105,6 +121,10 @@
     <EmbeddedResource Update="Resources\Services\Staff\StaffService.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>StaffService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Stations\StationsService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>StationsService.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
