@@ -4,6 +4,7 @@ using SmartMicrobus.Core.DTO.Route;
 using Microsoft.Extensions.Configuration;
 using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.Helper;
+using Microsoft.Extensions.Localization;
 
 namespace SmartMicrobus.Core.Services.Route
 {
@@ -11,19 +12,22 @@ namespace SmartMicrobus.Core.Services.Route
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
+        private readonly IStringLocalizer<OsrmRouteService> _localizer;
 
-        public OsrmRouteService(HttpClient httpClient, IConfiguration configuration)
+        public OsrmRouteService(HttpClient httpClient, IConfiguration configuration, IStringLocalizer<OsrmRouteService> localizer)
         {
             _httpClient = httpClient;
             _configuration = configuration;
+            _localizer = localizer;
         }
 
         public async Task<RouteResult> GetRouteAsync(RouteRequest request)
         {
             var url = _configuration["Osrm:BaseUrl"] +
-                      $"{request.StartLng},{request.StartLat};{request.EndLng},{request.EndLat}" +
-                      $"?overview={request.Overview.ToQueryValue()}" +
-                      $"&geometries={request.Geometry.ToQueryValue()}";
+                $"{request.TransportMode.ToQueryValue()}/" +
+                $"{request.StartLng},{request.StartLat};{request.EndLng},{request.EndLat}" +
+                $"?overview={request.Overview.ToQueryValue()}" +
+                $"&geometries={request.Geometry.ToQueryValue()}";
 
             var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
@@ -38,7 +42,7 @@ namespace SmartMicrobus.Core.Services.Route
             var data = JsonSerializer.Deserialize<OsrmResponse>(json, options);
 
             if (data?.Routes == null || !data.Routes.Any())
-                throw new Exception("No routes found from OSRM");
+                throw new Exception(_localizer["NoRoutesFound"]);
 
             var route = data.Routes.First();
 

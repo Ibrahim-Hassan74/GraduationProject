@@ -161,4 +161,7 @@
   <data name="PasswordRequiresUniqueChars" xml:space="preserve">
     <value>Password must contain at least {0} unique characters.</value>
   </data>
+	<data name="StationNotFound" xml:space="preserve">
+		<value>Station not found.</value>
+	</data>
 </root>

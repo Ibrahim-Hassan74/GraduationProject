@@ -138,6 +138,11 @@
               Looks up a localized string similar to Password must be at least {0} characters..
             </summary>
         </member>
+        <member name="P:SmartMicrobus.API.Resources.SharedResource.StationNotFound">
+            <summary>
+              Looks up a localized string similar to Station not found..
+            </summary>
+        </member>
         <member name="P:SmartMicrobus.API.Resources.SharedResource.UserAlreadyHasPassword">
             <summary>
               Looks up a localized string similar to User already has a password..
