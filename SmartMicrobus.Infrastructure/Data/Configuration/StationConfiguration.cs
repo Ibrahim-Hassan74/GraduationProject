@@ -28,6 +28,9 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
             builder.Property(s => s.CityAr)
                 .IsRequired()
                 .HasMaxLength(100);
+
+            builder.Property(s => s.Location)
+                 .HasColumnType("geography");
         }
     }
 }

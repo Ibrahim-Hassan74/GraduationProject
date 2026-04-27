@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using SmartMicrobus.Infrastructure.Data;
@@ -12,9 +13,11 @@ using SmartMicrobus.Infrastructure.Data;
 namespace SmartMicrobus.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260426095211_Add_Station_Location")]
+    partial class Add_Station_Location
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -402,11 +405,11 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<Guid>("FromStationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(10,2)");
+
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ToAr")
                         .IsRequired()
@@ -418,14 +421,14 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<Guid>("ToStationId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ToStationId");
+                    b.HasIndex("StationId");
 
-                    b.HasIndex("FromStationId", "ToStationId")
+                    b.HasIndex("FromAr", "ToAr")
+                        .IsUnique();
+
+                    b.HasIndex("FromEn", "ToEn")
                         .IsUnique();
 
                     b.ToTable("Routes");
@@ -437,10 +440,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AddressAr")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AddressEn")
+                    b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CityAr")
@@ -460,6 +460,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .HasColumnType("float");
 
                     b.Property<Point>("Location")
+                        .IsRequired()
                         .HasColumnType("geography");
 
                     b.Property<double>("Longitude")
@@ -841,21 +842,13 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Route", b =>
                 {
-                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "FromStation")
-                        .WithMany("FromRoutes")
-                        .HasForeignKey("FromStationId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "Station")
+                        .WithMany("Routes")
+                        .HasForeignKey("StationId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "ToStation")
-                        .WithMany("ToRoutes")
-                        .HasForeignKey("ToStationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("FromStation");
-
-                    b.Navigation("ToStation");
+                    b.Navigation("Station");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Trip", b =>
@@ -932,11 +925,9 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Station", b =>
                 {
-                    b.Navigation("FromRoutes");
-
                     b.Navigation("Queues");
 
-                    b.Navigation("ToRoutes");
+                    b.Navigation("Routes");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", b =>

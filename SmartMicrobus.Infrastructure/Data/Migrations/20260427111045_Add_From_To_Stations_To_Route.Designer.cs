@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using SmartMicrobus.Infrastructure.Data;
@@ -12,9 +13,11 @@ using SmartMicrobus.Infrastructure.Data;
 namespace SmartMicrobus.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427111045_Add_From_To_Stations_To_Route")]
+    partial class Add_From_To_Stations_To_Route
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -408,6 +411,9 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<Guid?>("StationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ToAr")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -422,6 +428,8 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StationId");
 
                     b.HasIndex("ToStationId");
 
@@ -842,13 +850,17 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Route", b =>
                 {
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "FromStation")
-                        .WithMany("FromRoutes")
+                        .WithMany()
                         .HasForeignKey("FromStationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", null)
+                        .WithMany("Routes")
+                        .HasForeignKey("StationId");
+
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "ToStation")
-                        .WithMany("ToRoutes")
+                        .WithMany()
                         .HasForeignKey("ToStationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -932,11 +944,9 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Station", b =>
                 {
-                    b.Navigation("FromRoutes");
-
                     b.Navigation("Queues");
 
-                    b.Navigation("ToRoutes");
+                    b.Navigation("Routes");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", b =>
