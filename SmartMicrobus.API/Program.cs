@@ -54,4 +54,6 @@ app.MapHub<DriverQueueHub>("/hubs/driver-queue");
 
 app.MapHub<DriverDashboardHub>("/hubs/driver-dashboard");
 
+app.MapHub<LocationTrackingHub>("/hubs/location-tracking");
+
 app.Run();

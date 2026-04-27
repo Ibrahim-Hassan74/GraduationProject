@@ -24,5 +24,11 @@ namespace SmartMicrobus.Core.Domain.Entities
         public decimal TotalAmount { get; set; }
 
         public TripStatus Status { get; set; }
+
+        public double? StartLat { get; set; }
+        public double? StartLng { get; set; }
+
+        public double? EndLat { get; set; }
+        public double? EndLng { get; set; }
     }
 }
