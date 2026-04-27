@@ -3,5 +3,6 @@
     public class RouteLocationResponse
     {
         public string CityName { get; set; } = string.Empty;
+        public Guid StationId { get; set; }
     }
 }

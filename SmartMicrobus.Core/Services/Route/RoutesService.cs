@@ -41,27 +41,35 @@ namespace SmartMicrobus.Core.Services.Route
             if (cities == null || !cities.Any())
                 return ApiResponseFactory.Success(_localizer["NoRoutesFound"], new List<RouteLocationResponse>());
 
-            var result = cities.Select(c => new RouteLocationResponse
-            {
-                CityName = c
-            }).ToList();
-
-            return ApiResponseFactory.Success(_localizer["RoutesRetrievedSuccessfully"], result);
+            return ApiResponseFactory.Success(_localizer["RoutesRetrievedSuccessfully"], cities);
         }
 
-        public async Task<ApiResponse> GetDestinationsByFromAsync(string from)
-        {
-            if (string.IsNullOrWhiteSpace(from))
-                return ApiResponseFactory.BadRequest(_localizer["FromValueRequired"]);
+        //public async Task<ApiResponse> GetDestinationsByFromAsync(string from)
+        //{
+        //    if (string.IsNullOrWhiteSpace(from))
+        //        return ApiResponseFactory.BadRequest(_localizer["FromValueRequired"]);
 
-            var routes = await _routeRepository.GetRoutesByFromAsync(from);
+        //    var routes = await _routeRepository.GetRoutesByFromAsync(from);
+
+        //    if (!routes.Any())
+        //        return ApiResponseFactory.Success(_localizer["NoDestinationsFound"], new List<DestinationResponse>());
+
+        //    var result = _mapper.Map<List<DestinationResponse>>(routes);
+
+        //    return ApiResponseFactory.Success(_localizer["DestinationsRetrieved"], result);
+        //}
+
+        public async Task<ApiResponse> GetDestinationsByFromAsync(Guid fromStationId)
+        {
+            var routes = await _routeRepository.GetRoutesByFromAsync(fromStationId);
 
             if (!routes.Any())
-                return ApiResponseFactory.Success(_localizer["NoDestinationsFound"], new List<DestinationResponse>());
+                return ApiResponseFactory.Success(_localizer["NoDestinationsFound"],new List<DestinationResponse>()
+                );
 
             var result = _mapper.Map<List<DestinationResponse>>(routes);
 
-            return ApiResponseFactory.Success(_localizer["DestinationsRetrieved"], result);
+            return ApiResponseFactory.Success(_localizer["DestinationsRetrieved"],result);
         }
 
         public async Task<ApiResponse> GetMicrobusesAtStationAsync(Guid routeId)

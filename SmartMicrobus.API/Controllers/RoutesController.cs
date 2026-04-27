@@ -20,9 +20,9 @@ namespace SmartMicrobus.API.Controllers
             return Ok(result?.Data);
         }
         [HttpGet("destinations")]
-        public async Task<IActionResult> GetDestinationsByFrom([FromQuery] string from)
+        public async Task<IActionResult> GetDestinationsByFrom([FromQuery] Guid fromStationId)
         {
-            var response = await _routeService.GetDestinationsByFromAsync(from);
+            var response = await _routeService.GetDestinationsByFromAsync(fromStationId);
             if (!response.Success)
                 return ToActionResult(response);
 
