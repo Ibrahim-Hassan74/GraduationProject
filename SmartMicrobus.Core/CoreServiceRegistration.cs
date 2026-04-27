@@ -102,7 +102,6 @@ namespace SmartMicrobus.Core
                     });
                 });
             });
-
             services.Configure<WhatsAppSettings>(configuration.GetSection("WhatsAppSettings"));
             services.AddHttpClient<IWhatsAppService, WhatsAppService>();
             services.AddSingleton<IImageService, ImageService>();
@@ -119,6 +118,8 @@ namespace SmartMicrobus.Core
             services.AddScoped<DriverDashboardRealtimeService>();
             services.AddScoped<IOsrmRouteService, OsrmRouteService>();
 
+            // Location tracking services
+            services.AddScoped<ILocationTrackingService, LocationTrackingService>();       
             return services;
         }
     }

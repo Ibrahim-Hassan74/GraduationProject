@@ -11,5 +11,6 @@ namespace SmartMicrobus.Core.RepositoryContracts
         Task<List<Trip>> GetMicrobusesOnTheWayAsync(Guid routeId);
         Task<int> GetMicrobusesOnTheWayCountAsync(Guid routeId);
         Task<List<Trip>> GetStationTripsAsync(Guid routeId, Guid stationId);
+        Task<Trip?> GetTripByDriverIdAsync(Guid driverId);
     }
 }
