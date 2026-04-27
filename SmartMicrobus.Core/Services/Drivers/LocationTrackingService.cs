@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
-using SmartMicrobus.Core.Domain.Entities;
+using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Route;
@@ -17,23 +17,33 @@ namespace SmartMicrobus.Core.Services.Drivers
         private readonly ITripRepository _tripRepository;
         private readonly IOsrmRouteService _osrmRouteService;
         private readonly ILocationBroadcastService _locationBroadcastService;
+        private readonly IStringLocalizer<LocationTrackingService> _localizer;
+
         private const string CacheKeyPrefix = "driver_location_";
 
-        public LocationTrackingService(IMemoryCache cache, IUnitOfWork unitOfWork, IOsrmRouteService osrmRouteService, ILocationBroadcastService locationBroadcastService)
+        public LocationTrackingService(
+            IMemoryCache cache,
+            IUnitOfWork unitOfWork,
+            IOsrmRouteService osrmRouteService,
+            ILocationBroadcastService locationBroadcastService,
+            IStringLocalizer<LocationTrackingService> localizer)
         {
             _cache = cache;
             _tripRepository = unitOfWork.TripRepository;
             _osrmRouteService = osrmRouteService;
             _locationBroadcastService = locationBroadcastService;
+            _localizer = localizer;
         }
 
+       
         public async Task<ApiResponse> UpdateDriverLocationAsync(Guid driverId, double latitude, double longitude)
         {
+           
             if (latitude < -90 || latitude > 90)
-                return ApiResponseFactory.BadRequest("Invalid latitude. Must be between -90 and 90.");
+                return ApiResponseFactory.BadRequest(_localizer["InvalidLatitude"]);
 
             if (longitude < -180 || longitude > 180)
-                return ApiResponseFactory.BadRequest("Invalid longitude. Must be between -180 and 180.");
+                return ApiResponseFactory.BadRequest(_localizer["InvalidLongitude"]);
 
             var location = new DriverLocationResponse
             {
@@ -43,18 +53,18 @@ namespace SmartMicrobus.Core.Services.Drivers
                 LastUpdated = DateTimeOffset.UtcNow
             };
 
-            if (_cache.TryGetValue(CacheKeyPrefix + driverId, out DriverLocationResponse? locationOut))
+           
+            if (_cache.TryGetValue(CacheKeyPrefix + driverId, out DriverLocationResponse? oldLocation))
             {
-                var distance = CalculateDistanceInMeters(locationOut.Latitude, locationOut.Longitude,
-                    location.Latitude, location.Longitude
-                );
+                var distance = CalculateDistanceInMeters(
+                    oldLocation.Latitude, oldLocation.Longitude,
+                    location.Latitude, location.Longitude);
 
                 if (distance < 30)
-                {
-                    return ApiResponseFactory.Success("Location update ignored (movement أقل من 30 متر)");
-                }
+                    return ApiResponseFactory.Success(_localizer["LocationIgnored"]);
             }
 
+           
             var cacheOptions = new MemoryCacheEntryOptions
             {
                 SlidingExpiration = TimeSpan.FromHours(1)
@@ -65,8 +75,9 @@ namespace SmartMicrobus.Core.Services.Drivers
             var trip = await _tripRepository.GetTripByDriverIdAsync(driverId);
 
             if (trip == null)
-                return ApiResponseFactory.NotFound("No active trip found for this driver.");
+                return ApiResponseFactory.NotFound(_localizer["TripNotFound"]);
 
+           
             var route = await _osrmRouteService.GetRouteAsync(new RouteRequest
             {
                 StartLat = latitude,
@@ -77,31 +88,40 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             var routeDTO = new RouteResultDTO
             {
+                DriverId = driverId,
                 Distance = route.Distance,
                 Duration = route.Duration,
                 Coordinates = route.Coordinates,
-                LastUpdated = location.LastUpdated,
-                DriverId = driverId
+                LastUpdated = location.LastUpdated
             };
+
+          
             await _locationBroadcastService.BroadcastDriverLocationAsync(driverId, routeDTO);
 
-            return ApiResponseFactory.Success("Location updated successfully.");
+            return ApiResponseFactory.Success(_localizer["LocationUpdated"]);
         }
 
+       
         public async Task<ApiResponse> GetDriverLocationAsync(Guid driverId)
         {
             var trip = await _tripRepository.GetTripByDriverIdAsync(driverId);
+
             if (trip == null)
-                return ApiResponseFactory.NotFound("No active trip found for this driver.");
+                return ApiResponseFactory.NotFound(_localizer["TripNotFound"]);
+
             var latitude = trip.StartLat ?? 0.0;
             var longitude = trip.StartLng ?? 0.0;
+            DateTimeOffset? lastUpdated = trip.StartedAt;
 
+            
             if (_cache.TryGetValue(CacheKeyPrefix + driverId, out DriverLocationResponse? location))
             {
-                latitude = location?.Latitude??latitude;
-                longitude= location?.Longitude??longitude;
+                latitude = location?.Latitude ?? latitude;
+                longitude = location?.Longitude ?? longitude;
+                lastUpdated = location?.LastUpdated;
             }
 
+           
             var route = await _osrmRouteService.GetRouteAsync(new RouteRequest
             {
                 StartLat = latitude,
@@ -112,19 +132,20 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             var routeDTO = new RouteResultDTO
             {
+                DriverId = driverId,
                 Distance = route.Distance,
                 Duration = route.Duration,
                 Coordinates = route.Coordinates,
-                LastUpdated = location?.LastUpdated,
-                DriverId = driverId
+                LastUpdated = lastUpdated
             };
-            return ApiResponseFactory.Success("Location retrieved successfully.", routeDTO);
 
+            return ApiResponseFactory.Success(_localizer["LocationRetrieved"], routeDTO);
         }
 
+     
         private static double CalculateDistanceInMeters(
-                double lat1, double lon1,
-                double lat2, double lon2)
+            double lat1, double lon1,
+            double lat2, double lon2)
         {
             const double R = 6371000;
 
@@ -140,7 +161,7 @@ namespace SmartMicrobus.Core.Services.Drivers
             return R * c;
         }
 
-        private static double ToRadians(double deg) => deg * (Math.PI / 180);
-
+        private static double ToRadians(double deg)
+            => deg * (Math.PI / 180);
     }
 }
