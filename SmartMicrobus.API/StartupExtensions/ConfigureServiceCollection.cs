@@ -110,7 +110,9 @@ namespace SmartMicrobus.API.StartupExtensions
             services.AddScoped<IQueueNotificationService, SignalRQueueNotificationService>();
 
             services.AddScoped<IDashboardNotificationService, SignalRDashboardNotificationService>();
-            
+
+            services.AddScoped<ILocationBroadcastService, LocationBroadcastService>();
+
             services.AddSwaggerGen(options =>
             {
                 options.IncludeXmlComments(

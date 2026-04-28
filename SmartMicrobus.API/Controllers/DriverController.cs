@@ -7,12 +7,13 @@ using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Driver;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
+using SmartMicrobus.Core.ServiceContracts.Notification;
 using System.Security.Claims;
 
 namespace SmartMicrobus.API.Controllers
 {
     [Authorize(Roles = nameof(UserRole.Driver))]
-    public class DriverController(IDriverService driverService, ITripService tripService, ILogger<DriverController> logger) : CustomControllerBase
+    public class DriverController(IDriverService driverService, ITripService tripService, ILocationTrackingService locationTrackingService, ILocationBroadcastService broadcastService, ILogger<DriverController> logger) : CustomControllerBase
     {
         [HttpGet("get-current-postion")]
         public async Task<IActionResult> CurrentPosition()
@@ -89,6 +90,41 @@ namespace SmartMicrobus.API.Controllers
                 return ToActionResult(response);
 
             var result = response as ApiResponseWithData<DriverResponse>;
+            return Ok(result?.Data);
+        }
+
+        
+        [HttpPost("location")]
+        public async Task<IActionResult> UpdateLocation([FromBody] UpdateDriverLocationRequest request)
+        {
+
+            var driverId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+
+            var updateResponse = await locationTrackingService.UpdateDriverLocationAsync(
+                driverId,
+                request.Latitude,
+                request.Longitude
+            );
+
+            if (!updateResponse.Success)
+            {
+                return BadRequest(updateResponse);
+            }
+
+            return Ok(updateResponse);
+        }
+
+        [HttpGet("location/{driverId}")]
+        [Authorize(Roles =nameof( UserRole.Passenger))]
+        public async Task<IActionResult> GetDriverLocation(Guid driverId)
+        {
+            var response = await locationTrackingService.GetDriverLocationAsync(driverId);
+
+            if (!response.Success)
+            {
+                return NotFound(response);
+            }
+            var result = response as ApiResponseWithData<RouteResultDTO>;
             return Ok(result?.Data);
         }
     }
