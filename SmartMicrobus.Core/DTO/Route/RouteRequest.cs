@@ -12,5 +12,6 @@ namespace SmartMicrobus.Core.DTO.Route
 
         public OverviewType Overview { get; set; } = OverviewType.Full;
         public GeometryType Geometry { get; set; } = GeometryType.GeoJson;
+        public TransportMode TransportMode { get; set; } = TransportMode.Driving;
     }
 }

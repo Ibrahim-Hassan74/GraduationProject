@@ -5,5 +5,7 @@
         public Guid RouteId { get; set; }
 
         public string? To { get; set; }
+
+        public Guid StationId { get; set; }
     }
 }

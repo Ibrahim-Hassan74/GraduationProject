@@ -25,5 +25,15 @@ namespace SmartMicrobus.Core.Helper
                 _ => "geojson"
             };
         }
+        public static string ToQueryValue(this TransportMode mode)
+        {
+            return mode switch
+            {
+                TransportMode.Driving => "driving",
+                TransportMode.Walking => "foot",
+                TransportMode.Cycling => "bike",
+                _ => "driving"
+            };
+        }
     }
 }

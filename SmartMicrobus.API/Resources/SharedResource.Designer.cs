@@ -214,6 +214,15 @@ namespace SmartMicrobus.API.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Station not found..
+        /// </summary>
+        public static string StationNotFound {
+            get {
+                return ResourceManager.GetString("StationNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User already has a password..
         /// </summary>
         public static string UserAlreadyHasPassword {

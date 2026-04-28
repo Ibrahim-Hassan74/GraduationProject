@@ -10,8 +10,11 @@
 
         public decimal Price { get; set; }
 
-        public Guid StationId { get; set; }
-        public Station Station { get; set; } = null!;
+        public Guid FromStationId { get; set; }
+        public Station FromStation { get; set; } = null!;
+
+        public Guid ToStationId { get; set; }
+        public Station ToStation { get; set; } = null!;
 
         public double DistanceKm { get; set; }
 

@@ -50,7 +50,7 @@ namespace SmartMicrobus.API.StartupExtensions
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"), x => x.UseNetTopologySuite());
             });
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using SmartMicrobus.Infrastructure.Data;
@@ -12,9 +13,11 @@ using SmartMicrobus.Infrastructure.Data;
 namespace SmartMicrobus.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260427115448_FixRelations")]
+    partial class FixRelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -492,12 +495,6 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Property<Guid>("DriverId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double?>("EndLat")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("EndLng")
-                        .HasColumnType("float");
-
                     b.Property<DateTimeOffset?>("EndedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -509,12 +506,6 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.Property<Guid>("RouteId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<double?>("StartLat")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("StartLng")
-                        .HasColumnType("float");
 
                     b.Property<DateTimeOffset>("StartedAt")
                         .HasColumnType("datetimeoffset");

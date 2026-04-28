@@ -13,12 +13,14 @@ using SmartMicrobus.Core.ServiceContracts.Drivers;
 using SmartMicrobus.Core.ServiceContracts.Report;
 using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.ServiceContracts.Staff;
+using SmartMicrobus.Core.ServiceContracts.Stations;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Core.Services.Common;
 using SmartMicrobus.Core.Services.Drivers;
 using SmartMicrobus.Core.Services.Report;
 using SmartMicrobus.Core.Services.Route;
 using SmartMicrobus.Core.Services.Staff;
+using SmartMicrobus.Core.Services.Stations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -117,6 +119,7 @@ namespace SmartMicrobus.Core
             services.AddScoped<ITripService, TripService>();
             services.AddScoped<DriverDashboardRealtimeService>();
             services.AddScoped<IOsrmRouteService, OsrmRouteService>();
+            services.AddScoped<IStationsService, StationsService>();
 
             // Location tracking services
             services.AddScoped<ILocationTrackingService, LocationTrackingService>();       
