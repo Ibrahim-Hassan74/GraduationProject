@@ -178,6 +178,12 @@ namespace SmartMicrobus.Core.Services.Staff
                 return ApiResponseFactory.BadRequest(_localizer["InvalidStationForRoute"]);
             }
 
+            var fromStation = await _unitOfWork.StationRepository.GetByIdAsync(fromStationId);
+            var toStation = await _unitOfWork.StationRepository.GetByIdAsync(toStationId);
+
+            if (fromStation == null || toStation == null)
+                return ApiResponseFactory.NotFound(_localizer["StationsNotFound"]);
+            
             // 6. Create Trip
             var trip = new Trip
             {
@@ -192,7 +198,14 @@ namespace SmartMicrobus.Core.Services.Staff
 
                 PassengerCount = microbus.PassengerCount,
                 TotalAmount = microbus.PassengerCount * route.Price,
-                DistanceKm = route.DistanceKm
+                DistanceKm = route.DistanceKm,
+
+                StartLat = fromStation.Latitude,
+                StartLng = fromStation.Longitude,
+
+                EndLat = toStation.Latitude,
+                EndLng = toStation.Longitude,
+
             };
 
             await _tripRepository.AddAsync(trip);

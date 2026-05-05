@@ -78,6 +78,11 @@
               Looks up a localized string similar to The number &apos;{0}&apos; already exists..
             </summary>
         </member>
+        <member name="P:SmartMicrobus.API.Resources.SharedResource.Forbidden">
+            <summary>
+              Looks up a localized string similar to Access denied..
+            </summary>
+        </member>
         <member name="P:SmartMicrobus.API.Resources.SharedResource.InvalidEmail">
             <summary>
               Looks up a localized string similar to Email &apos;{0}&apos; is invalid..
@@ -141,6 +146,11 @@
         <member name="P:SmartMicrobus.API.Resources.SharedResource.StationNotFound">
             <summary>
               Looks up a localized string similar to Station not found..
+            </summary>
+        </member>
+        <member name="P:SmartMicrobus.API.Resources.SharedResource.Unauthorized">
+            <summary>
+              Looks up a localized string similar to Unauthorized access..
             </summary>
         </member>
         <member name="P:SmartMicrobus.API.Resources.SharedResource.UserAlreadyHasPassword">

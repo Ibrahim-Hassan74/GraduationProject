@@ -111,7 +111,7 @@
       <LastGenOutput>FavoriteRouteService.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Services\Route\OsrmRouteService.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>OsrmRouteService.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Services\Route\RoutesService.resx">

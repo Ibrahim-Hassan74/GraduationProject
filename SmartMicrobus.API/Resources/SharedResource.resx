@@ -164,4 +164,10 @@
 	<data name="StationNotFound" xml:space="preserve">
 		<value>Station not found.</value>
 	</data>
+  <data name="Unauthorized" xml:space="preserve">
+    <value>Unauthorized access.</value>
+  </data>
+  <data name="Forbidden" xml:space="preserve">
+    <value>Access denied.</value>
+  </data>
 </root>

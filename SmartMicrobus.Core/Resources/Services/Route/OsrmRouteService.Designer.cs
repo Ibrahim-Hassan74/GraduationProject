@@ -22,7 +22,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class OsrmRouteService {
+    public class OsrmRouteService {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SmartMicrobus.Core.Resources.Services.Route.OsrmRouteService", typeof(OsrmRouteService).Assembly);
@@ -51,7 +51,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace SmartMicrobus.Core.Resources.Services.Route {
         /// <summary>
         ///   Looks up a localized string similar to No routes found from OSRM.
         /// </summary>
-        internal static string NoRoutesFound {
+        public static string NoRoutesFound {
             get {
                 return ResourceManager.GetString("NoRoutesFound", resourceCulture);
             }

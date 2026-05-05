@@ -80,15 +80,25 @@ namespace SmartMicrobus.Core.Mapping
 
                 .ForMember(dest => dest.RouteFrom,
                     opt => opt.MapFrom(src =>
-                        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
-                            ? src.Route.FromAr
-                            : src.Route.FromEn))
+                        src.StationId == src.Route.FromStationId
+                            ? (CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                                ? src.Route.FromAr
+                                : src.Route.FromEn)
+                            : (CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                                ? src.Route.ToAr
+                                : src.Route.ToEn)
+                    ))
 
                 .ForMember(dest => dest.RouteTo,
                     opt => opt.MapFrom(src =>
-                        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
-                            ? src.Route.ToAr
-                            : src.Route.ToEn))
+                        src.StationId == src.Route.FromStationId
+                            ? (CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                                ? src.Route.ToAr
+                                : src.Route.ToEn)
+                            : (CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                                ? src.Route.FromAr
+                                : src.Route.FromEn)
+                    ))
 
                 .ForMember(dest => dest.DistanceKm,
                     opt => opt.MapFrom(src => src.DistanceKm))
@@ -98,8 +108,19 @@ namespace SmartMicrobus.Core.Mapping
 
                 .ForMember(dest => dest.EstimatedArrivalMinutes,
                     opt => opt.MapFrom(src =>
-                        (int)Math.Ceiling(src.DistanceKm * 1.2))); // will change it later
+                        (int)Math.Ceiling(src.DistanceKm * 1.2)))
 
+                .ForMember(dest => dest.FromStationId,
+                    opt => opt.MapFrom(src =>
+                        src.StationId == src.Route.FromStationId
+                            ? src.Route.FromStationId
+                            : src.Route.ToStationId))
+
+                .ForMember(dest => dest.ToStationId,
+                    opt => opt.MapFrom(src =>
+                        src.StationId == src.Route.FromStationId
+                            ? src.Route.ToStationId
+                            : src.Route.FromStationId));
 
             CreateMap<Driver, DriverResponse>()
                 .ForMember(dest => dest.From,

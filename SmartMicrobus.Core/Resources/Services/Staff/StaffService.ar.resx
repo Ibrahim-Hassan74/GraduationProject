@@ -144,4 +144,7 @@
 	<data name="InvalidStationForRoute" xml:space="preserve">
     <value>المحطة غير صالحة لهذا المسار</value>
   </data>
+	<data name="StationsNotFound" xml:space="preserve">
+		<value>تعذر العثور على محطة البداية أو محطة الوصول المحددة.</value>
+</data>
 </root>

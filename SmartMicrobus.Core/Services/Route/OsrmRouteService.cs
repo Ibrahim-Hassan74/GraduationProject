@@ -1,10 +1,11 @@
-﻿using System.Text.Json;
-using SmartMicrobus.Core.Enums;
-using SmartMicrobus.Core.DTO.Route;
-using Microsoft.Extensions.Configuration;
-using SmartMicrobus.Core.ServiceContracts.Route;
-using SmartMicrobus.Core.Helper;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using SmartMicrobus.Core.DTO.Route;
+using SmartMicrobus.Core.Enums;
+using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.ServiceContracts.Route;
+using System.Globalization;
+using System.Text.Json;
 
 namespace SmartMicrobus.Core.Services.Route
 {
@@ -25,7 +26,7 @@ namespace SmartMicrobus.Core.Services.Route
         {
             var url = _configuration["Osrm:BaseUrl"] +
                 $"{request.TransportMode.ToQueryValue()}/" +
-                $"{request.StartLng},{request.StartLat};{request.EndLng},{request.EndLat}" +
+                $"{request.StartLng.ToString(CultureInfo.InvariantCulture)},{request.StartLat.ToString(CultureInfo.InvariantCulture)};{request.EndLng.ToString(CultureInfo.InvariantCulture)},{request.EndLat.ToString(CultureInfo.InvariantCulture)}" +
                 $"?overview={request.Overview.ToQueryValue()}" +
                 $"&geometries={request.Geometry.ToQueryValue()}";
 

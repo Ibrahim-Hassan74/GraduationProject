@@ -167,5 +167,14 @@ namespace SmartMicrobus.Core.Resources.Services.Staff {
                 return ResourceManager.GetString("RouteNotFound", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The selected start or destination station could not be found..
+        /// </summary>
+        public static string StationsNotFound {
+            get {
+                return ResourceManager.GetString("StationsNotFound", resourceCulture);
+            }
+        }
     }
 }

@@ -144,4 +144,7 @@
 	<data name="InvalidStationForRoute" xml:space="preserve">
     <value>Invalid station for this route</value>
   </data>
+	<data name="StationsNotFound" xml:space="preserve">
+		<value>The selected start or destination station could not be found.</value>
+</data>
 </root>

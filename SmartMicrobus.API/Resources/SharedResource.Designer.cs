@@ -106,6 +106,15 @@ namespace SmartMicrobus.API.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Access denied..
+        /// </summary>
+        public static string Forbidden {
+            get {
+                return ResourceManager.GetString("Forbidden", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Email &apos;{0}&apos; is invalid..
         /// </summary>
         public static string InvalidEmail {
@@ -219,6 +228,15 @@ namespace SmartMicrobus.API.Resources {
         public static string StationNotFound {
             get {
                 return ResourceManager.GetString("StationNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unauthorized access..
+        /// </summary>
+        public static string Unauthorized {
+            get {
+                return ResourceManager.GetString("Unauthorized", resourceCulture);
             }
         }
         

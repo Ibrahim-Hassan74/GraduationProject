@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartMicrobus.API.Filters;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Route;
@@ -29,9 +30,14 @@ namespace SmartMicrobus.API.Controllers
         }
 
         [HttpGet("get-driver-queue")]
-        public async Task<IActionResult> DriverQueue(Guid driverId)
+        public async Task<IActionResult> DriverQueue()
         {
-            var response = await driverService.GetMyQueueAsync(driverId);
+            var driverId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (driverId is null)
+                return Unauthorized(ApiResponseFactory.Unauthorized());
+
+            var response = await driverService.GetMyQueueAsync(Guid.Parse(driverId));
 
             if (!response.Success)
             {
@@ -114,6 +120,20 @@ namespace SmartMicrobus.API.Controllers
             return Ok(updateResponse);
         }
 
-       
+        [HttpGet("location/{driverId}")]
+        [AllowAnonymous]
+        [TypeFilter(typeof(PassengerOnlyFilter))]
+        public async Task<IActionResult> GetDriverLocation(Guid driverId)
+        {
+            var response = await locationTrackingService.GetDriverLocationAsync(driverId);
+
+            if (!response.Success)
+            {
+                return NotFound(response);
+            }
+            var result = response as ApiResponseWithData<RouteResultDTO>;
+            return Ok(result?.Data);
+        }
+
     }
 }
