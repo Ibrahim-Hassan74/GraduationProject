@@ -24,9 +24,12 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(t => t.Route)
-                .WithMany()
+                .WithMany(r => r.Trips)
                 .HasForeignKey(t => t.RouteId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(t => t.TotalAmount)
+                .HasPrecision(18, 4);
         }
     }
 }

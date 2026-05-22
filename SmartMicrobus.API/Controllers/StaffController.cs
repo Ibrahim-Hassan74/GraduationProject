@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SmartMicrobus.Core.DTO.Queue;
+using SmartMicrobus.Core.DTO.Staff;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.ServiceContracts.Staff;
 

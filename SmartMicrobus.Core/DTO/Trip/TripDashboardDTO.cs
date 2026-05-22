@@ -13,5 +13,9 @@
         public double DistanceKm { get; set; }
 
         public int EstimatedArrivalMinutes { get; set; }
+
+        public Guid FromStationId { get; set; }
+
+        public Guid ToStationId {  get; set; }
     }
 }

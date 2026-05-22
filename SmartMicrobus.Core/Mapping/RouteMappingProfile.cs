@@ -18,7 +18,9 @@ namespace SmartMicrobus.Core.Mapping
                            ? src.ToAr
                            : src.ToEn))
                .ForMember(dest => dest.RouteId,
-                   opt => opt.MapFrom(src => src.Id));
+                   opt => opt.MapFrom(src => src.Id))
+               .ForMember(dest => dest.StationId,
+                   opt => opt.MapFrom(src => src.ToStationId));
 
 
             CreateMap<FavoriteRoute, FavoriteRouteResponse>()

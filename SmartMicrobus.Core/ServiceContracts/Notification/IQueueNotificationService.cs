@@ -1,6 +1,6 @@
 ﻿using SmartMicrobus.Core.DTO.Queue;
 
-namespace SmartMicrobus.Core.ServiceContracts.Common
+namespace SmartMicrobus.Core.ServiceContracts.Notification
 {
     public interface IQueueNotificationService
     {

@@ -9,16 +9,19 @@ using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
+using SmartMicrobus.Core.ServiceContracts.Driver;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
+using SmartMicrobus.Core.ServiceContracts.Report;
 using SmartMicrobus.Core.ServiceContracts.Manager;
 using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.ServiceContracts.Staff;
+using SmartMicrobus.Core.ServiceContracts.Stations;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Core.Services.Common;
 using SmartMicrobus.Core.Services.Drivers;
-using SmartMicrobus.Core.Services.Manager;
 using SmartMicrobus.Core.Services.Route;
 using SmartMicrobus.Core.Services.Staff;
+using SmartMicrobus.Core.Services.Stations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -102,7 +105,6 @@ namespace SmartMicrobus.Core
                     });
                 });
             });
-
             services.Configure<WhatsAppSettings>(configuration.GetSection("WhatsAppSettings"));
             services.AddHttpClient<IWhatsAppService, WhatsAppService>();
             services.AddSingleton<IImageService, ImageService>();
@@ -114,8 +116,15 @@ namespace SmartMicrobus.Core
             services.AddScoped<IQrTokenService, QrTokenService>();
             services.AddScoped<IRoutesService, RoutesService>();
             services.AddScoped<IFavoriteRouteService, FavoriteRouteService>();
+            services.AddScoped<IReportService, ReportService>();
+            services.AddScoped<ITripService, TripService>();
+            services.AddScoped<DriverDashboardRealtimeService>();
+            services.AddScoped<IOsrmRouteService, OsrmRouteService>();
+            services.AddScoped<IStationsService, StationsService>();
             services.AddScoped<IManagerService, ManagerService>();
 
+            // Location tracking services
+            services.AddScoped<ILocationTrackingService, LocationTrackingService>();       
             return services;
         }
     }

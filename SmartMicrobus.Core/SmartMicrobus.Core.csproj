@@ -12,15 +12,120 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
-    <PackageReference Include="MailKit" Version="4.13.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.18" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.15" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.15">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MimeKit" Version="4.15.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="8.0.15" />
+    <PackageReference Include="NetTopologySuite" Version="2.6.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\Services\Account\AuthService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AuthService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Common\ImageService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ImageService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Common\JwtService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>JwtService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Drivers\DriverService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DriverService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Drivers\TripService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>TripService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Report\ReportService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ReportService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Route\FavoriteRouteService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>FavoriteRouteService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Route\OsrmRouteService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>OsrmRouteService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Route\RoutesService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>RoutesService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Staff\StaffService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StaffService.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\Services\Stations\StationsService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StationsService.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Services\Account\AuthService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>AuthService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Common\ImageService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>ImageService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Common\JwtService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>JwtService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Drivers\DriverService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>DriverService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Drivers\TripService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>TripService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Report\ReportService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>ReportService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Route\FavoriteRouteService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>FavoriteRouteService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Route\OsrmRouteService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>OsrmRouteService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Route\RoutesService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>RoutesService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Staff\StaffService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>StaffService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Stations\StationsService.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>StationsService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

@@ -1,15 +1,28 @@
-﻿using SmartMicrobus.Core.Domain.IdentityEntities;
-using SmartMicrobus.Core.Helper;
+﻿using SmartMicrobus.Core.Helper;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartMicrobus.Core.DTO.Account
 {
     public class RegisterDriverDTO
     {
+        [Required(ErrorMessageResourceName = "RequiredDisplayName",
+                  ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
         public string DisplayName { get; set; } = string.Empty;
-        [EgyptianPhone]
+
+        [Required(ErrorMessageResourceName = "RequiredPhoneNumber",
+                  ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
+        [EgyptianPhone(ErrorMessageResourceName = "InvalidPhoneNumber",
+                       ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
         public string PhoneNumber { get; set; } = string.Empty;
+
+        [Required(ErrorMessageResourceName = "RequiredPassword",
+                  ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
+        [MinLength(6, ErrorMessageResourceName = "MinLengthPassword",
+                      ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
         public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessageResourceName = "RequiredLicenseNumber",
+                  ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
         public string LicenseNumber { get; set; } = string.Empty;
     }
 }

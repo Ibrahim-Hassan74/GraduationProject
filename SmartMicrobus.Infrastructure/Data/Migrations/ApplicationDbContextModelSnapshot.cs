@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NetTopologySuite.Geometries;
 using SmartMicrobus.Infrastructure.Data;
 
 #nullable disable
@@ -140,6 +141,60 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.ToTable("Drivers");
                 });
 
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.DriverReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<Guid?>("DriverId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PassengerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PlateNumber")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DriverId");
+
+                    b.HasIndex("PassengerId");
+
+                    b.ToTable("DriverReports");
+                });
+
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.DriverReportReason", b =>
+                {
+                    b.Property<Guid>("DriverReportId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ReportReasonId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("DriverReportId", "ReportReasonId");
+
+                    b.HasIndex("ReportReasonId");
+
+                    b.ToTable("DriverReportReasons");
+                });
+
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.FavoriteRoute", b =>
                 {
                     b.Property<Guid>("Id")
@@ -162,7 +217,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.HasIndex("PassengerId", "RouteId")
                         .IsUnique();
 
-                    b.ToTable("FavoriteRoutes");
+                    b.ToTable("FavoriteRoute");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Microbus", b =>
@@ -200,17 +255,15 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Property<Guid>("RouteId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("RouteId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DriverId")
                         .IsUnique();
 
-                    b.HasIndex("RouteId");
+                    b.HasIndex("PlateNumber")
+                        .IsUnique();
 
-                    b.HasIndex("RouteId1");
+                    b.HasIndex("RouteId");
 
                     b.ToTable("Microbuses");
                 });
@@ -256,22 +309,12 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Property<Guid>("RouteId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("RouteId1")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("StationId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("StationId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("RouteId");
-
-                    b.HasIndex("RouteId1");
-
-                    b.HasIndex("StationId1");
 
                     b.HasIndex("StationId", "RouteId")
                         .IsUnique();
@@ -317,6 +360,29 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.ToTable("QueueItems");
                 });
 
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.ReportReason", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("NameAr")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReportReasons");
+                });
+
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Route", b =>
                 {
                     b.Property<Guid>("Id")
@@ -336,11 +402,11 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<Guid>("FromStationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(10,2)");
-
-                    b.Property<Guid>("StationId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ToAr")
                         .IsRequired()
@@ -352,9 +418,15 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<Guid>("ToStationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("StationId");
+                    b.HasIndex("ToStationId");
+
+                    b.HasIndex("FromStationId", "ToStationId")
+                        .IsUnique();
 
                     b.ToTable("Routes");
                 });
@@ -364,6 +436,12 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AddressAr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AddressEn")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CityAr")
                         .IsRequired()
@@ -377,6 +455,15 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<Point>("Location")
+                        .HasColumnType("geography");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<string>("NameAr")
                         .IsRequired()
@@ -405,6 +492,12 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Property<Guid>("DriverId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<double?>("EndLat")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("EndLng")
+                        .HasColumnType("float");
+
                     b.Property<DateTimeOffset?>("EndedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -417,14 +510,24 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Property<Guid>("RouteId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<double?>("StartLat")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("StartLng")
+                        .HasColumnType("float");
+
                     b.Property<DateTimeOffset>("StartedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 4)
+                        .HasColumnType("decimal(18,4)");
 
                     b.HasKey("Id");
 
@@ -433,6 +536,8 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.HasIndex("MicrobusId");
 
                     b.HasIndex("RouteId");
+
+                    b.HasIndex("StationId");
 
                     b.ToTable("Trips");
                 });
@@ -606,6 +711,42 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Navigation("ApplicationUser");
                 });
 
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.DriverReport", b =>
+                {
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Driver", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverId");
+
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Passenger", "Passenger")
+                        .WithMany()
+                        .HasForeignKey("PassengerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
+
+                    b.Navigation("Passenger");
+                });
+
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.DriverReportReason", b =>
+                {
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.DriverReport", "DriverReport")
+                        .WithMany("Reasons")
+                        .HasForeignKey("DriverReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.ReportReason", "ReportReason")
+                        .WithMany("DriverReports")
+                        .HasForeignKey("ReportReasonId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DriverReport");
+
+                    b.Navigation("ReportReason");
+                });
+
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.FavoriteRoute", b =>
                 {
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Passenger", "Passenger")
@@ -634,14 +775,10 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Route", "Route")
-                        .WithMany()
+                        .WithMany("Microbuses")
                         .HasForeignKey("RouteId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Route", null)
-                        .WithMany("Microbuses")
-                        .HasForeignKey("RouteId1");
 
                     b.Navigation("Driver");
 
@@ -671,24 +808,16 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Queue", b =>
                 {
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Route", "Route")
-                        .WithMany()
+                        .WithMany("Queues")
                         .HasForeignKey("RouteId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Route", null)
-                        .WithMany("Queues")
-                        .HasForeignKey("RouteId1");
-
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "Station")
-                        .WithMany()
+                        .WithMany("Queues")
                         .HasForeignKey("StationId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", null)
-                        .WithMany("Queues")
-                        .HasForeignKey("StationId1");
 
                     b.Navigation("Route");
 
@@ -724,13 +853,21 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Route", b =>
                 {
-                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "Station")
-                        .WithMany("Routes")
-                        .HasForeignKey("StationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "FromStation")
+                        .WithMany("FromRoutes")
+                        .HasForeignKey("FromStationId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Station");
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "ToStation")
+                        .WithMany("ToRoutes")
+                        .HasForeignKey("ToStationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FromStation");
+
+                    b.Navigation("ToStation");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Trip", b =>
@@ -748,9 +885,15 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Route", "Route")
-                        .WithMany()
+                        .WithMany("Trips")
                         .HasForeignKey("RouteId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "Station")
+                        .WithMany()
+                        .HasForeignKey("StationId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Driver");
@@ -758,12 +901,19 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Navigation("Microbus");
 
                     b.Navigation("Route");
+
+                    b.Navigation("Station");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Driver", b =>
                 {
                     b.Navigation("Microbus")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.DriverReport", b =>
+                {
+                    b.Navigation("Reasons");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Passenger", b =>
@@ -776,6 +926,11 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Navigation("Items");
                 });
 
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.ReportReason", b =>
+                {
+                    b.Navigation("DriverReports");
+                });
+
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Route", b =>
                 {
                     b.Navigation("FavoriteRoutes");
@@ -783,13 +938,17 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Navigation("Microbuses");
 
                     b.Navigation("Queues");
+
+                    b.Navigation("Trips");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Station", b =>
                 {
+                    b.Navigation("FromRoutes");
+
                     b.Navigation("Queues");
 
-                    b.Navigation("Routes");
+                    b.Navigation("ToRoutes");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", b =>

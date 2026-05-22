@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using SmartMicrobus.API.Hubs;
 using SmartMicrobus.Core.DTO.Queue;
-using SmartMicrobus.Core.ServiceContracts.Common;
+using SmartMicrobus.Core.ServiceContracts.Notification;
 
 namespace SmartMicrobus.API.Realtime
 {

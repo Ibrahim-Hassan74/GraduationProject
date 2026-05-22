@@ -5,12 +5,17 @@ namespace SmartMicrobus.Core.DTO.Account
 {
     public class LoginDTO
     {
-        [Required(ErrorMessage = "Phone number is required.")]
-        [EgyptianPhone]
+        [Required(ErrorMessageResourceName = "RequiredPhoneNumber",
+                  ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
+        [EgyptianPhone(ErrorMessageResourceName = "InvalidPhoneNumber",
+                       ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
         public string PhoneNumber { get; set; } = null!;
 
-        [Required(ErrorMessage = "Password is required.")]
-        [MinLength(6, ErrorMessage = "Password must be at least 6 characters long.")]
+        [Required(ErrorMessageResourceName = "RequiredPassword",
+                  ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
+        [MinLength(6, ErrorMessageResourceName = "MinLengthPassword",
+                      ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
+        [DataType(DataType.Password)]
         public string Password { get; set; } = null!;
 
         public bool RememberMe { get; set; }

@@ -5,6 +5,7 @@ using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using Microsoft.Extensions.Localization;
 
 namespace SmartMicrobus.Core.Services.Common
 {
@@ -12,11 +13,13 @@ namespace SmartMicrobus.Core.Services.Common
     {
         private readonly IFileProvider _fileProvider;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IStringLocalizer<ImageService> _localizer;
 
-        public ImageService(IFileProvider fileProvider, IWebHostEnvironment webHostEnvironment)
+        public ImageService(IFileProvider fileProvider, IWebHostEnvironment webHostEnvironment, IStringLocalizer<ImageService> localizer)
         {
             _fileProvider = fileProvider;
             _webHostEnvironment = webHostEnvironment;
+            _localizer = localizer;
         }
 
         public async Task<List<string>> AddImageAsync(IFormFileCollection files, string src)
@@ -24,11 +27,18 @@ namespace SmartMicrobus.Core.Services.Common
             var saveImageSrc = new List<string>();
             if (files == null || files.Count == 0)
             {
-                throw new ArgumentException("No files provided for image upload.", nameof(files));
+                throw new ArgumentException(
+                    _localizer["File_No_Files_Provided"],
+                    nameof(files)
+                );
             }
+
             if (string.IsNullOrWhiteSpace(src))
             {
-                throw new ArgumentException("Source folder cannot be null or empty.", nameof(src));
+                throw new ArgumentException(
+                    _localizer["File_Source_Folder_Required"],
+                    nameof(src)
+                );
             }
             src = src.Replace(" ", "");
             var path = Path.Combine(_webHostEnvironment.WebRootPath, "Images", src);
@@ -86,7 +96,10 @@ namespace SmartMicrobus.Core.Services.Common
         {
             if (string.IsNullOrWhiteSpace(src))
             {
-                throw new ArgumentException("Source path cannot be null or empty.", nameof(src));
+                throw new ArgumentException(
+                    _localizer["File_Source_Path_Required"],
+                    nameof(src)
+                );
             }
 
             var info = _fileProvider.GetFileInfo(src);
@@ -94,7 +107,10 @@ namespace SmartMicrobus.Core.Services.Common
 
             if (!info.Exists)
             {
-                throw new FileNotFoundException("The specified image does not exist.", src);
+                throw new FileNotFoundException(
+                    _localizer["File_Not_Found"],
+                    src
+                );
             }
 
             var root = info.PhysicalPath;

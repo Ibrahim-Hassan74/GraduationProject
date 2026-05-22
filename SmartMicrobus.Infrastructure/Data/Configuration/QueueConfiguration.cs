@@ -10,12 +10,12 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
             builder.HasKey(q => q.Id);
 
             builder.HasOne(q => q.Station)
-                .WithMany()
+                .WithMany(r => r.Queues)
                 .HasForeignKey(q => q.StationId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(q => q.Route)
-                .WithMany()
+                .WithMany(r => r.Queues)
                 .HasForeignKey(q => q.RouteId)
                 .OnDelete(DeleteBehavior.Restrict);
             builder.HasIndex(q => new { q.StationId, q.RouteId }).IsUnique();

@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Route;
+using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.ServiceContracts.Route;
 
 namespace SmartMicrobus.API.Controllers
 {
-    public class RoutesController(IRoutesService routeService) : CustomControllerBase
+    public class RoutesController(IRoutesService routeService, IOsrmRouteService osrmRouteService) : CustomControllerBase
     {
         private readonly IRoutesService _routeService = routeService;
+        private readonly IOsrmRouteService _osrmRouteService = osrmRouteService;
         [HttpGet]
         public async Task<IActionResult> GetAllRoutes()
         {
@@ -21,9 +22,9 @@ namespace SmartMicrobus.API.Controllers
             return Ok(result?.Data);
         }
         [HttpGet("destinations")]
-        public async Task<IActionResult> GetDestinationsByFrom([FromQuery] string from)
+        public async Task<IActionResult> GetDestinationsByFrom([FromQuery] Guid fromStationId)
         {
-            var response = await _routeService.GetDestinationsByFromAsync(from);
+            var response = await _routeService.GetDestinationsByFromAsync(fromStationId);
             if (!response.Success)
                 return ToActionResult(response);
 
@@ -62,42 +63,6 @@ namespace SmartMicrobus.API.Controllers
 
             var result = response as ApiResponseWithData<List<MicrobusOnTheWayResponse>>;
             return Ok(result?.Data);
-        }
-
-        [HttpPost]
-        [Route("add-route")]
-        [Authorize(Roles = nameof(UserRole.Manager))]
-        public async Task<IActionResult> AddRoute([FromBody] RouteAddRequest routeAddRequest)
-        {
-            var response = await _routeService.AddRouteAsync(routeAddRequest);
-
-            if (!response.Success)
-                return ToActionResult(response);
-
-            return Ok(response.Message);
-        }
-
-        [HttpPatch]
-        [Route("update-route")]
-        [Authorize(Roles = nameof(UserRole.Manager))]
-        public async Task<IActionResult> UpdateRoute([FromBody] RouteUpdateRequest routeUpdateRequest)
-        {
-            var response = await _routeService.UpdateRouteAsync(routeUpdateRequest);
-
-            if (!response.Success)
-                return ToActionResult(response);
-            return Ok(response.Message);
-        }
-
-        [HttpDelete]
-        [Route("delete-route")]
-        [Authorize(Roles = nameof(UserRole.Manager))]
-        public async Task<IActionResult> DeleteRoute([FromQuery] Guid routeId)
-        {
-            var response = await _routeService.DeleteRouteAsync(routeId);
-            if (!response.Success)
-                return ToActionResult(response);
-            return Ok(response.Message);
         }
     }
 }

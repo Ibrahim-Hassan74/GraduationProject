@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
@@ -7,6 +8,8 @@ using SmartMicrobus.Core.DTO.Trip;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
+using SmartMicrobus.Core.Resources;
+using SmartMicrobus.Core.Resources.Services.Drivers;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
 
 namespace SmartMicrobus.Core.Services.Drivers
@@ -17,12 +20,19 @@ namespace SmartMicrobus.Core.Services.Drivers
         private readonly IQueueItemRepository _queueItemRepository;
         private readonly ITripRepository _tripRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public DriverService(IUnitOfWork unitOfWork, IMapper mapper)
+        private readonly IStringLocalizer<DriverService> _localizer;
+        private readonly IDriverRepository _driverRepository;
+        public DriverService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            IStringLocalizer<DriverService> localizer)
         {
             _queueItemRepository = unitOfWork.QueueItemRepository;
             _tripRepository = unitOfWork.TripRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _localizer = localizer;
+            _driverRepository = unitOfWork.DriverRepository;
         }
 
         public async Task<ApiResponse> EndTripAsync(Guid driverId)
@@ -30,18 +40,16 @@ namespace SmartMicrobus.Core.Services.Drivers
             var trip = await _tripRepository.GetActiveTripAsync(driverId);
 
             if (trip == null)
-                return ApiResponseFactory.Failure("No active trip found for the driver", 404);
+                return ApiResponseFactory.Failure(_localizer["NoActiveTripFound"], 404);
 
             trip.Status = TripStatus.Completed;
             trip.EndedAt = DateTimeOffset.UtcNow;
 
             await _tripRepository.UpdateAsync(trip);
-
             await _unitOfWork.CompleteAsync();
 
-            return ApiResponseFactory.Success("Trip ended successfully");
+            return ApiResponseFactory.Success(_localizer["TripEndedSuccessfully"]);
         }
-
         public async Task<ApiResponseWithData<DriverDashboardDTO>> GetDashboardAsync(Guid driverId)
         {
             var activeTrip = await _tripRepository.GetActiveTripAsync(driverId);
@@ -57,14 +65,14 @@ namespace SmartMicrobus.Core.Services.Drivers
                     Trip = tripDto
                 };
 
-                return ApiResponseFactory.Success("Driver is currently on a trip", dashboard);
+                return ApiResponseFactory.Success(_localizer["DriverOnTrip"], dashboard);
             }
 
             var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
 
             if (queueItem == null)
             {
-                return ApiResponseFactory.Success("Driver is currently available",
+                return ApiResponseFactory.Success(_localizer["DriverAvailable"],
                     new DriverDashboardDTO
                     {
                         DriverId = driverId,
@@ -87,37 +95,34 @@ namespace SmartMicrobus.Core.Services.Drivers
                 Queue = queueDto
             };
 
-            return ApiResponseFactory.Success("Driver is currently in the queue", dashboardResult);
+            return ApiResponseFactory.Success(_localizer["DriverInQueue"], dashboardResult);
         }
+
 
         public async Task<ApiResponseWithData<int>> GetDriversBeforeMeAsync(Guid driverId)
         {
-            var queueItem = await _queueItemRepository
-                .GetActiveByDriverIdAsync(driverId);
+            var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
 
             if (queueItem == null)
-                return ApiResponseFactory.NotFound<int>("Driver is not in queue.");
+                return ApiResponseFactory.NotFound<int>(_localizer["DriverNotInQueue"]);
 
             var count = await _queueItemRepository
                 .CountDriversBeforeAsync(queueItem.QueueId, queueItem.Position);
 
-            return ApiResponseFactory.Success("Drivers count retrieved.", count);
+            return ApiResponseFactory.Success(_localizer["DriversCountRetrieved"], count);
         }
-
         public async Task<ApiResponseWithData<IEnumerable<QueueItemResponse>>> GetMyQueueAsync(Guid driverId)
         {
-            var queueItem = await _queueItemRepository
-                .GetActiveByDriverIdAsync(driverId);
+            var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
 
             if (queueItem == null)
-                return ApiResponseFactory.NotFound<IEnumerable<QueueItemResponse>>("Driver is not in any queue.");
+                return ApiResponseFactory.NotFound<IEnumerable<QueueItemResponse>>(_localizer["DriverNotInQueue"]);
 
-            var items = await _queueItemRepository
-                .GetActiveQueueItemsAsync(queueItem.QueueId);
+            var items = await _queueItemRepository.GetActiveQueueItemsAsync(queueItem.QueueId);
 
             var result = _mapper.Map<List<QueueItemResponse>>(items);
 
-            return ApiResponseFactory.Success<IEnumerable<QueueItemResponse>>("Queue retrieved successfully.", result);
+            return ApiResponseFactory.Success<IEnumerable<QueueItemResponse>>(_localizer["QueueRetrievedSuccessfully"], result);
         }
 
         public async Task ResetDailyQueueAsync()
@@ -173,13 +178,12 @@ namespace SmartMicrobus.Core.Services.Drivers
             var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
 
             if (queueItem == null)
-                return ApiResponseFactory.NotFound("Driver not in queue.");
+                return ApiResponseFactory.NotFound(_localizer["DriverNotInQueue"]);
 
-            var first = await _queueItemRepository
-                .GetFirstInQueueAsync(queueItem.QueueId);
+            var first = await _queueItemRepository.GetFirstInQueueAsync(queueItem.QueueId);
 
             if (first?.Id != queueItem.Id)
-                return ApiResponseFactory.Conflict("It is not your turn.");
+                return ApiResponseFactory.Conflict(_localizer["NotYourTurn"]);
 
             var trip = new Trip
             {
@@ -194,10 +198,11 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             queueItem.Status = QueueStatus.InTrip;
             queueItem.LeftAt = DateTimeOffset.UtcNow;
+
             await _queueItemRepository.UpdateAsync(queueItem);
             await _unitOfWork.CompleteAsync();
 
-            return ApiResponseFactory.Success("Trip started successfully.");
+            return ApiResponseFactory.Success(_localizer["TripStartedSuccessfully"]);
         }
 
         public async Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request)
@@ -220,13 +225,22 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             if (tripsHistory == null || !tripsHistory.Trips.Any())
             {
-                return ApiResponseFactory.NotFound("No trips found for the selected period");
+                return ApiResponseFactory.NotFound(_localizer["NoTripsFoundForPeriod"]);
             }
 
             var history = _mapper.Map<List<TripHistoryDTO>>(tripsHistory.Trips);
             var response = new DriverHistoryResponse(tripsHistory.TotalAmount, history, tripsHistory.TotalCount);
 
-            return ApiResponseFactory.Success("Driver trip history retrieved successfully", response);
+            return ApiResponseFactory.Success(_localizer["DriverTripHistoryRetrieved"], response);
+        }
+
+        public async Task<ApiResponse> GetDriverByPlateNumber(string plateNumber)
+        {
+            var driver = await _driverRepository.GetDriverByPlateNumber(plateNumber);
+            if (driver == null)
+                return ApiResponseFactory.NotFound(_localizer["Driver_Not_Found_By_Plate"]);
+            var driverInfo = _mapper.Map<DriverResponse>(driver);
+            return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
         }
     }
 }

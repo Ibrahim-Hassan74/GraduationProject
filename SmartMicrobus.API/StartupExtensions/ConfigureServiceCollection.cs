@@ -7,11 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using SmartMicrobus.API.Filters;
+using SmartMicrobus.API.Identity;
 using SmartMicrobus.API.Realtime;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
-using SmartMicrobus.Core.ServiceContracts.Common;
+using SmartMicrobus.Core.ServiceContracts.Notification;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Core.Services.Common;
 using SmartMicrobus.Infrastructure.Data;
@@ -50,7 +51,7 @@ namespace SmartMicrobus.API.StartupExtensions
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"), x => x.UseNetTopologySuite());
             });
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -83,6 +84,7 @@ namespace SmartMicrobus.API.StartupExtensions
                 options.Password.RequireLowercase = true;
                 options.Password.RequireDigit = true;
             })
+                .AddErrorDescriber<CustomIdentityErrorDescriber>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders()
                 .AddUserStore<UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>>()
@@ -108,6 +110,11 @@ namespace SmartMicrobus.API.StartupExtensions
 
             services.AddScoped<IQueueNotificationService, SignalRQueueNotificationService>();
 
+            services.AddScoped<IDashboardNotificationService, SignalRDashboardNotificationService>();
+
+            services.AddScoped<ILocationBroadcastService, LocationBroadcastService>();
+
+
             services.AddScoped<IQrTokenService, QrTokenService>();
             services.AddSwaggerGen(options =>
             {
@@ -122,6 +129,29 @@ namespace SmartMicrobus.API.StartupExtensions
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
                     Scheme = "Bearer"
+                });
+
+                options.AddSecurityDefinition("Accept-Language", new OpenApiSecurityScheme
+                {
+                    Description = "Specify the request language. Supported values: 'ar' or 'en'.",
+                    Name = "Accept-Language",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey
+                });
+
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Accept-Language"
+                            }
+                        },
+                        new string[] {}
+                    }
                 });
 
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement

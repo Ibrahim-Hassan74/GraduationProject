@@ -23,6 +23,13 @@ namespace SmartMicrobus.Infrastructure.Repository
                     x.DriverId == driverId &&
                     x.Status == TripStatus.Started);
         }
+        public async Task<Trip?> GetTripByDriverIdAsync(Guid driverId)
+        {
+            return await _context.Trips
+                .FirstOrDefaultAsync(x =>
+                    x.DriverId == driverId &&
+                    x.Status == TripStatus.Started);
+        }
         public async Task<TripHistoryResponse> GetDriverTripsAsync(Guid driverId, DriverHistoryRequest request)
         {
             var trips = _context.Trips
@@ -69,5 +76,17 @@ namespace SmartMicrobus.Infrastructure.Repository
                     t.Status == TripStatus.Started);
         }
 
+        public async Task<List<Trip>> GetStationTripsAsync(Guid routeId, Guid stationId)
+        {
+            return await _context.Trips
+                .Include(x => x.Route)
+                .Include(x => x.Microbus)
+                    .ThenInclude(x => x.Driver)
+                .Where(x => x.RouteId == routeId
+                         && x.StationId == stationId
+                         && x.StartedAt.Date < DateTime.Today
+                         && x.Status == TripStatus.Completed)
+                .ToListAsync();
+        }
     }
 }
