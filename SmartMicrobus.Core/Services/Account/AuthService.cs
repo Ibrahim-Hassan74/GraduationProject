@@ -74,8 +74,7 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 return ApiResponseFactory.Failure(
                     _localizer["RegisterDriver_Failed"],
-                    400,
-                    [.. result.Errors.Select(e => e.Description)]
+                    400
                 );
             }
 
