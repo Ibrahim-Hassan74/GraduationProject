@@ -20,6 +20,12 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
                     .WithMany()
                     .HasForeignKey(m => m.RouteId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                builder.HasOne(m => m.Driver)
+                    .WithOne(d => d.Microbus)
+                    .HasForeignKey<Microbus>(m => m.DriverId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
            
         }
     }

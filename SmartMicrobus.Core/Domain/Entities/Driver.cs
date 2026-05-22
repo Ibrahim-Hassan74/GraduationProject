@@ -6,6 +6,6 @@ namespace SmartMicrobus.Core.Domain.Entities
     {
         public string LicenseNumber { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
-        public Microbus Microbus { get; set; } = null!;
+        public virtual Microbus? Microbus { get; set; }
     }
 }
