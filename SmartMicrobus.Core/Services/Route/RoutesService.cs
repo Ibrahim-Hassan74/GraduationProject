@@ -7,6 +7,7 @@ using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.Resources.Services.Route;
 using SmartMicrobus.Core.ServiceContracts.Route;
 using System.Globalization;
+using RouteEntity = SmartMicrobus.Core.Domain.Entities.Route;
 
 namespace SmartMicrobus.Core.Services.Route
 {
@@ -32,6 +33,30 @@ namespace SmartMicrobus.Core.Services.Route
             _localizer = localizer;
         }
 
+        public async Task<ApiResponse> AddRouteAsync(RouteAddRequest routeAddRequest)
+        {
+            if (routeAddRequest is null)
+            {
+                return ApiResponseFactory.Failure("Route data is required.", 404);
+            }
+            await _routeRepository.AddAsync(_mapper.Map<RouteEntity>(routeAddRequest));
+            await _unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Route added successfully.");
+        }
+
+        public async Task<ApiResponse> UpdateRouteAsync(RouteUpdateRequest routeUpdateRequest)
+        {
+            if (routeUpdateRequest is null)
+            {
+                return ApiResponseFactory.Failure("Route data is required.", 404);
+            }
+
+            await _routeRepository.UpdateAsync(_mapper.Map<RouteEntity>(routeUpdateRequest));
+            await _unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Route updated successfully.");
+        }
         public async Task<ApiResponse> GetAllRoutesAsync()
         {
             var isArabic = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar";
@@ -125,6 +150,19 @@ namespace SmartMicrobus.Core.Services.Route
             };
 
             return ApiResponseFactory.Success(_localizer["RouteSummaryRetrieved"], summary);
+        }
+
+        public async Task<ApiResponse> DeleteRouteAsync(Guid routeId)
+        {
+            if (routeId == Guid.Empty)
+            {
+                return ApiResponseFactory.Failure("RouteId is required.", 404);
+            }
+
+            await _routeRepository.DeleteAsync(routeId);
+            await _unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Route deleted successfully.");
         }
     }
 }

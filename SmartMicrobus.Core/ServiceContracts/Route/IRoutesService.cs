@@ -1,4 +1,5 @@
 ﻿using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Route;
 
 namespace SmartMicrobus.Core.ServiceContracts.Route
 {
@@ -13,5 +14,10 @@ namespace SmartMicrobus.Core.ServiceContracts.Route
         Task<ApiResponse> GetMicrobusesAtStationAsync(Guid routeId); // return List<MicrobusAtStationResponse> (includes microbus details)
 
         Task<ApiResponse> GetMicrobusesOnTheWayAsync(Guid routeId); // return List<MicrobusOnTheWayResponse> (includes microbus details and estimated arrival time)
+
+        Task<ApiResponse> AddRouteAsync(RouteAddRequest routeAddRequest); 
+
+        Task<ApiResponse> UpdateRouteAsync(RouteUpdateRequest routeUpdateRequest);
+        Task<ApiResponse> DeleteRouteAsync(Guid routeId);
     }
 }
