@@ -25,6 +25,8 @@ using SmartMicrobus.Core.Services.Stations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using SmartMicrobus.Core.Services.Manager;
+using SmartMicrobus.Core.Services.Report;
 
 namespace SmartMicrobus.Core
 {
@@ -106,6 +108,7 @@ namespace SmartMicrobus.Core
                 });
             });
             services.Configure<WhatsAppSettings>(configuration.GetSection("WhatsAppSettings"));
+            services.Configure<CustomWhatsAppSettings>(configuration.GetSection("CustomWhatsApp"));
             services.AddHttpClient<IWhatsAppService, WhatsAppService>();
             services.AddSingleton<IImageService, ImageService>();
             services.AddScoped<IJwtService, JwtService>();
@@ -122,7 +125,7 @@ namespace SmartMicrobus.Core
             services.AddScoped<IOsrmRouteService, OsrmRouteService>();
             services.AddScoped<IStationsService, StationsService>();
             services.AddScoped<IManagerService, ManagerService>();
-
+            services.AddScoped<ICustomWhatsAppService, CustomWhatsAppService>();
             // Location tracking services
             services.AddScoped<ILocationTrackingService, LocationTrackingService>();       
             return services;

@@ -124,7 +124,9 @@ namespace SmartMicrobus.Core.Resources.Services.Report {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Report submitted successfully..
+        ///   Looks up a localized string similar to Your report has been submitted successfully.
+        ///The report will be reviewed and the appropriate action will be taken as soon as possible.
+        ///Thank you for cooperating with Smart Microbus..
         /// </summary>
         public static string Report_Submitted_Success {
             get {

@@ -169,4 +169,10 @@
 <data name="ReportDeleted" xml:space="preserve">
   <value>تم حذف البلاغ بنجاح</value>
 </data>
+
+	<data name="Report_Submitted_Success" xml:space="preserve">
+  <value>تم إرسال البلاغ بنجاح.
+سيتم مراجعة البلاغ واتخاذ الإجراء المناسب في أقرب وقت.
+شكرًا لتعاونك مع Smart Microbus.</value>
+</data>
 </root>

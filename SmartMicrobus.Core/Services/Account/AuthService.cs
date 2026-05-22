@@ -33,6 +33,7 @@ namespace SmartMicrobus.Core.Services.Account
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
         private readonly IStringLocalizer<AuthService> _localizer;
+        private readonly ICustomWhatsAppService _customWhatsAppService;
         public AuthService(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IJwtService jwtService,
@@ -43,7 +44,8 @@ namespace SmartMicrobus.Core.Services.Account
             RoleManager<ApplicationRole> roleManager,
             IMapper mapper,
             IConfiguration configuration,
-            IStringLocalizer<AuthService> localizer)
+            IStringLocalizer<AuthService> localizer,
+            ICustomWhatsAppService customWhatsAppService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -58,6 +60,7 @@ namespace SmartMicrobus.Core.Services.Account
             _mapper = mapper;
             _configuration = configuration;
             _localizer = localizer;
+            _customWhatsAppService = customWhatsAppService;
         }
 
         // Parse stored token format:
@@ -74,8 +77,8 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 return ApiResponseFactory.Failure(
                     _localizer["RegisterDriver_Failed"],
-                    400,
-                    [.. result.Errors.Select(e => e.Description)]
+                    400
+                    //,                    [.. result.Errors.Select(e => e.Description)]
                 );
             }
 
@@ -88,10 +91,14 @@ namespace SmartMicrobus.Core.Services.Account
             try
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
-                var ok = await _whatsAppService.SendOTPAsync(
-                    user.PhoneNumber!,
-                    otp,
-                    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //var ok = await _whatsAppService.SendOTPAsync(
+                //    user.PhoneNumber!,
+                //    otp,
+                //    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //);
+                
+                var ok = await _customWhatsAppService.SendMessageAsync(
+                    user.PhoneNumber!, _localizer["ConfirmAccount_Message", otp]
                 );
 
                 if (!ok)
@@ -151,10 +158,14 @@ namespace SmartMicrobus.Core.Services.Account
             try
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
-                var ok = await _whatsAppService.SendOTPAsync(
-                    user.PhoneNumber!,
-                    otp,
-                    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //var ok = await _whatsAppService.SendOTPAsync(
+                //    user.PhoneNumber!,
+                //    otp,
+                //    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //);
+
+                var ok = await _customWhatsAppService.SendMessageAsync(
+                    user.PhoneNumber!, _localizer["ConfirmAccount_Message", otp]
                 );
 
                 if (!ok)
@@ -379,10 +390,14 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
 
-                var ok = await _whatsAppService.SendOTPAsync(
-                    user.PhoneNumber!,
-                    otp,
-                    _configuration["WhatsAppTemplates:ResetPassword"]
+                //var ok = await _whatsAppService.SendOTPAsync(
+                //    user.PhoneNumber!,
+                //    otp,
+                //    _configuration["WhatsAppTemplates:ResetPassword"]
+                //);
+
+                var ok = await _customWhatsAppService.SendMessageAsync(
+                    user.PhoneNumber!, _localizer["ResetPassword_Message", otp]
                 );
 
                 if (!ok)
@@ -532,10 +547,14 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
 
-                var result = await _whatsAppService.SendOTPAsync(
-                    user.PhoneNumber!,
-                    otp,
-                    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //var result = await _whatsAppService.SendOTPAsync(
+                //    user.PhoneNumber!,
+                //    otp,
+                //    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //);
+
+                var result = await _customWhatsAppService.SendMessageAsync(
+                    user.PhoneNumber!, _localizer["ConfirmAccount_Message", otp]
                 );
 
                 if (!result)

@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Localization;
@@ -12,6 +13,7 @@ using SmartMicrobus.API.Realtime;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
+using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Notification;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Core.Services.Common;
@@ -196,6 +198,13 @@ namespace SmartMicrobus.API.StartupExtensions
             services.AddEndpointsApiExplorer();
 
             services.AddHttpClient();
+
+            services.AddHangfire(x =>
+                x.UseSqlServerStorage(
+                    configuration.GetConnectionString("DefaultConnection")
+                ));
+
+            services.AddHangfireServer();
 
             return services;
         }

@@ -1,7 +1,8 @@
+using Hangfire;
+using Microsoft.Extensions.Options;
 using SmartMicrobus.API.Hubs;
 using SmartMicrobus.API.Middleware;
 using SmartMicrobus.API.StartupExtensions;
-using Microsoft.Extensions.Options;
 using SmartMicrobus.Core;
 using SmartMicrobus.Infrastructure;
 
@@ -47,6 +48,8 @@ app.UseRequestLocalization(localizationOptions);
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseHangfireDashboard();
 
 app.MapControllers();
 

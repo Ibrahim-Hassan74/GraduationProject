@@ -273,4 +273,16 @@
 <data name="DeleteUserPhoto_Success" xml:space="preserve">
   <value>تم حذف صورة المستخدم بنجاح.</value>
 </data>
+
+
+	<data name="ConfirmAccount_Message" xml:space="preserve">
+  <value>مرحبًا
+تم إنشاء حسابك بنجاح في Smart Microbus.
+كود تأكيد الحساب هو: {0}
+من فضلك لا تشارك هذا الكود مع أي شخص.</value>
+</data>
+
+	<data name="ResetPassword_Message" xml:space="preserve">
+  <value>مرحبًا، {0} هو رمز استرداد كلمة المرور الخاصة بك.</value>
+</data>
 </root>
