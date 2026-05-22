@@ -40,6 +40,10 @@ namespace SmartMicrobus.Core.Mapping
                 opt => opt.MapFrom(src => src.Route.Price));
 
 
+            CreateMap<RouteAddRequest, Route>();
+            CreateMap<RouteUpdateRequest, Route>();
+
+
           
 
         }

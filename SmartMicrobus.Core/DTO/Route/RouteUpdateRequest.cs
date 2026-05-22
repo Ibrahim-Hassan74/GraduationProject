@@ -8,6 +8,7 @@ namespace SmartMicrobus.Core.DTO.Route
 {
     public class RouteUpdateRequest
     {
+        public Guid RouteId { get; set; }
         public string FromAr { get; set; } = null!;
         public string FromEn { get; set; } = null!;
 

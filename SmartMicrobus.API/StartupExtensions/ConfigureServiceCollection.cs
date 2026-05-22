@@ -14,6 +14,7 @@ using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Notification;
 using SmartMicrobus.Core.Services.Account;
+using SmartMicrobus.Core.Services.Common;
 using SmartMicrobus.Infrastructure.Data;
 using System.Globalization;
 
@@ -113,6 +114,8 @@ namespace SmartMicrobus.API.StartupExtensions
 
             services.AddScoped<ILocationBroadcastService, LocationBroadcastService>();
 
+
+            services.AddScoped<IQrTokenService, QrTokenService>();
             services.AddSwaggerGen(options =>
             {
                 options.IncludeXmlComments(

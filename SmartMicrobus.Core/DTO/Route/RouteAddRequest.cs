@@ -18,7 +18,6 @@ namespace SmartMicrobus.Core.DTO.Route
         public decimal Price { get; set; }
 
         public Guid StationId { get; set; }
-        public Station Station { get; set; } = null!;
 
         public double DistanceKm { get; set; }
     }

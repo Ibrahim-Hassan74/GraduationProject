@@ -111,7 +111,6 @@ namespace SmartMicrobus.Infrastructure.Repository
                 throw new ArgumentNullException(nameof(entity), "Entity cannot be null");
             }
             _context.Entry(entity).State = EntityState.Modified;
-            int res = await _context.SaveChangesAsync();
             return entity;
         }
     }

@@ -42,8 +42,6 @@ namespace SmartMicrobus.Infrastructure.Repository
 
             newQueue = await AddAsync(newQueue);
 
-            await _context.SaveChangesAsync();
-
             return newQueue;
         }
     }

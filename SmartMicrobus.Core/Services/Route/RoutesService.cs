@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Localization;
+using RouteEntity = SmartMicrobus.Core.Domain.Entities.Route;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Route;
 using SmartMicrobus.Core.Helper;
@@ -7,7 +8,6 @@ using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.Resources.Services.Route;
 using SmartMicrobus.Core.ServiceContracts.Route;
 using System.Globalization;
-using RouteEntity = SmartMicrobus.Core.Domain.Entities.Route;
 
 namespace SmartMicrobus.Core.Services.Route
 {
@@ -52,7 +52,14 @@ namespace SmartMicrobus.Core.Services.Route
                 return ApiResponseFactory.Failure("Route data is required.", 404);
             }
 
-            await _routeRepository.UpdateAsync(_mapper.Map<RouteEntity>(routeUpdateRequest));
+            var route = await _routeRepository.GetByIdAsync(routeUpdateRequest.RouteId);
+            if (route == null)
+            {
+                return ApiResponseFactory.Failure("Route not found.", 404);
+            }
+
+            _mapper.Map(routeUpdateRequest, route);
+            await _routeRepository.UpdateAsync(route);
             await _unitOfWork.CompleteAsync();
 
             return ApiResponseFactory.Success("Route updated successfully.");
