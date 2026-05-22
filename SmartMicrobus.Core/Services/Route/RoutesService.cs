@@ -44,7 +44,14 @@ namespace SmartMicrobus.Core.Services.Route
                 return ApiResponseFactory.Failure("Route data is required.", 404);
             }
 
-            await _routeRepository.UpdateAsync(_mapper.Map<RouteEntity>(routeUpdateRequest));
+            var route = await _routeRepository.GetByIdAsync(routeUpdateRequest.RouteId);
+            if (route == null)
+            {
+                return ApiResponseFactory.Failure("Route not found.", 404);
+            }
+
+            _mapper.Map(routeUpdateRequest, route);
+            await _routeRepository.UpdateAsync(route);
             await _unitOfWork.CompleteAsync();
 
             return ApiResponseFactory.Success("Route updated successfully.");

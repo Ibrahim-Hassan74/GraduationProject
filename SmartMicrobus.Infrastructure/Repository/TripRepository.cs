@@ -28,7 +28,7 @@ namespace SmartMicrobus.Infrastructure.Repository
             var trips = _context.Trips
                 .Include(x => x.Route)
                 .Include(x => x.Microbus)
-                .Where(x => x.Microbus.DriverId == driverId &&
+                .Where(x => x.DriverId == driverId &&
                             x.StartedAt >= request.FromDate &&
                             x.StartedAt < request.ToDate &&
                             x.Status == TripStatus.Completed);
@@ -55,8 +55,7 @@ namespace SmartMicrobus.Infrastructure.Repository
         public async Task<List<Trip>> GetMicrobusesOnTheWayAsync(Guid routeId)
         {
             return await _context.Trips
-                .Include(t => t.Driver)
-                    .ThenInclude(d => d.Microbus)
+                .Include(t => t.Microbus)
                 .Include(t => t.Driver)
                     .ThenInclude(x => x.ApplicationUser)
                 .Where(t => t.RouteId == routeId && t.Status == TripStatus.Started)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+﻿
+using Microsoft.EntityFrameworkCore.Storage;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Infrastructure.Data;
 
@@ -30,7 +31,7 @@ namespace SmartMicrobus.Infrastructure.Repository
             QueueItemRepository = new QueueItemRepository(_context);
             RouteRepository = new RouteRepository(_context);
             StationRepository = new StationRepository(_context);
-            FavoriteRouteRepository = new FavoriteRouteRepository(_context); 
+            FavoriteRouteRepository = new FavoriteRouteRepository(_context);
         }
 
         public async Task<int> CompleteAsync()

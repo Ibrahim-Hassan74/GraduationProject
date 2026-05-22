@@ -14,7 +14,6 @@ namespace SmartMicrobus.Infrastructure
         {
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-
             services.AddSingleton<IConnectionMultiplexer>(provider =>
             {
                 var configurationOptions = ConfigurationOptions.Parse(configuration.GetConnectionString("RedisConnection")!);
