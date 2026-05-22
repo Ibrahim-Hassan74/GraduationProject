@@ -7,6 +7,8 @@ namespace SmartMicrobus.Core.ServiceContracts.Route
     {
         Task<ApiResponse> GetAllRoutesAsync(); // return List<RouteLocationResponse>
 
+        Task<ApiResponse> GetPaginatedRoutesAsync(int pageNumber, int pageSize);
+
         Task<ApiResponse> GetDestinationsByFromAsync(Guid fromStationId); // return List<DestinationResponse> of destinations
 
         Task<ApiResponse> GetRouteSearchResultAsync(Guid routeId); // return RouteSummaryResponse

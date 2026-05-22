@@ -42,6 +42,7 @@ namespace SmartMicrobus.Core.Mapping
 
             CreateMap<RouteAddRequest, Route>();
             CreateMap<RouteUpdateRequest, Route>();
+            CreateMap<Route, RouteResponse>();
 
 
           

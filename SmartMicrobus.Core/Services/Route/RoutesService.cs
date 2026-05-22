@@ -77,6 +77,22 @@ namespace SmartMicrobus.Core.Services.Route
             return ApiResponseFactory.Success(_localizer["RoutesRetrievedSuccessfully"], cities);
         }
 
+        public async Task<ApiResponse> GetPaginatedRoutesAsync(int pageNumber, int pageSize)
+        {
+            var routes = await _routeRepository.GetAllAsync();
+            var totalCount = routes.Count();
+
+            var paginatedRoutes = routes
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var mappedRoutes = _mapper.Map<List<RouteResponse>>(paginatedRoutes);
+            var result = new Pagination<List<RouteResponse>>(pageNumber, pageSize, totalCount, mappedRoutes);
+
+            return ApiResponseFactory.Success("Paginated routes retrieved successfully", result);
+        }
+
         //public async Task<ApiResponse> GetDestinationsByFromAsync(string from)
         //{
         //    if (string.IsNullOrWhiteSpace(from))
