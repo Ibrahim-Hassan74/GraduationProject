@@ -59,20 +59,21 @@ namespace SmartMicrobus.Core.Services.Account
         // Parse stored token format:
         // otp|expiryUnix[|sentUnix[|resendCount]]
 
-        public async Task<ApiResponse> RegisterDriverAsync(RegisterDriverDTO dto)
+        public async Task<ApiResponse> RegisterDriverAsync(RegisterDriverDTO
+            dto)
         {
-            var user = new ApplicationUser
-            {
-                UserName = dto.PhoneNumber,
-                PhoneNumber = dto.PhoneNumber,
-                DisplayName = dto.DisplayName,
-            };
+            if (dto is null)
+                return ApiResponseFactory.BadRequest("Driver registration data is required.");
 
-            var result = await _userManager.CreateAsync(user, dto.Password);
-            if (!result.Succeeded)
+            var user = await _userManager.Users.SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+            if (user == null)
             {
-                return ApiResponseFactory.Failure("Failed to register driver.", 400, [.. result.Errors.Select(e => e.Description)]);
+                return ApiResponseFactory.BadRequest("driver should be added in the station");
             }
+
+            var PasswordResult = await _userManager.AddPasswordAsync(user, dto.Password);
+            if (!PasswordResult.Succeeded)
+                return ApiResponseFactory.BadRequest(PasswordResult.Errors.First().Description);
 
             await EnsureRoleExistsAndAssignAsync(user, UserRole.Driver.ToString());
 
@@ -98,14 +99,6 @@ namespace SmartMicrobus.Core.Services.Account
                 return ApiResponseFactory.InternalServerError("Failed to send OTP. Please try again later.");
             }
 
-            var driver = new Driver
-            {
-                Id = user.Id,
-                LicenseNumber = dto.LicenseNumber
-            };
-
-            await _driverRepository.AddAsync(driver);
-            await _unitOfWork.CompleteAsync();
             return ApiResponseFactory.Success("Driver registered successfully.");
         }
 
