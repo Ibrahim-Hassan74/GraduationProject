@@ -21,6 +21,13 @@ namespace SmartMicrobus.API.Controllers
             var result = response as ApiResponseWithData<List<RouteLocationResponse>>;
             return Ok(result?.Data);
         }
+
+        [HttpGet("paginated")]
+        public async Task<IActionResult> GetPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var response = await _routeService.GetPaginatedRoutesAsync(pageNumber, pageSize);
+            return ToActionResult(response);
+        }
         [HttpGet("destinations")]
         public async Task<IActionResult> GetDestinationsByFrom([FromQuery] Guid fromStationId)
         {
@@ -66,7 +73,7 @@ namespace SmartMicrobus.API.Controllers
         }
                 [HttpPost]
         [Route("add-route")]
-        [Authorize(nameof(UserRole.Manager))]
+        [Authorize(Roles = nameof(UserRole.Manager))]
         public async Task<IActionResult> AddRoute([FromBody] RouteAddRequest routeAddRequest)
         {
             var response = await _routeService.AddRouteAsync(routeAddRequest);
@@ -79,7 +86,7 @@ namespace SmartMicrobus.API.Controllers
 
         [HttpPatch]
         [Route("update-route")]
-        [Authorize(nameof(UserRole.Manager))]
+        [Authorize(Roles = nameof(UserRole.Manager))]
         public async Task<IActionResult> UpdateRoute([FromBody] RouteUpdateRequest routeUpdateRequest)
         {
             var response = await _routeService.UpdateRouteAsync(routeUpdateRequest);
@@ -91,6 +98,7 @@ namespace SmartMicrobus.API.Controllers
 
         [HttpDelete]
         [Route("delete-route")]
+        [Authorize(Roles = nameof(UserRole.Manager))]
         public async Task<IActionResult> DeleteRoute([FromQuery] Guid routeId)
         {
             var response = await _routeService.DeleteRouteAsync(routeId);

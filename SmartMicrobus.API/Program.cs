@@ -1,5 +1,6 @@
 using Hangfire;
 using Microsoft.Extensions.Options;
+using SmartMicrobus.API.Filters;
 using SmartMicrobus.API.Hubs;
 using SmartMicrobus.API.Middleware;
 using SmartMicrobus.API.StartupExtensions;
@@ -41,6 +42,8 @@ app.UseStaticFiles();
 
 app.UseCors("AllowAllOrigins");
 
+app.UseRateLimiter();
+
 app.UseHttpsRedirection();
 
 app.UseRequestLocalization(localizationOptions);
@@ -49,7 +52,11 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
-app.UseHangfireDashboard();
+app.UseHangfireDashboard("/dashboard", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter(app.Services, app.Environment) },
+    AppPath = null
+});
 
 app.MapControllers();
 

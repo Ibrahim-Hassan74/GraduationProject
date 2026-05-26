@@ -232,6 +232,15 @@ namespace SmartMicrobus.API.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Too Many Requests. Please try again later..
+        /// </summary>
+        public static string TooManyRequests {
+            get {
+                return ResourceManager.GetString("TooManyRequests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unauthorized access..
         /// </summary>
         public static string Unauthorized {

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Hangfire;
 using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
@@ -7,6 +8,7 @@ using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Common;
+using SmartMicrobus.Core.ServiceContracts.Driver;
 using SmartMicrobus.Core.ServiceContracts.Notification;
 using SmartMicrobus.Core.ServiceContracts.Staff;
 using SmartMicrobus.Core.Services.Common;
@@ -27,13 +29,15 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly IRouteRepository _routeRepository;
         private readonly IStringLocalizer<StaffService> _localizer;
         private readonly DriverDashboardRealtimeService _dashboardRealtimeService;
+        private readonly IBackgroundJobClient _backgroundJobClient;
 
         public StaffService(IUnitOfWork unitOfWork,
             IQueueNotificationService queueNotificationService,
             IMapper mapper,
             IQrTokenService qrTokenService,
             IStringLocalizer<StaffService> localizer,
-            DriverDashboardRealtimeService dashboardRealtimeService)
+            DriverDashboardRealtimeService dashboardRealtimeService,
+            IBackgroundJobClient backgroundJobClient)
         {
             _unitOfWork = unitOfWork;
             _microbusRepository = _unitOfWork.MicrobusRepository;
@@ -46,6 +50,7 @@ namespace SmartMicrobus.Core.Services.Staff
             _routeRepository = _unitOfWork.RouteRepository;
             _localizer = localizer;
             _dashboardRealtimeService = dashboardRealtimeService;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         public async Task<ApiResponse> CheckInAtGateAsync(string qrCode, Guid stationId)
@@ -217,6 +222,21 @@ namespace SmartMicrobus.Core.Services.Staff
             await _queueItemRepository.UpdateAsync(queueItem);
 
             await _unitOfWork.CompleteAsync();
+
+            const double MinBusSpeedKmPerHour = 30;
+
+            var estimatedDuration = TimeSpan.FromHours(route.DistanceKm / MinBusSpeedKmPerHour);
+
+            Console.WriteLine(
+    $"Distance: {route.DistanceKm}");
+
+            Console.WriteLine(
+                $"Hours: {route.DistanceKm / MinBusSpeedKmPerHour}");
+
+            Console.WriteLine(
+                $"Duration: {estimatedDuration}");
+
+            _backgroundJobClient.Schedule<ITripService>(x => x.EndTripAsync(payload.DriverId), estimatedDuration);
 
             await _dashboardRealtimeService.PushDashboard(payload.DriverId);
 

@@ -148,6 +148,11 @@
               Looks up a localized string similar to Station not found..
             </summary>
         </member>
+        <member name="P:SmartMicrobus.API.Resources.SharedResource.TooManyRequests">
+            <summary>
+              Looks up a localized string similar to Too Many Requests. Please try again later..
+            </summary>
+        </member>
         <member name="P:SmartMicrobus.API.Resources.SharedResource.Unauthorized">
             <summary>
               Looks up a localized string similar to Unauthorized access..

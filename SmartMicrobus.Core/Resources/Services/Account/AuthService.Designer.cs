@@ -98,8 +98,8 @@ namespace SmartMicrobus.Core.Resources.Services.Account {
         
         /// <summary>
         ///   Looks up a localized string similar to Hello,
-        ///Your account has been successfully created in Smart Microbus.
-        ///Your account confirmation code is: {0}
+        ///Your account has been successfully created in Wasla.
+        ///Your account confirmation code is: *{0}*
         ///Please do not share this code with anyone..
         /// </summary>
         public static string ConfirmAccount_Message {
@@ -397,7 +397,7 @@ namespace SmartMicrobus.Core.Resources.Services.Account {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello, {0} is your password recovery code..
+        ///   Looks up a localized string similar to Hello, *{0}* is your password recovery code..
         /// </summary>
         public static string ResetPassword_Message {
             get {

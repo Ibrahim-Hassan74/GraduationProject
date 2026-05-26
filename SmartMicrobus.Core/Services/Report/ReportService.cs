@@ -89,7 +89,7 @@ namespace SmartMicrobus.Core.Services.Report
                 BackgroundJob.Enqueue(() =>
                     _customWhatsAppService.SendMessageAsync(
                         user.PhoneNumber!,
-                        _localizer["Report_Submitted_Success"]
+                        _localizer["Report_Submitted_Message"]
                     )
                 );
             }

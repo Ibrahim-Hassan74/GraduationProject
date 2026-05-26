@@ -277,12 +277,12 @@
 
 	<data name="ConfirmAccount_Message" xml:space="preserve">
   <value>مرحبًا
-تم إنشاء حسابك بنجاح في Smart Microbus.
-كود تأكيد الحساب هو: {0}
+تم إنشاء حسابك بنجاح في وصلة.
+كود تأكيد الحساب هو: *{0}*
 من فضلك لا تشارك هذا الكود مع أي شخص.</value>
 </data>
 
 	<data name="ResetPassword_Message" xml:space="preserve">
-  <value>مرحبًا، {0} هو رمز استرداد كلمة المرور الخاصة بك.</value>
+  <value>مرحبًا، *{0}* هو رمز استرداد كلمة المرور الخاصة بك.</value>
 </data>
 </root>

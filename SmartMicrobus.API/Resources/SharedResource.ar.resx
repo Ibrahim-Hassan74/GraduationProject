@@ -170,4 +170,7 @@
 	<data name="Forbidden" xml:space="preserve">
     <value>تم رفض الوصول.</value>
   </data>
+	<data name="TooManyRequests" xml:space="preserve">
+    <value>طلبات كثيرة جداً. يرجى المحاولة مرة أخرى لاحقاً.</value>
+  </data>
 </root>
