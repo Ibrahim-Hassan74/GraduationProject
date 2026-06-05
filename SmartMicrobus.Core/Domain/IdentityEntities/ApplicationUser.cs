@@ -11,6 +11,7 @@ namespace SmartMicrobus.Core.Domain.IdentityEntities
         public string? RefreshToken { get; set; }
         public DateTimeOffset RefreshTokenExpirationDateTime { get; set; }
         public virtual Photo? Photo { get; set; }
-        public UserRole Role { get; set; }
+        public virtual Staff? Staff { get; set; }
+        //public UserRole Role { get; set; }
     }
 }

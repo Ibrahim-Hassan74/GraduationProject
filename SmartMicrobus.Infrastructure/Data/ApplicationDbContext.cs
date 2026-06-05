@@ -30,6 +30,7 @@ namespace SmartMicrobus.Infrastructure.Data
         public virtual DbSet<Queue> Queues { get; set; }
 
         public virtual DbSet<QueueItem> QueueItems { get; set; }
+        public virtual DbSet<Staff> Staff { get; set; }
 
         public virtual DbSet<Trip> Trips { get; set; }
         public virtual DbSet<FavoriteRoute> FavoriteRoute { get; set; }

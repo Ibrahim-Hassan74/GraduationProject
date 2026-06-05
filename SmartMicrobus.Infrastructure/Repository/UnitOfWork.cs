@@ -20,6 +20,7 @@ namespace SmartMicrobus.Infrastructure.Repository
         public IReportRepository ReportRepository { get; }
         public IReportReasonRepository ReportReasonRepository { get; }
         public IFavoriteRouteRepository FavoriteRouteRepository { get; }
+        public IStaffRepository StaffRepository { get; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -36,6 +37,7 @@ namespace SmartMicrobus.Infrastructure.Repository
             ReportRepository = new ReportRepository(_context);
             ReportReasonRepository = new ReportReasonRepository(_context);
             FavoriteRouteRepository = new FavoriteRouteRepository(_context); 
+            StaffRepository = new StaffRepository(_context);
         }
 
         public async Task<int> CompleteAsync()

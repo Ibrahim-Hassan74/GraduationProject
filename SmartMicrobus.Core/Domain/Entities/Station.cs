@@ -20,5 +20,6 @@ namespace SmartMicrobus.Core.Domain.Entities
         public ICollection<Route> FromRoutes { get; set; } = new List<Route>();
         public ICollection<Route> ToRoutes { get; set; } = new List<Route>();
         public ICollection<Queue> Queues { get; set; } = new List<Queue>();
+        public ICollection<Staff> StaffMembers { get; set; } = new List<Staff>();
     }
 }

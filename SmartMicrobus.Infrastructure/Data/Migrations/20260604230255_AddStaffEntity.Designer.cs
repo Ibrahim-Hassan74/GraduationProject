@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using SmartMicrobus.Infrastructure.Data;
@@ -12,9 +13,11 @@ using SmartMicrobus.Infrastructure.Data;
 namespace SmartMicrobus.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260604230255_AddStaffEntity")]
+    partial class AddStaffEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,7 +141,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Drivers", (string)null);
+                    b.ToTable("Drivers");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.DriverReport", b =>
@@ -174,7 +177,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.HasIndex("PassengerId");
 
-                    b.ToTable("DriverReports", (string)null);
+                    b.ToTable("DriverReports");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.DriverReportReason", b =>
@@ -192,7 +195,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.HasIndex("ReportReasonId");
 
-                    b.ToTable("DriverReportReasons", (string)null);
+                    b.ToTable("DriverReportReasons");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.FavoriteRoute", b =>
@@ -217,7 +220,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.HasIndex("PassengerId", "RouteId")
                         .IsUnique();
 
-                    b.ToTable("FavoriteRoute", (string)null);
+                    b.ToTable("FavoriteRoute");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Microbus", b =>
@@ -265,7 +268,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.HasIndex("RouteId");
 
-                    b.ToTable("Microbuses", (string)null);
+                    b.ToTable("Microbuses");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Passenger", b =>
@@ -275,7 +278,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Passangers", (string)null);
+                    b.ToTable("Passangers");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Photo", b =>
@@ -297,7 +300,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
-                    b.ToTable("Photos", (string)null);
+                    b.ToTable("Photos");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Queue", b =>
@@ -319,7 +322,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.HasIndex("StationId", "RouteId")
                         .IsUnique();
 
-                    b.ToTable("Queues", (string)null);
+                    b.ToTable("Queues");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.QueueItem", b =>
@@ -357,7 +360,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.HasIndex("QueueId");
 
-                    b.ToTable("QueueItems", (string)null);
+                    b.ToTable("QueueItems");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.ReportReason", b =>
@@ -380,7 +383,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ReportReasons", (string)null);
+                    b.ToTable("ReportReasons");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Route", b =>
@@ -428,7 +431,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.HasIndex("FromStationId", "ToStationId")
                         .IsUnique();
 
-                    b.ToTable("Routes", (string)null);
+                    b.ToTable("Routes");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Staff", b =>
@@ -453,7 +456,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Staff", (string)null);
+                    b.ToTable("Staff");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Station", b =>
@@ -502,7 +505,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Stations", (string)null);
+                    b.ToTable("Stations");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Trip", b =>
@@ -564,7 +567,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.HasIndex("StationId");
 
-                    b.ToTable("Trips", (string)null);
+                    b.ToTable("Trips");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationRole", b =>
