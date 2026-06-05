@@ -4,6 +4,8 @@ using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -18,12 +20,14 @@ namespace SmartMicrobus.Core.Services.Common
         private readonly IConfiguration _configuration;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IStringLocalizer<JwtService> _localizer;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public JwtService(IConfiguration configuration, UserManager<ApplicationUser> userManager, IStringLocalizer<JwtService> localizer)
+        public JwtService(IConfiguration configuration, UserManager<ApplicationUser> userManager, IStringLocalizer<JwtService> localizer, IUnitOfWork unitOfWork)
         {
             _configuration = configuration;
             _userManager = userManager;
             _localizer = localizer;
+            _unitOfWork = unitOfWork;
         }
 
         /// <inheritdoc/>
@@ -46,6 +50,12 @@ namespace SmartMicrobus.Core.Services.Common
                  new Claim(ClaimTypes.MobilePhone, user.PhoneNumber), //Email of the user
                  new Claim("remember_me", rememberMe.ToString().ToLower())
              };
+            var staff = await _unitOfWork.StaffRepository.GetStaffByUserId(user.Id);
+
+            if (staff != null)
+            {
+                claims.Add(new Claim(CustomClaims.StationId, staff.StationId.ToString()));
+            }
 
             var audienceClaims = _configuration.GetSection("Jwt:Audiences").Get<string[]>();
             if (audienceClaims is not null)
