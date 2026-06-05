@@ -284,4 +284,9 @@ Please do not share this code with anyone.</value>
 	<data name="ResetPassword_Message" xml:space="preserve">
   <value>Hello, *{0}* is your password recovery code.</value>
 </data>
+
+	<data name="PhoneNumberAlreadyExists" xml:space="preserve">
+  <value>An account with this phone number already exists.</value>
+</data>
+	
 </root>

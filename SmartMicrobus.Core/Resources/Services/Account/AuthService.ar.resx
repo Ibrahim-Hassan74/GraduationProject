@@ -285,4 +285,7 @@
 	<data name="ResetPassword_Message" xml:space="preserve">
   <value>مرحبًا، *{0}* هو رمز استرداد كلمة المرور الخاصة بك.</value>
 </data>
+	<data name="PhoneNumberAlreadyExists" xml:space="preserve">
+  <value>يوجد حساب مسجل بالفعل بهذا الرقم.</value>
+</data>
 </root>

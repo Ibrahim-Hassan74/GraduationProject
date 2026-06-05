@@ -262,6 +262,15 @@ namespace SmartMicrobus.Core.Resources.Services.Account {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An account with this phone number already exists..
+        /// </summary>
+        public static string PhoneNumberAlreadyExists {
+            get {
+                return ResourceManager.GetString("PhoneNumberAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Access token is invalid..
         /// </summary>
         public static string RefreshToken_Access_Invalid {

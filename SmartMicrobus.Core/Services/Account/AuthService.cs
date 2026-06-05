@@ -95,7 +95,7 @@ namespace SmartMicrobus.Core.Services.Account
                 //    otp,
                 //    _configuration["WhatsAppTemplates:ConfirmAccount"]
                 //);
-                
+
                 var ok = await _customWhatsAppService.SendMessageAsync(
                     user.PhoneNumber!, _localizer["ConfirmAccount_Message", otp]
                 );
@@ -135,6 +135,15 @@ namespace SmartMicrobus.Core.Services.Account
 
         public async Task<ApiResponse> RegisterPassengerAsync(RegisterPassengerDTO dto)
         {
+            var existingUser = await _userManager.Users
+                    .SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+
+            if (existingUser != null)
+            {
+                return ApiResponseFactory.BadRequest(
+                    _localizer["PhoneNumberAlreadyExists"]
+                );
+            }
             var user = new ApplicationUser
             {
                 UserName = dto.PhoneNumber,
@@ -574,7 +583,7 @@ namespace SmartMicrobus.Core.Services.Account
                 }
 
                 return ApiResponseFactory.InternalServerError(
-                    _localizer["OTP_Send_Failed"] 
+                    _localizer["OTP_Send_Failed"]
                 );
             }
 
@@ -697,18 +706,30 @@ namespace SmartMicrobus.Core.Services.Account
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
+            {
                 return ApiResponseFactory.NotFound(
                     _localizer["RefreshToken_User_Not_Found"]
                 );
+            }
 
-            var deleted = await _userManager.DeleteAsync(user);
+            var originalPhone = user.PhoneNumber;
 
-            if (!deleted.Succeeded)
+            user.IsDeleted = true;
+            user.PhoneNumber = $"DELETED_{user.Id}_{originalPhone}";
+            user.UserName = user.PhoneNumber;
+            user.PhoneNumberConfirmed = false;
+            user.EmailConfirmed = false;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
                 return ApiResponseFactory.Failure(
                     _localizer["DeleteAccount_Failed"],
                     400,
-                    deleted.Errors.Select(e => e.Description).ToArray()
+                    result.Errors.Select(e => e.Description).ToArray()
                 );
+            }
 
             return ApiResponseFactory.Success(
                 _localizer["DeleteAccount_Success"]
