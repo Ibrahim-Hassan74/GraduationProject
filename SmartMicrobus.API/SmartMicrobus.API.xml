@@ -37,6 +37,23 @@
             <param name="builder"></param>
             <returns></returns>
         </member>
+        <member name="M:SmartMicrobus.API.Realtime.SignalRRouteTrackingNotificationService.NotifyRouteUpdated(System.Guid)">
+            <summary>
+            Called on check-in/check-out events — re-queries counts and includes
+            the best known ETA from the in-memory tracker.
+            </summary>
+        </member>
+        <member name="M:SmartMicrobus.API.Realtime.SignalRRouteTrackingNotificationService.UpdateDriverEtaAsync(System.Guid,System.Guid,System.Int32)">
+            <summary>
+            Called from LocationTrackingService on every GPS update.
+            Tracks the ETA per driver and broadcasts the minimum across all active drivers.
+            </summary>
+        </member>
+        <member name="M:SmartMicrobus.API.Realtime.SignalRRouteTrackingNotificationService.RemoveDriverEta(System.Guid,System.Guid)">
+            <summary>
+            Removes a driver's ETA entry when their trip ends.
+            </summary>
+        </member>
         <member name="T:SmartMicrobus.API.Resources.SharedResource">
             <summary>
               A strongly-typed resource class, for looking up localized strings, etc.
