@@ -17,21 +17,26 @@ namespace SmartMicrobus.Core.Services.Drivers
         private readonly ITripRepository _tripRepository;
         private readonly IOsrmRouteService _osrmRouteService;
         private readonly ILocationBroadcastService _locationBroadcastService;
+        private readonly IRouteTrackingNotificationService _routeTrackingNotificationService;
         private readonly IStringLocalizer<LocationTrackingService> _localizer;
 
         private const string CacheKeyPrefix = "driver_location_";
+        private const string ReturnTripCachePrefix = "return_trip_duration_";
+        private const int TurnaroundMinutes = 5;
 
         public LocationTrackingService(
             IMemoryCache cache,
             IUnitOfWork unitOfWork,
             IOsrmRouteService osrmRouteService,
             ILocationBroadcastService locationBroadcastService,
+            IRouteTrackingNotificationService routeTrackingNotificationService,
             IStringLocalizer<LocationTrackingService> localizer)
         {
             _cache = cache;
             _tripRepository = unitOfWork.TripRepository;
             _osrmRouteService = osrmRouteService;
             _locationBroadcastService = locationBroadcastService;
+            _routeTrackingNotificationService = routeTrackingNotificationService;
             _localizer = localizer;
         }
 
@@ -98,6 +103,11 @@ namespace SmartMicrobus.Core.Services.Drivers
           
             await _locationBroadcastService.BroadcastDriverLocationAsync(driverId, routeDTO);
 
+            // --- Real-time route ETA update (piggybacked on existing OSRM result) ---
+            var returnDuration = await GetOrComputeReturnTripDurationAsync(trip);
+            var totalEta = (int)Math.Ceiling(route.Duration + returnDuration + TurnaroundMinutes);
+            await _routeTrackingNotificationService.UpdateDriverEtaAsync(trip.RouteId, driverId, totalEta);
+
             return ApiResponseFactory.Success(_localizer["LocationUpdated"]);
         }
 
@@ -140,6 +150,51 @@ namespace SmartMicrobus.Core.Services.Drivers
             };
 
             return ApiResponseFactory.Success(_localizer["LocationRetrieved"], routeDTO);
+        }
+
+        /// <summary>
+        /// Gets the cached return trip duration (ToStation → FromStation) for a route,
+        /// or computes it via OSRM on first access and caches for 4 hours.
+        /// </summary>
+        private async Task<double> GetOrComputeReturnTripDurationAsync(Domain.Entities.Trip trip)
+        {
+            var cacheKey = ReturnTripCachePrefix + trip.RouteId;
+
+            if (_cache.TryGetValue(cacheKey, out double cachedDuration))
+                return cachedDuration;
+
+            // Compute return trip: destination (EndLat/EndLng) → departure station (FromStation)
+            var fromStation = trip.Route?.FromStation;
+
+            double fromLat, fromLng;
+            if (fromStation != null)
+            {
+                fromLat = fromStation.Latitude;
+                fromLng = fromStation.Longitude;
+            }
+            else
+            {
+                // Fallback: use trip start location as approximation
+                fromLat = trip.StartLat ?? 0.0;
+                fromLng = trip.StartLng ?? 0.0;
+            }
+
+            var returnRoute = await _osrmRouteService.GetRouteAsync(new RouteRequest
+            {
+                StartLat = trip.EndLat ?? 0.0,
+                StartLng = trip.EndLng ?? 0.0,
+                EndLat = fromLat,
+                EndLng = fromLng
+            });
+
+            var returnDuration = returnRoute.Duration;
+
+            _cache.Set(cacheKey, returnDuration, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(4)
+            });
+
+            return returnDuration;
         }
 
      

@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
@@ -11,6 +11,7 @@ using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.Resources;
 using SmartMicrobus.Core.Resources.Services.Drivers;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
+using SmartMicrobus.Core.ServiceContracts.Route;
 
 namespace SmartMicrobus.Core.Services.Drivers
 {
@@ -22,10 +23,12 @@ namespace SmartMicrobus.Core.Services.Drivers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStringLocalizer<DriverService> _localizer;
         private readonly IDriverRepository _driverRepository;
+        private readonly IRouteTrackingNotificationService _routeTrackingNotificationService;
         public DriverService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IStringLocalizer<DriverService> localizer)
+            IStringLocalizer<DriverService> localizer,
+            IRouteTrackingNotificationService routeTrackingNotificationService)
         {
             _queueItemRepository = unitOfWork.QueueItemRepository;
             _tripRepository = unitOfWork.TripRepository;
@@ -33,6 +36,7 @@ namespace SmartMicrobus.Core.Services.Drivers
             _unitOfWork = unitOfWork;
             _localizer = localizer;
             _driverRepository = unitOfWork.DriverRepository;
+            _routeTrackingNotificationService = routeTrackingNotificationService;
         }
 
         public async Task<ApiResponse> EndTripAsync(Guid driverId)
@@ -47,6 +51,10 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             await _tripRepository.UpdateAsync(trip);
             await _unitOfWork.CompleteAsync();
+
+            // Clean up driver's ETA and notify route subscribers
+            _routeTrackingNotificationService.RemoveDriverEta(trip.RouteId, driverId);
+            await _routeTrackingNotificationService.NotifyRouteUpdated(trip.RouteId);
 
             return ApiResponseFactory.Success(_localizer["TripEndedSuccessfully"]);
         }

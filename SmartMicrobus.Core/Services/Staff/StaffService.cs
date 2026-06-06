@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Hangfire;
 using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
@@ -10,6 +10,7 @@ using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Driver;
 using SmartMicrobus.Core.ServiceContracts.Notification;
+using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.ServiceContracts.Staff;
 using SmartMicrobus.Core.Services.Common;
 using MyRoute = SmartMicrobus.Core.Domain.Entities.Route;
@@ -30,6 +31,7 @@ namespace SmartMicrobus.Core.Services.Staff
         private readonly IStringLocalizer<StaffService> _localizer;
         private readonly DriverDashboardRealtimeService _dashboardRealtimeService;
         private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly IRouteTrackingNotificationService _routeTrackingNotificationService;
 
         public StaffService(IUnitOfWork unitOfWork,
             IQueueNotificationService queueNotificationService,
@@ -37,7 +39,8 @@ namespace SmartMicrobus.Core.Services.Staff
             IQrTokenService qrTokenService,
             IStringLocalizer<StaffService> localizer,
             DriverDashboardRealtimeService dashboardRealtimeService,
-            IBackgroundJobClient backgroundJobClient)
+            IBackgroundJobClient backgroundJobClient,
+            IRouteTrackingNotificationService routeTrackingNotificationService)
         {
             _unitOfWork = unitOfWork;
             _microbusRepository = _unitOfWork.MicrobusRepository;
@@ -51,6 +54,7 @@ namespace SmartMicrobus.Core.Services.Staff
             _localizer = localizer;
             _dashboardRealtimeService = dashboardRealtimeService;
             _backgroundJobClient = backgroundJobClient;
+            _routeTrackingNotificationService = routeTrackingNotificationService;
         }
 
         public async Task<ApiResponse> CheckInAtGateAsync(string qrCode, Guid stationId)
@@ -106,6 +110,9 @@ namespace SmartMicrobus.Core.Services.Staff
                 activeTrip.EndedAt = DateTimeOffset.UtcNow;
 
                 await _tripRepository.UpdateAsync(activeTrip);
+
+                // Clean up driver's ETA from the route they just finished
+                _routeTrackingNotificationService.RemoveDriverEta(activeTrip.RouteId, payload.DriverId);
             }
             #endregion
 
@@ -132,6 +139,9 @@ namespace SmartMicrobus.Core.Services.Staff
 
             // 10. Notify
             await _queueNotificationService.NotifyDriverAdded(queue.Id, queueResponse);
+
+            // 11. Notify route subscribers (counts changed — bus arrived at station)
+            await _routeTrackingNotificationService.NotifyRouteUpdated(route.Id);
 
             return ApiResponseFactory.Success(_localizer["Queue_Scan_Success"]);
         }
@@ -227,20 +237,14 @@ namespace SmartMicrobus.Core.Services.Staff
 
             var estimatedDuration = TimeSpan.FromHours(route.DistanceKm / MinBusSpeedKmPerHour);
 
-            Console.WriteLine(
-    $"Distance: {route.DistanceKm}");
-
-            Console.WriteLine(
-                $"Hours: {route.DistanceKm / MinBusSpeedKmPerHour}");
-
-            Console.WriteLine(
-                $"Duration: {estimatedDuration}");
-
             _backgroundJobClient.Schedule<ITripService>(x => x.EndTripAsync(payload.DriverId), estimatedDuration);
 
             await _dashboardRealtimeService.PushDashboard(payload.DriverId);
 
             await _queueNotificationService.NotifyDriverRemoved(queueItem.QueueId, payload.DriverId);
+
+            // Notify route subscribers (counts changed — bus left station, trip started)
+            await _routeTrackingNotificationService.NotifyRouteUpdated(route.Id);
 
             return ApiResponseFactory.Success(_localizer["Queue_Scan_Success"]);
         }
