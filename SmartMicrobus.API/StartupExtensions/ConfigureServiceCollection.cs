@@ -16,6 +16,7 @@ using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Notification;
+using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Core.Services.Common;
 using SmartMicrobus.Infrastructure.Data;
@@ -147,6 +148,7 @@ namespace SmartMicrobus.API.StartupExtensions
 
 
             services.AddScoped<IQrTokenService, QrTokenService>();
+            services.AddScoped<IRouteTrackingNotificationService, SignalRRouteTrackingNotificationService>();
             services.AddSwaggerGen(options =>
             {
                 options.IncludeXmlComments(

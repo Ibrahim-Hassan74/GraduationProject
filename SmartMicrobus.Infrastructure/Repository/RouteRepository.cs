@@ -4,6 +4,7 @@ using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Route;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Infrastructure.Data;
+using System.Globalization;
 
 namespace SmartMicrobus.Infrastructure.Repository
 {
@@ -26,6 +27,7 @@ namespace SmartMicrobus.Infrastructure.Repository
         {
             return await _context.Routes
                 .Where(r => r.FromStationId == fromStationId)
+                .OrderBy(r => CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar" ? r.ToAr : r.ToEn)
                 .ToListAsync();
         }
 

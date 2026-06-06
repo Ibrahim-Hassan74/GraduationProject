@@ -32,7 +32,7 @@ var localizationOptions = app.Services
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "1.0");
         options.SwaggerEndpoint("/swagger/v2/swagger.json", "2.0");
-    }); 
+    });
 }
 app.UseExceptionHandlingMiddleware();
 
@@ -65,5 +65,7 @@ app.MapHub<DriverQueueHub>("/hubs/driver-queue");
 app.MapHub<DriverDashboardHub>("/hubs/driver-dashboard");
 
 app.MapHub<LocationTrackingHub>("/hubs/location-tracking");
+
+app.MapHub<RouteTrackingHub>("/hubs/route-tracking");
 
 app.Run();
