@@ -173,4 +173,7 @@
 	<data name="TooManyRequests" xml:space="preserve">
     <value>Too Many Requests. Please try again later.</value>
   </data>
+<data name="InternalServerError">
+  <value>Something went wrong. Please try again later.</value>
+</data>
 </root>

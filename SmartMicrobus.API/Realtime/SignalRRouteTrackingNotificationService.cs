@@ -12,6 +12,7 @@ namespace SmartMicrobus.API.Realtime
     {
         private readonly IHubContext<RouteTrackingHub> _hub;
         private readonly ITripRepository _tripRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IQueueItemRepository _queueRepository;
 
         // Static so ETA state persists across scoped service instances.
@@ -20,12 +21,12 @@ namespace SmartMicrobus.API.Realtime
 
         public SignalRRouteTrackingNotificationService(
             IHubContext<RouteTrackingHub> hub,
-            ITripRepository tripRepository,
-            IQueueItemRepository queueRepository)
+            IUnitOfWork unitOfWork)
         {
             _hub = hub;
-            _tripRepository = tripRepository;
-            _queueRepository = queueRepository;
+            _unitOfWork = unitOfWork;
+            _tripRepository = _unitOfWork.TripRepository;
+            _queueRepository = _unitOfWork.QueueItemRepository;
         }
 
         /// <summary>

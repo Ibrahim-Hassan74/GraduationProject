@@ -160,53 +160,54 @@ namespace SmartMicrobus.Core.Services.Staff
             if (queueItem == null)
                 return ApiResponseFactory.BadRequest(_localizer["Queue_Driver_Not_In_Queue"]);
 
-            // 3. Get microbus + route
-            var microbus = await _microbusRepository.GetByIdAsync(queueItem.MicrobusId, x => x.Route);
+            // 2. Get microbus + base route
+            var microbus = await _microbusRepository.GetByIdAsync(
+                queueItem.MicrobusId,
+                x => x.Route);
 
             if (microbus == null)
                 return ApiResponseFactory.NotFound(_localizer["Queue_Microbus_Not_Found"]);
 
-            var route = microbus.Route;
+            var baseRoute = microbus.Route;
 
-            if (route == null)
+            if (baseRoute == null)
                 return ApiResponseFactory.BadRequest(_localizer["RouteNotFound"]);
 
-            // 4. Start Station
+            // 3. Determine actual route based on station direction
             var startStationId = queueItem.Queue.StationId;
 
-            // 5. Directions
-            Guid fromStationId;
-            Guid toStationId;
+            MyRoute? route = null;
 
-            if (route.FromStationId == startStationId)
+            if (baseRoute.FromStationId == startStationId)
             {
-                fromStationId = route.FromStationId;
-                toStationId = route.ToStationId;
+                route = baseRoute;
             }
-            else if (route.ToStationId == startStationId)
+            else if (baseRoute.ToStationId == startStationId)
             {
-                fromStationId = route.ToStationId;
-                toStationId = route.FromStationId;
+                route = await _routeRepository.GetReverseRouteAsync(baseRoute);
             }
-            else
-            {
+            Console.WriteLine(
+            $"Trip Route: {route.FromEn} -> {route.ToEn}"
+            );
+            if (route == null)
                 return ApiResponseFactory.BadRequest(_localizer["InvalidStationForRoute"]);
-            }
 
-            var fromStation = await _unitOfWork.StationRepository.GetByIdAsync(fromStationId);
-            var toStation = await _unitOfWork.StationRepository.GetByIdAsync(toStationId);
+            // 4. Stations
+            var fromStation = await _unitOfWork.StationRepository.GetByIdAsync(route.FromStationId);
+            var toStation = await _unitOfWork.StationRepository.GetByIdAsync(route.ToStationId);
 
             if (fromStation == null || toStation == null)
                 return ApiResponseFactory.NotFound(_localizer["StationsNotFound"]);
-            
-            // 6. Create Trip
+
+            // 5. Create Trip
             var trip = new Trip
             {
                 DriverId = payload.DriverId,
                 MicrobusId = queueItem.MicrobusId,
+
                 RouteId = route.Id,
 
-                StationId = fromStationId,
+                StationId = route.FromStationId,
 
                 StartedAt = DateTimeOffset.UtcNow,
                 Status = TripStatus.Started,
@@ -220,30 +221,42 @@ namespace SmartMicrobus.Core.Services.Staff
 
                 EndLat = toStation.Latitude,
                 EndLng = toStation.Longitude,
-
             };
 
             await _tripRepository.AddAsync(trip);
 
+            // 6. Update queue item
             queueItem.Status = QueueStatus.InTrip;
-
             queueItem.LeftAt = DateTimeOffset.UtcNow;
 
             await _queueItemRepository.UpdateAsync(queueItem);
 
             await _unitOfWork.CompleteAsync();
 
+            // 7. Schedule auto trip ending
             const double MinBusSpeedKmPerHour = 30;
 
-            var estimatedDuration = TimeSpan.FromHours(route.DistanceKm / MinBusSpeedKmPerHour);
+            var estimatedDuration =
+                TimeSpan.FromHours(route.DistanceKm / MinBusSpeedKmPerHour);
 
-            _backgroundJobClient.Schedule<ITripService>(x => x.EndTripAsync(payload.DriverId), estimatedDuration);
+            Console.WriteLine($"Distance: {route.DistanceKm}");
+            Console.WriteLine($"ETA: {estimatedDuration}");
+            Console.WriteLine($"Now: {DateTime.UtcNow}");
+            Console.WriteLine($"Run At: {DateTime.UtcNow + estimatedDuration}");
 
+            _backgroundJobClient.Schedule<ITripService>(
+                x => x.EndTripAsync(payload.DriverId),
+                estimatedDuration);
+
+            // 8. Dashboard
             await _dashboardRealtimeService.PushDashboard(payload.DriverId);
 
-            await _queueNotificationService.NotifyDriverRemoved(queueItem.QueueId, payload.DriverId);
+            // 9. Queue realtime
+            await _queueNotificationService.NotifyDriverRemoved(
+                queueItem.QueueId,
+                payload.DriverId);
 
-            // Notify route subscribers (counts changed — bus left station, trip started)
+            // 10. Route realtime
             await _routeTrackingNotificationService.NotifyRouteUpdated(route.Id);
 
             return ApiResponseFactory.Success(_localizer["Queue_Scan_Success"]);

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Helper;
 using System.Net;
 using System.Text.Json;
@@ -9,11 +10,13 @@ namespace SmartMicrobus.API.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly IHostEnvironment _host;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public ExceptionHandlingMiddleware(RequestDelegate next, IHostEnvironment host)
+        public ExceptionHandlingMiddleware(RequestDelegate next, IHostEnvironment host, IStringLocalizer<SharedResource> localizer)
         {
             _next = next;
             _host = host;
+            _localizer = localizer;
         }
 
         public async Task Invoke(HttpContext httpContext)
@@ -30,7 +33,7 @@ namespace SmartMicrobus.API.Middleware
                 httpContext.Response.ContentType = "application/json";
                 var response = _host.IsDevelopment() ?
                     ApiResponseFactory.InternalServerError(ex.Message, new List<string> { ex.StackTrace }) :
-                    ApiResponseFactory.InternalServerError(ex.Message);
+                    ApiResponseFactory.InternalServerError(_localizer["InternalServerError"]);
 
                 var json = JsonSerializer.Serialize(response);
                 await httpContext.Response.WriteAsync(json);

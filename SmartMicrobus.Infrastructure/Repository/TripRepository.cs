@@ -61,20 +61,71 @@ namespace SmartMicrobus.Infrastructure.Repository
             return trips.Skip(skipAmount).Take(pageSize);
         }
 
+        //public async Task<List<Trip>> GetMicrobusesOnTheWayAsync(Guid routeId)
+        //{
+        //    return await _context.Trips
+        //        .Include(t => t.Microbus)
+        //        .Include(t => t.Driver)
+        //            .ThenInclude(x => x.ApplicationUser)
+        //        .Where(t => t.RouteId == routeId && t.Status == TripStatus.Started)
+        //        .ToListAsync();
+        //}
         public async Task<List<Trip>> GetMicrobusesOnTheWayAsync(Guid routeId)
         {
+            var route = await _context.Routes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == routeId);
+
+            if (route == null)
+                return new List<Trip>();
+
+            var reverseRoute = await _context.Routes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r =>
+                    r.FromStationId == route.ToStationId &&
+                    r.ToStationId == route.FromStationId);
+
+            if (reverseRoute == null)
+                return new List<Trip>();
+
             return await _context.Trips
                 .Include(t => t.Microbus)
                 .Include(t => t.Driver)
-                    .ThenInclude(x => x.ApplicationUser)
-                .Where(t => t.RouteId == routeId && t.Status == TripStatus.Started)
+                    .ThenInclude(d => d.ApplicationUser)
+                .Where(t =>
+                    t.RouteId == reverseRoute.Id &&
+                    t.Status == TripStatus.Started)
                 .ToListAsync();
         }
+        //public async Task<int> GetMicrobusesOnTheWayCountAsync(Guid routeId)
+        //{
+        //    return await _context.Trips
+        //        .CountAsync(t =>
+        //            t.RouteId == routeId &&
+        //            t.Status == TripStatus.Started);
+        //}
+
         public async Task<int> GetMicrobusesOnTheWayCountAsync(Guid routeId)
         {
+            var route = await _context.Routes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == routeId);
+
+            if (route == null)
+                return 0;
+
+            var reverseRoute = await _context.Routes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r =>
+                    r.FromStationId == route.ToStationId &&
+                    r.ToStationId == route.FromStationId);
+
+            if (reverseRoute == null)
+                return 0;
+
             return await _context.Trips
                 .CountAsync(t =>
-                    t.RouteId == routeId &&
+                    t.RouteId == reverseRoute.Id &&
                     t.Status == TripStatus.Started);
         }
 
