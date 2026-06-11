@@ -33,6 +33,7 @@ namespace SmartMicrobus.Infrastructure.Data
 
         public virtual DbSet<Trip> Trips { get; set; }
         public virtual DbSet<FavoriteRoute> FavoriteRoute { get; set; }
+        public virtual DbSet<Manager> Managers { get; set; }
         public virtual DbSet<DriverReport> DriverReports { get; set; }
         public virtual DbSet<ReportReason> ReportReasons { get; set; }
         public virtual DbSet<DriverReportReason> DriverReportReasons { get; set; }
