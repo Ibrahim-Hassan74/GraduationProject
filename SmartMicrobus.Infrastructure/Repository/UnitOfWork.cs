@@ -10,7 +10,8 @@ namespace SmartMicrobus.Infrastructure.Repository
         private readonly ApplicationDbContext _context;
         public IPhotoRepository PhotoRepository { get; }
         public IDriverRepository DriverRepository { get; }
-        public IPassengerRepository PassengerRepository { get; }     
+        public IPassengerRepository PassengerRepository { get; }
+        public IManagerRepository ManagerRepository { get; }
         public IMicrobusRepository MicrobusRepository { get; }
         public ITripRepository TripRepository { get; }
         public IQueueRepository QueueRepository { get; }
@@ -27,6 +28,7 @@ namespace SmartMicrobus.Infrastructure.Repository
             PhotoRepository = new PhotoRepository(_context);
             DriverRepository = new DriverRepository(_context);
             PassengerRepository = new PassengerRepository(_context);
+            ManagerRepository = new ManagerRepository(_context);
             MicrobusRepository = new MicrobusRepository(_context);
             TripRepository = new TripRepository(_context);
             QueueRepository = new QueueRepository(_context);

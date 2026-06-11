@@ -106,5 +106,14 @@ namespace SmartMicrobus.Core.Services.Manager
 
             return ApiResponseFactory.Success("driver assigned to microbus successfully", qrCode);
         }
+
+        public async Task<ApiResponse> GetManagerStationAsync(Guid managerId)
+        {
+            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
+            if (manager == null)
+                return ApiResponseFactory.NotFound("Manager not found");
+
+            return ApiResponseFactory.Success("Manager station retrieved successfully", manager.StationId);
+        }
     }
 }

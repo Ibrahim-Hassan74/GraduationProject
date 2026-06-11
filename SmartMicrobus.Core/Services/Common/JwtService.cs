@@ -4,6 +4,8 @@ using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.Enums;
+using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -13,27 +15,20 @@ using System.Text;
 namespace SmartMicrobus.Core.Services.Common
 {
     /// <inheritdoc/>
-    public class JwtService : IJwtService
+    public class JwtService(
+        IConfiguration configuration,
+        UserManager<ApplicationUser> userManager,
+        IUnitOfWork unitOfWork,
+        IStringLocalizer<JwtService> localizer) : IJwtService
     {
-        private readonly IConfiguration _configuration;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IStringLocalizer<JwtService> _localizer;
-
-        public JwtService(IConfiguration configuration, UserManager<ApplicationUser> userManager, IStringLocalizer<JwtService> localizer)
-        {
-            _configuration = configuration;
-            _userManager = userManager;
-            _localizer = localizer;
-        }
-
         /// <inheritdoc/>
         public async Task<ApiResponse> CreateJwtToken(ApplicationUser user, bool rememberMe)
         {
             // Create a DateTime object representing the token expiration time by adding the number of minutes specified in the configuration to the current UTC time.
-            DateTime expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:EXPIRATION_MINUTES"]));
+            DateTime expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(configuration["Jwt:EXPIRATION_MINUTES"]));
             var refreshTokenExpiryMinutes = rememberMe
-                    ? Convert.ToDouble(_configuration["RefreshToken:LONG_EXPIRATION_MINUTES"])
-                    : Convert.ToDouble(_configuration["RefreshToken:EXPIRATION_MINUTES"]);
+                    ? Convert.ToDouble(configuration["RefreshToken:LONG_EXPIRATION_MINUTES"])
+                    : Convert.ToDouble(configuration["RefreshToken:EXPIRATION_MINUTES"]);
 
             // Create an array of Claim objects representing the user's claims, such as their ID, name, email, etc.
             List<Claim> claims = new List<Claim>
@@ -47,7 +42,7 @@ namespace SmartMicrobus.Core.Services.Common
                  new Claim("remember_me", rememberMe.ToString().ToLower())
              };
 
-            var audienceClaims = _configuration.GetSection("Jwt:Audiences").Get<string[]>();
+            var audienceClaims = configuration.GetSection("Jwt:Audiences").Get<string[]>();
             if (audienceClaims is not null)
             {
                 foreach (var aud in audienceClaims)
@@ -56,21 +51,31 @@ namespace SmartMicrobus.Core.Services.Common
                 }
             }
 
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await userManager.GetRolesAsync(user);
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+                
+                // If the user is a manager, include their StationId in the claims
+                if (role == nameof(UserRole.Manager))
+                {
+                    var manager = await unitOfWork.ManagerRepository.GetByIdAsync(user.Id);
+                    if (manager != null)
+                    {
+                        claims.Add(new Claim("StationId", manager.StationId.ToString()));
+                    }
+                }
             }
 
             // Create a SymmetricSecurityKey object using the key specified in the configuration.
-            SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
 
             // Create a SigningCredentials object with the security key and the HMACSHA256 algorithm.
             SigningCredentials signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             // Create a JwtSecurityToken object with the given issuer, audience, claims, expiration, and signing credentials.
             JwtSecurityToken tokenGenerator = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
+                issuer: configuration["Jwt:Issuer"],
                 claims: claims,
                 expires: expiration,
                 signingCredentials: signingCredentials
@@ -93,7 +98,7 @@ namespace SmartMicrobus.Core.Services.Common
                 RefreshTokenExpirationDateTime = refreshTokenExpiry,
                 StatusCode = 200,
                 Success = true,
-                Message = _localizer["Token_Generated_Success"]
+                Message = localizer["Token_Generated_Success"]
             };
         }
 
@@ -117,9 +122,9 @@ namespace SmartMicrobus.Core.Services.Common
                 ValidateAudience = true,
                 ValidateIssuerSigningKey = true,
                 ValidateLifetime = false,
-                ValidIssuer = _configuration["Jwt:Issuer"],
-                ValidAudiences = _configuration.GetSection("Jwt:Audiences").Get<List<string>>(),
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])),
+                ValidIssuer = configuration["Jwt:Issuer"],
+                ValidAudiences = configuration.GetSection("Jwt:Audiences").Get<List<string>>(),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
                 RoleClaimType = ClaimTypes.Role
             };
 
@@ -131,7 +136,7 @@ namespace SmartMicrobus.Core.Services.Common
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
                 throw new SecurityTokenException(
-                    _localizer["Token_Invalid"]
+                    localizer["Token_Invalid"]
                 );
             }
 
