@@ -415,4 +415,3 @@ FodyWeavers.xsd
 /SmartMicrobus.API/Configurations/appsettings.json
 /SmartMicrobus.API/Configurations/appsettings.Development.json
 /SmartMicrobus.API/Configurations/appsettings.Production.json
-/SmartMicrobus.API/Controllers/Admin
