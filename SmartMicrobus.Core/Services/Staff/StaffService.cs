@@ -71,28 +71,29 @@ namespace SmartMicrobus.Core.Services.Staff
             if (existing != null)
                 return ApiResponseFactory.BadRequest(_localizer["Queue_Already_In_Queue"]);
 
-            // 2. Get base route
+            // 2. Get base route from QR to identify the two stations on this line
             var baseRoute = await _routeRepository.GetByIdAsync(payload.RouteId);
 
             if (baseRoute == null)
                 return ApiResponseFactory.BadRequest(_localizer["InvalidRoute"]);
 
-            // 3. Determine direction
-            MyRoute? route = null;
+            // 3. Source = current station, Destination = the other station on the line
+            Guid destinationStationId;
 
             if (baseRoute.FromStationId == stationId)
-            {
-                route = baseRoute;
-            }
+                destinationStationId = baseRoute.ToStationId;
             else if (baseRoute.ToStationId == stationId)
-            {
-                route = await _routeRepository.GetReverseRouteAsync(baseRoute);
-            }
-
-            if (route == null)
+                destinationStationId = baseRoute.FromStationId;
+            else
                 return ApiResponseFactory.BadRequest(_localizer["MicrobusInvalidStartStation"]);
 
-            // 4. Get Queue
+            // 4. Find the exact route: FROM this station TO destination
+            var route = await _routeRepository.GetByStationsAsync(stationId, destinationStationId);
+
+            if (route == null)
+                return ApiResponseFactory.BadRequest(_localizer["InvalidRoute"]);
+
+            // 5. Get Queue at this station for this route
             var queue = await _queueRepository.GetByStationAndRouteAsync(stationId, route.Id);
 
             if (queue == null)
@@ -126,6 +127,9 @@ namespace SmartMicrobus.Core.Services.Staff
                 Status = QueueStatus.Waiting
             };
 
+
+            //var currentStation = await _unitOfWork.StationRepository.GetByIdAsync(stationId);
+
             await _queueItemRepository.AddAsync(item);
             await _unitOfWork.CompleteAsync();
 
@@ -142,6 +146,11 @@ namespace SmartMicrobus.Core.Services.Staff
 
             // 11. Notify route subscribers (counts changed — bus arrived at station)
             await _routeTrackingNotificationService.NotifyRouteUpdated(route.Id);
+
+            // Also notify reverse route subscribers
+            var reverseRoute = await _routeRepository.GetByStationsAsync(route.ToStationId, route.FromStationId);
+            if (reverseRoute != null)
+                await _routeTrackingNotificationService.NotifyRouteUpdated(reverseRoute.Id);
 
             return ApiResponseFactory.Success(_localizer["Queue_Scan_Success"]);
         }
@@ -160,37 +169,21 @@ namespace SmartMicrobus.Core.Services.Staff
             if (queueItem == null)
                 return ApiResponseFactory.BadRequest(_localizer["Queue_Driver_Not_In_Queue"]);
 
-            // 2. Get microbus + base route
-            var microbus = await _microbusRepository.GetByIdAsync(
-                queueItem.MicrobusId,
-                x => x.Route);
+            // 2. Get microbus (for passenger count)
+            var microbus = await _microbusRepository.GetByIdAsync(queueItem.MicrobusId);
 
             if (microbus == null)
                 return ApiResponseFactory.NotFound(_localizer["Queue_Microbus_Not_Found"]);
 
-            var baseRoute = microbus.Route;
+            // 3. The queue already holds the correct route — use it directly
+            var route = queueItem.Queue.Route;
 
-            if (baseRoute == null)
+            if (route == null)
                 return ApiResponseFactory.BadRequest(_localizer["RouteNotFound"]);
 
-            // 3. Determine actual route based on station direction
-            var startStationId = queueItem.Queue.StationId;
-
-            MyRoute? route = null;
-
-            if (baseRoute.FromStationId == startStationId)
-            {
-                route = baseRoute;
-            }
-            else if (baseRoute.ToStationId == startStationId)
-            {
-                route = await _routeRepository.GetReverseRouteAsync(baseRoute);
-            }
             Console.WriteLine(
             $"Trip Route: {route.FromEn} -> {route.ToEn}"
             );
-            if (route == null)
-                return ApiResponseFactory.BadRequest(_localizer["InvalidStationForRoute"]);
 
             // 4. Stations
             var fromStation = await _unitOfWork.StationRepository.GetByIdAsync(route.FromStationId);
@@ -256,8 +249,15 @@ namespace SmartMicrobus.Core.Services.Staff
                 queueItem.QueueId,
                 payload.DriverId);
 
-            // 10. Route realtime
+            // 10. Route realtime — notify both directions
+            //     route.Id = departure route (e.g. Minya → Deir Mawas)
+            //     reverse  = arrival route   (e.g. Deir Mawas → Minya)
+            //     so subscribers at BOTH stations get updated counts
             await _routeTrackingNotificationService.NotifyRouteUpdated(route.Id);
+
+            var reverseRoute = await _routeRepository.GetByStationsAsync(route.ToStationId, route.FromStationId);
+            if (reverseRoute != null)
+                await _routeTrackingNotificationService.NotifyRouteUpdated(reverseRoute.Id);
 
             return ApiResponseFactory.Success(_localizer["Queue_Scan_Success"]);
         }

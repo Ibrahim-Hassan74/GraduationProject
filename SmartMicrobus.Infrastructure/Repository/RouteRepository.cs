@@ -78,9 +78,21 @@ namespace SmartMicrobus.Infrastructure.Repository
         public async Task<Route?> GetReverseRouteAsync(Route baseRoute)
         {
             return await _context.Routes
+                .Include(x => x.FromStation)
+                .Include(x => x.ToStation)
                 .FirstOrDefaultAsync(r =>
                     r.FromStationId == baseRoute.ToStationId &&
                     r.ToStationId == baseRoute.FromStationId);
+        }
+
+        public async Task<Route?> GetByStationsAsync(Guid fromStationId, Guid toStationId)
+        {
+            return await _context.Routes
+                .Include(x => x.FromStation)
+                .Include(x => x.ToStation)
+                .FirstOrDefaultAsync(r =>
+                    r.FromStationId == fromStationId &&
+                    r.ToStationId == toStationId);
         }
     }
 }
