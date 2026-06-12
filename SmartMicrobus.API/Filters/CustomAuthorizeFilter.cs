@@ -7,11 +7,11 @@ using System.Security.Claims;
 
 namespace SmartMicrobus.API.Filters
 {
-    public class PassengerOnlyFilter : IAuthorizationFilter
+    public class CustomAuthorizeFilter : IAuthorizationFilter
     {
         private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public PassengerOnlyFilter(IStringLocalizer<SharedResource> localizer)
+        public CustomAuthorizeFilter(IStringLocalizer<SharedResource> localizer)
         {
             _localizer = localizer;
         }
@@ -31,7 +31,9 @@ namespace SmartMicrobus.API.Filters
 
             var role = user.FindFirst(ClaimTypes.Role)?.Value;
 
-            if (role != UserRole.Passenger.ToString())
+            if (role != UserRole.Passenger.ToString() && 
+                role != UserRole.Manager.ToString() && 
+                role != UserRole.Admin.ToString())
             {
                 context.Result = new ObjectResult(ApiResponseFactory.Forbidden(_localizer["Forbidden"]))
                 {

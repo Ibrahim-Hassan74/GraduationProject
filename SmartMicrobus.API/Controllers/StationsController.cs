@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Station;
@@ -69,6 +70,30 @@ namespace SmartMicrobus.API.Controllers
                 return ToActionResult(result);
             var response = result as ApiResponseWithData<RouteBetweenStationsResponse>;
             return Ok(response?.Data);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = nameof(UserRole.Admin))]
+        public async Task<IActionResult> AddStation([FromBody] StationAddRequest stationAddRequest)
+        {
+            var result = await _stationsService.AddStationAsync(stationAddRequest);
+            return ToActionResult(result);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = nameof(UserRole.Admin))]
+        public async Task<IActionResult> UpdateStation(Guid id, [FromBody] StationUpdateRequest stationUpdateRequest)
+        {
+            var result = await _stationsService.UpdateStationAsync(id, stationUpdateRequest);
+            return ToActionResult(result);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = nameof(UserRole.Admin))]
+        public async Task<IActionResult> DeleteStation(Guid id)
+        {
+            var result = await _stationsService.DeleteStationAsync(id);
+            return ToActionResult(result);
         }
     }
 }

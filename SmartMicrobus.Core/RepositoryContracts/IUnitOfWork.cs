@@ -7,6 +7,7 @@ namespace SmartMicrobus.Core.RepositoryContracts
         IPhotoRepository PhotoRepository { get; }
         IDriverRepository DriverRepository { get; }
         IPassengerRepository PassengerRepository { get; }
+        IManagerRepository ManagerRepository { get; }
 
         IMicrobusRepository MicrobusRepository { get; }
         ITripRepository TripRepository { get; }

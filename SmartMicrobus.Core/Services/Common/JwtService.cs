@@ -6,6 +6,7 @@ using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
+using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -50,12 +51,8 @@ namespace SmartMicrobus.Core.Services.Common
                  new Claim(ClaimTypes.MobilePhone, user.PhoneNumber), //Email of the user
                  new Claim("remember_me", rememberMe.ToString().ToLower())
              };
-            var staff = await _unitOfWork.StaffRepository.GetStaffByUserId(user.Id);
+            
 
-            if (staff != null)
-            {
-                claims.Add(new Claim(CustomClaims.StationId, staff.StationId.ToString()));
-            }
 
             var audienceClaims = _configuration.GetSection("Jwt:Audiences").Get<string[]>();
             if (audienceClaims is not null)
@@ -70,6 +67,26 @@ namespace SmartMicrobus.Core.Services.Common
             foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            if(roles.Contains(UserRole.Staff.ToString()))
+            {
+                var staff = await _unitOfWork.StaffRepository.GetStaffByUserId(user.Id);
+                
+                if (staff != null)
+                {
+                    claims.Add(new Claim(CustomClaims.StationId, staff.StationId.ToString()));
+                }
+            }
+
+            if(roles.Contains(UserRole.Manager.ToString()))
+            {
+                var manager = await _unitOfWork.ManagerRepository.GetByIdAsync(user.Id);
+
+                if (manager != null)
+                {
+                    claims.Add(new Claim("StationId", manager.StationId.ToString()));
+                }
             }
 
             // Create a SymmetricSecurityKey object using the key specified in the configuration.

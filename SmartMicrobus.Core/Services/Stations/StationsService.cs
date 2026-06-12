@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Localization;
+using NetTopologySuite.Geometries;
+using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Route;
 using SmartMicrobus.Core.DTO.Station;
@@ -158,6 +160,40 @@ namespace SmartMicrobus.Core.Services.Stations
             };
 
             return ApiResponseFactory.Success(_localizer["RouteBetweenStationsFound"], result);
+        }
+
+        public async Task<ApiResponse> AddStationAsync(StationAddRequest stationAddRequest)
+        {
+            var station = _mapper.Map<Station>(stationAddRequest);
+            await _unitOfWork.StationRepository.AddStationAsync(station);
+            await _unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success(_localizer["StationAddedSuccessfully"], _mapper.Map<StationResponse>(station));
+        }
+
+        public async Task<ApiResponse> UpdateStationAsync(Guid id, StationUpdateRequest stationUpdateRequest)
+        {
+            var station = await _unitOfWork.StationRepository.GetByIdAsync(id);
+            if (station == null)
+                return ApiResponseFactory.NotFound(_localizer["StationNotFound"]);
+
+            _mapper.Map(stationUpdateRequest, station);
+            station.Location = new Point(station.Longitude, station.Latitude) { SRID = 4326 };
+
+            await _unitOfWork.StationRepository.UpdateAsync(station);
+            await _unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success(_localizer["StationUpdatedSuccessfully"], _mapper.Map<StationResponse>(station));
+        }
+
+        public async Task<ApiResponse> DeleteStationAsync(Guid id)
+        {
+            var success = await _unitOfWork.StationRepository.DeleteAsync(id);
+            if (!success)
+                return ApiResponseFactory.NotFound(_localizer["StationNotFound"]);
+
+            await _unitOfWork.CompleteAsync();
+            return ApiResponseFactory.Success(_localizer["StationDeletedSuccessfully"]);
         }
     }
 }

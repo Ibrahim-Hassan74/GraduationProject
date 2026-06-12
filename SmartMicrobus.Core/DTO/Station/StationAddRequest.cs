@@ -1,8 +1,8 @@
 ﻿using NetTopologySuite.Geometries;
 
-namespace SmartMicrobus.Core.Domain.Entities
+namespace SmartMicrobus.Core.DTO.Station
 {
-    public class Station : BaseEntity<Guid>
+    public class StationAddRequest
     {
         public string NameAr { get; set; } = null!;
         public string NameEn { get; set; } = null!;
@@ -16,11 +16,5 @@ namespace SmartMicrobus.Core.Domain.Entities
         public string? AddressAr { get; set; }
         public string? AddressEn { get; set; }
         public Point? Location { get; set; } = null!;
-        //public ICollection<Route> Routes { get; set; } = new List<Route>();
-        public virtual Manager? Manager { get; set; }
-        public ICollection<Route> FromRoutes { get; set; } = new List<Route>();
-        public ICollection<Route> ToRoutes { get; set; } = new List<Route>();
-        public ICollection<Queue> Queues { get; set; } = new List<Queue>();
-        public ICollection<Staff> StaffMembers { get; set; } = new List<Staff>();
     }
 }

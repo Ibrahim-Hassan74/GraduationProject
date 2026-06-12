@@ -2,6 +2,7 @@
 {
     public enum UserRole
     {
+        Admin,
         Manager,
         Staff,
         Driver,
