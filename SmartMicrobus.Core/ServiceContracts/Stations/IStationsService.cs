@@ -11,5 +11,8 @@ namespace SmartMicrobus.Core.ServiceContracts.Stations
         Task<ApiResponse> GetStationByIdAsync(Guid id);
         Task<ApiResponse> GetStationDetailsWithRouteAsync(Guid stationId, double userLat, double userLng, TransportMode mode);
         Task<ApiResponse> GetRouteBetweenStationsAsync(Guid fromStationId, Guid toStationId, TransportMode mode);
+        Task<ApiResponse> AddStationAsync(StationAddRequest stationAddRequest);
+        Task<ApiResponse> UpdateStationAsync(Guid id, StationUpdateRequest stationUpdateRequest);
+        Task<ApiResponse> DeleteStationAsync(Guid id);
     }
 }

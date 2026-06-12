@@ -29,6 +29,12 @@ namespace SmartMicrobus.Core.Mapping
                     opt => opt.MapFrom(src => src.Location.Y))
                 .ForMember(dest => dest.Lng,
                     opt => opt.MapFrom(src => src.Location.X));
+
+            CreateMap<StationAddRequest, Station>()
+                .ForMember(dest => dest.Location, opt => opt.Ignore());
+
+            CreateMap<StationUpdateRequest, Station>()
+                .ForMember(dest => dest.Location, opt => opt.Ignore());
         }
     }
 }

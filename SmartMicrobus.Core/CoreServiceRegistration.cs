@@ -22,6 +22,8 @@ using SmartMicrobus.Core.Services.Drivers;
 using SmartMicrobus.Core.Services.Route;
 using SmartMicrobus.Core.Services.Staff;
 using SmartMicrobus.Core.Services.Stations;
+using SmartMicrobus.Core.ServiceContracts.Admin;
+using SmartMicrobus.Core.Services.Admin;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -87,17 +89,20 @@ namespace SmartMicrobus.Core
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy($"${nameof(UserRole.Driver)}", policy =>
-                    policy.RequireRole($"${nameof(UserRole.Driver)}"));
+                options.AddPolicy(nameof(UserRole.Admin), policy =>
+                    policy.RequireRole(nameof(UserRole.Admin)));
 
-                options.AddPolicy($"${nameof(UserRole.Passenger)}", policy =>
-                    policy.RequireRole($"${nameof(UserRole.Passenger)}"));
+                options.AddPolicy(nameof(UserRole.Driver), policy =>
+                    policy.RequireRole(nameof(UserRole.Driver)));
 
-                options.AddPolicy($"${nameof(UserRole.Staff)}", policy =>
-                    policy.RequireRole($"${nameof(UserRole.Staff)}"));
+                options.AddPolicy(nameof(UserRole.Passenger), policy =>
+                    policy.RequireRole(nameof(UserRole.Passenger)));
 
-                options.AddPolicy($"${nameof(UserRole.Manager)}", policy =>
-                    policy.RequireRole($"${nameof(UserRole.Manager)}"));
+                options.AddPolicy(nameof(UserRole.Staff), policy =>
+                    policy.RequireRole(nameof(UserRole.Staff)));
+
+                options.AddPolicy(nameof(UserRole.Manager), policy =>
+                    policy.RequireRole(nameof(UserRole.Manager)));
 
                 options.AddPolicy("NotAuthorized", policy =>
                 {
@@ -126,6 +131,8 @@ namespace SmartMicrobus.Core
             services.AddScoped<IStationsService, StationsService>();
             services.AddScoped<IManagerService, ManagerService>();
             services.AddScoped<ICustomWhatsAppService, CustomWhatsAppService>();
+            services.AddScoped<IAdminService, AdminService>();
+
             // Location tracking services
             services.AddScoped<ILocationTrackingService, LocationTrackingService>();       
             return services;

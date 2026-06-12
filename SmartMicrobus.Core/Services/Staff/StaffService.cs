@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Hangfire;
 using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
