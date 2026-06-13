@@ -9,6 +9,9 @@ namespace SmartMicrobus.Core.ServiceContracts.Report
         Task<ApiResponse> GetReasonsAsync();
         Task<ApiResponse> GetReportsAsync(Guid passengerId, GetReportsQuery query);
         Task<ApiResponse> GetReportByIdAsync(Guid passengerId, Guid reportId);
+        Task<ApiResponse> GetAllReportsAsync(GetReportsQuery query, Guid stationId);
+        Task<ApiResponse> GetReportByIdForAdminAsync(Guid reportId, Guid stationId);
+        Task<ApiResponse> UpdateReportStatusAsync(Guid reportId, UpdateReportStatusRequest request);
         Task<ApiResponse> UpdateReportAsync(Guid passengerId, Guid reportId, UpdateReportRequest request);
         Task<ApiResponse> DeleteReportAsync(Guid passengerId, Guid reportId);
     }
