@@ -35,6 +35,52 @@ namespace SmartMicrobus.Core.Services.Report
             _userManager = userManager;
         }
 
+        public async Task<ApiResponse> GetAllReportsAsync(GetReportsQuery query, Guid stationId)
+        {
+
+            var (items, totalCount) = await _reportRepository.GetPagedReportsForAdminAsync(query, stationId);
+
+            var reportResponses = _mapper.Map<List<ReportResponse>>(items);
+
+            var pagedResponse = new PagedResponse<ReportResponse>
+            {
+                Items = reportResponses,
+                TotalCount = totalCount,
+                PageNumber = query.PageNumber,
+                PageSize = query.PageSize
+            };
+
+            return ApiResponseFactory.Success(_localizer["ReportsRetrieved"], pagedResponse);
+        }
+
+        public async Task<ApiResponse> GetReportByIdForAdminAsync(Guid reportId, Guid stationId)
+        {
+            var report = await _reportRepository.GetByIdWithReasonsAsync(reportId, stationId);
+
+            if (report == null)
+                return ApiResponseFactory.NotFound(_localizer["ReportNotFound"]);
+
+            var reportResponse = _mapper.Map<ReportResponseForManager>(report);
+
+            return ApiResponseFactory.Success(_localizer["ReportRetrieved"], reportResponse);
+        }
+
+        public async Task<ApiResponse> UpdateReportStatusAsync(Guid reportId, UpdateReportStatusRequest request)
+        {
+            var report = await _reportRepository.GetByIdAsync(reportId);
+
+            if (report == null)
+                return ApiResponseFactory.NotFound(_localizer["ReportNotFound"]);
+
+            report.Status = request.Status;
+            report.ResolvedAt = request.Status == ReportStatus.Reviewed ? DateTimeOffset.UtcNow : (DateTimeOffset?)null;
+
+            await _reportRepository.UpdateAsync(report);
+            await _unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success(_localizer["ReportUpdated"]);
+        }
+
         public async Task<ApiResponse> CreateReportAsync(Guid passengerId, CreateReportRequest request)
         {
             var validate = ValidationHelper.ModelValidation(request);
