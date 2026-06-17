@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.ServiceContracts.Manager;
 using SmartMicrobus.Core.DTO.Microbus;
+using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Station;
 
 namespace SmartMicrobus.API.Controllers
 {
@@ -53,6 +55,21 @@ namespace SmartMicrobus.API.Controllers
                 return BadRequest("failed to assign driver");
 
             return Ok(result);
+        }
+
+        [HttpGet("dashboard/overview")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
+
+            var result = await managerService.GetStationDashboardAsync(stationId);
+
+            if (!result.Success)
+                return ToActionResult(result);
+
+            var response = result as ApiResponseWithData<StationDashboardDTO>;
+
+            return Ok(response?.Data);
         }
     }
 }

@@ -115,5 +115,11 @@ namespace SmartMicrobus.Core.Services.Manager
 
             return ApiResponseFactory.Success("Manager station retrieved successfully", manager.StationId);
         }
+
+        public async Task<ApiResponse> GetStationDashboardAsync(Guid stationId)
+        {
+            var stats = await unitOfWork.StationRepository.GetDashboardStatsAsync(stationId);
+            return ApiResponseFactory.Success("Dashboard stats retrieved successfully", stats);
+        }
     }
 }
