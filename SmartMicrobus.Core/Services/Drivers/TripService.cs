@@ -94,18 +94,15 @@ namespace SmartMicrobus.Core.Services.Drivers
 
         public async Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request)
         {
-            DateTime from;
-            DateTime to;
-
             if (!request.FromDate.HasValue && !request.ToDate.HasValue)
             {
-                from = DateTime.Today;
-                to = DateTime.Today.AddDays(1);
+                request.FromDate = DateTime.Today;
+                request.ToDate = DateTime.Today.AddDays(1);
             }
             else
             {
-                from = request.FromDate ?? DateTime.MinValue;
-                to = request.ToDate ?? DateTime.MaxValue;
+                request.FromDate = request.FromDate ?? DateTime.MinValue;
+                request.ToDate = request.ToDate ?? DateTime.MaxValue;
             }
 
             var tripsHistory = await _tripRepository.GetDriverTripsAsync(driverId, request);

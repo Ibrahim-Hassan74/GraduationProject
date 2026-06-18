@@ -1,15 +1,14 @@
 using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Localization;
-using RouteEntity = SmartMicrobus.Core.Domain.Entities.Route;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Route;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
-using SmartMicrobus.Core.Resources.Services.Route;
 using SmartMicrobus.Core.ServiceContracts.Route;
 using System.Globalization;
+using RouteEntity = SmartMicrobus.Core.Domain.Entities.Route;
 
 namespace SmartMicrobus.Core.Services.Route
 {
@@ -86,22 +85,16 @@ namespace SmartMicrobus.Core.Services.Route
             return ApiResponseFactory.Success(_localizer["RoutesRetrievedSuccessfully"], cities);
         }
 
-        public async Task<ApiResponse> GetPaginatedRoutesAsync(int pageNumber, int pageSize)
+        public async Task<ApiResponse> GetPaginatedRoutesAsync(RouteQuery query, Guid stationId)
         {
-            var routes = await _routeRepository.GetAllAsync();
-            var totalCount = routes.Count();
+            var (routes, totalCount) = await _routeRepository.GetPaginatedByStationAsync(stationId, query);
 
-            var paginatedRoutes = routes
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var mappedRoutes = _mapper.Map<List<RouteDetails>>(routes);
 
-            var mappedRoutes = _mapper.Map<List<RouteResponse>>(paginatedRoutes);
-            var result = new Pagination<List<RouteResponse>>(pageNumber, pageSize, totalCount, mappedRoutes);
+            var result = new Pagination<List<RouteDetails>>(query.PageNumber, query.PageSize, totalCount,  mappedRoutes);
 
-            return ApiResponseFactory.Success("Paginated routes retrieved successfully", result);
+            return ApiResponseFactory.Success("Paginated routes retrieved successfully.", result);
         }
-
         //public async Task<ApiResponse> GetDestinationsByFromAsync(string from)
         //{
         //    if (string.IsNullOrWhiteSpace(from))
@@ -197,6 +190,21 @@ namespace SmartMicrobus.Core.Services.Route
             await _unitOfWork.CompleteAsync();
 
             return ApiResponseFactory.Success("Route deleted successfully.");
+        }
+
+        public async Task<ApiResponse> GetRouteByIdAsync(Guid routeId, Guid stationId)
+        {
+            var result = await _routeRepository.GetByIdAsync(routeId);
+
+            if (result == null)
+                return ApiResponseFactory.NotFound("Route not found.");
+
+            if(stationId != result.FromStationId)
+                return ApiResponseFactory.Unauthorized("You are not authorized to access this route.");
+
+            var response = _mapper.Map<RouteDetails>(result);
+
+            return ApiResponseFactory.Success("Route retrieved successfully.", response);
         }
 
         private async Task<int> CalculateNearestArrivalOptimizedAsync(Guid routeId, RouteEntity route)

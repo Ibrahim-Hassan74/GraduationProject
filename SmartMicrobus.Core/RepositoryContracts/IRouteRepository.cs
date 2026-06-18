@@ -13,5 +13,6 @@ namespace SmartMicrobus.Core.RepositoryContracts
         Task<List<Route>> GetRoutesByLineAsync(Guid routeId);
         Task<Route?> GetReverseRouteAsync(Route baseRoute);
         Task<Route?> GetByStationsAsync(Guid fromStationId, Guid toStationId);
+        Task<(List<Route> Routes, int TotalCount)> GetPaginatedByStationAsync(Guid stationId, RouteQuery routeQuery);
     }
 }

@@ -25,6 +25,22 @@
             <returns>An IActionResult representing the outcome described by the ApiResponse. Returns Ok if successful; otherwise,
             returns a result corresponding to the ApiResponse's status code.</returns>
         </member>
+        <member name="M:SmartMicrobus.API.UsersSeeder.ExportAllStationsAsync(SmartMicrobus.Infrastructure.Data.ApplicationDbContext)">
+            <summary>
+            Exports station data from the database to JSON and TXT files
+            without re-running the seed. Use this to recover deleted files.
+            </summary>
+        </member>
+        <member name="M:SmartMicrobus.API.UsersSeeder.ExportStationByNameAsync(SmartMicrobus.Infrastructure.Data.ApplicationDbContext,System.String)">
+            <summary>
+            Exports a single station's data from the DB to a JSON file by its English name.
+            </summary>
+        </member>
+        <member name="M:SmartMicrobus.API.UsersSeeder.ExportStationByIdAsync(SmartMicrobus.Infrastructure.Data.ApplicationDbContext,System.Guid)">
+            <summary>
+            Exports a single station's data from the DB to a JSON file by its ID.
+            </summary>
+        </member>
         <member name="T:SmartMicrobus.API.Middleware.ExceptionHandlingMiddlewareExtensions">
             <summary>
             Exception Handling Middleware Extensions

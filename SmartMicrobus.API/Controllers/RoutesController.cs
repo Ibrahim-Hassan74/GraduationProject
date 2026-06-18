@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SmartMicrobus.Core.DTO.Route;
-using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Route;
 using SmartMicrobus.Core.Enums;
+using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.ServiceContracts.Route;
 
 namespace SmartMicrobus.API.Controllers
 {
@@ -22,11 +23,17 @@ namespace SmartMicrobus.API.Controllers
             return Ok(result?.Data);
         }
 
-        [HttpGet("paginated")]
-        public async Task<IActionResult> GetPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        [HttpGet("all")]
+        [Authorize(Roles = nameof(UserRole.Manager))]
+        public async Task<IActionResult> GetPaginated([FromQuery] RouteQuery query)
         {
-            var response = await _routeService.GetPaginatedRoutesAsync(pageNumber, pageSize);
-            return ToActionResult(response);
+            var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
+            var response = await _routeService.GetPaginatedRoutesAsync(query, stationId);
+            if (!response.Success)
+                ToActionResult(response);
+            var result = response as ApiResponseWithData<Pagination<List<RouteDetails>>>;
+
+            return Ok(result?.Data);
         }
         [HttpGet("destinations")]
         public async Task<IActionResult> GetDestinationsByFrom([FromQuery] Guid fromStationId)
@@ -71,7 +78,7 @@ namespace SmartMicrobus.API.Controllers
             var result = response as ApiResponseWithData<List<MicrobusOnTheWayResponse>>;
             return Ok(result?.Data);
         }
-                [HttpPost]
+        [HttpPost]
         [Route("add-route")]
         [Authorize(Roles = nameof(UserRole.Manager))]
         public async Task<IActionResult> AddRoute([FromBody] RouteAddRequest routeAddRequest)
@@ -106,12 +113,25 @@ namespace SmartMicrobus.API.Controllers
                 return ToActionResult(response);
             return Ok(response.Message);
         }    
-                [HttpGet("route")]
+        [HttpGet("route")]
         public async Task<IActionResult> GetRoute(double lat1, double lng1, double lat2, double lng2)
         {
             var result = await _osrmRouteService.GetRouteAsync(new RouteRequest() { StartLat = lat1, StartLng = lng1, EndLat = lat2, EndLng = lng2 });
 
             return Ok(result);
+        }
+        [HttpGet("{routeId:guid}")]
+        [Authorize(Roles = nameof(UserRole.Manager))]
+        public async Task<IActionResult> GetRouteById([FromRoute]Guid routeId)
+        {
+            var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
+            var result = await _routeService.GetRouteByIdAsync(routeId, stationId);
+
+            if (!result.Success)
+                return ToActionResult(result);
+            var response = result as ApiResponseWithData<RouteDetails>;
+
+            return Ok(response?.Data);
         }
     }
 }

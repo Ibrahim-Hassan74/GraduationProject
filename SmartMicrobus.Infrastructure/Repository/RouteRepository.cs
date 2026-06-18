@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Route;
+using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Infrastructure.Data;
 using System.Globalization;
@@ -93,6 +94,63 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .FirstOrDefaultAsync(r =>
                     r.FromStationId == fromStationId &&
                     r.ToStationId == toStationId);
+        }
+
+        public async Task<(List<Route> Routes, int TotalCount)> GetPaginatedByStationAsync(Guid stationId, RouteQuery routeQuery)
+        {
+            var query = _context.Routes.Where(r => r.FromStationId == stationId);
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(routeQuery.Search))
+            {
+                var search = routeQuery.Search.Trim().ToLower();
+
+                query = query.Where(r =>
+                    r.ToEn.ToLower().Contains(search) ||
+                    r.ToAr.Contains(search));
+            }
+
+            // Price Filter
+            if (routeQuery.MinPrice.HasValue)
+                query = query.Where(r => r.Price >= routeQuery.MinPrice.Value);
+
+            if (routeQuery.MaxPrice.HasValue)
+                query = query.Where(r => r.Price <= routeQuery.MaxPrice.Value);
+
+            // Distance Filter
+            if (routeQuery.MinDistance.HasValue)
+                query = query.Where(r => r.DistanceKm >= routeQuery.MinDistance.Value);
+
+            if (routeQuery.MaxDistance.HasValue)
+                query = query.Where(r => r.DistanceKm <= routeQuery.MaxDistance.Value);
+
+            var isDescending = routeQuery.SortOrder == SortOrderOptions.DESC;
+
+            query = routeQuery.SortBy switch
+            {
+                RouteSortBy.Price => isDescending
+                    ? query.OrderByDescending(r => r.Price)
+                    : query.OrderBy(r => r.Price),
+
+                RouteSortBy.Distance => isDescending
+                    ? query.OrderByDescending(r => r.DistanceKm)
+                    : query.OrderBy(r => r.DistanceKm),
+
+                RouteSortBy.To => isDescending
+                    ? query.OrderByDescending(r => r.ToEn)
+                    : query.OrderBy(r => r.ToEn),
+
+                _ => query.OrderBy(r => r.ToEn)
+            };
+
+            var totalCount = await query.CountAsync();
+
+            var routes = await query
+                .Skip((routeQuery.PageNumber - 1) * routeQuery.PageSize)
+                .Take(routeQuery.PageSize)
+                .ToListAsync();
+
+            return (routes, totalCount);
         }
     }
 }
