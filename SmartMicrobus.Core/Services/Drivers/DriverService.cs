@@ -39,9 +39,6 @@ namespace SmartMicrobus.Core.Services.Drivers
             _routeTrackingNotificationService = routeTrackingNotificationService;
         }
 
-        public async Task<ApiResponse> EndTripAsync(Guid driverId)
-        {
-            var trip = await _tripRepository.GetActiveTripAsync(driverId);
 
             if (trip == null)
                 return ApiResponseFactory.Failure(_localizer["NoActiveTripFound"], 404);
