@@ -3,13 +3,9 @@
 namespace SmartMicrobus.Core.Enums
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum UserRole
+    public enum UsersSortBy
     {
-        Admin,
-        Manager,
-        Staff,
-        Driver,
-        Passenger,
-        Owner
+        Name,
+        Role        
     }
 }
