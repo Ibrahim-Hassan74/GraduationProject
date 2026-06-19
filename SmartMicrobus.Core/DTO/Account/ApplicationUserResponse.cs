@@ -2,7 +2,7 @@
 {
     public class ApplicationUserResponse
     {
-        public string Id { get; set; } = string.Empty;
+        public Guid Id { get; set; } = Guid.Empty;
         public string DisplayName { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public bool IsConfirmed { get; set; }
