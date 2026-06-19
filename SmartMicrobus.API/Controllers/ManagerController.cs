@@ -192,5 +192,65 @@ namespace SmartMicrobus.API.Controllers
             var result = response as ApiResponseWithData<Pagination<List<SmartMicrobus.Core.DTO.Driver.DriverResponse>>>;
             return Ok(result?.Data);
         }
+
+        [HttpPost]
+        [Route("station-staff")]
+        public async Task<IActionResult> AddStaff([FromBody] SmartMicrobus.Core.DTO.Staff.AddStaffDTO dto)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.AddStaffAsync(dto, stationId);
+            return ToActionResult(response);
+        }
+
+        [HttpPut]
+        [Route("station-staff/{id}")]
+        public async Task<IActionResult> UpdateStaff(Guid id, [FromBody] SmartMicrobus.Core.DTO.Staff.UpdateStaffDTO dto)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.UpdateStaffAsync(id, dto, stationId);
+            return ToActionResult(response);
+        }
+
+        [HttpDelete]
+        [Route("station-staff/{id}")]
+        public async Task<IActionResult> DeleteStaff(Guid id)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.DeleteStaffAsync(id, stationId);
+            return ToActionResult(response);
+        }
+
+        [HttpGet]
+        [Route("station-staff")]
+        public async Task<IActionResult> GetPaginatedStationStaff([FromQuery] SmartMicrobus.Core.DTO.Staff.StaffQuery query)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.GetPaginatedStationStaffAsync(query, stationId);
+            if (!response.Success)
+                return ToActionResult(response);
+
+            var result = response as ApiResponseWithData<Pagination<List<SmartMicrobus.Core.DTO.Staff.StaffResponseDTO>>>;
+            return Ok(result?.Data);
+        }
     }
 }

@@ -315,5 +315,106 @@ namespace SmartMicrobus.Core.Services.Manager
 
             return ApiResponseFactory.Success("Paginated drivers retrieved successfully.", result);
         }
+
+        public async Task<ApiResponse> AddStaffAsync(SmartMicrobus.Core.DTO.Staff.AddStaffDTO dto, Guid stationId)
+        {
+            var existingUser = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+            if (existingUser != null)
+                return ApiResponseFactory.BadRequest("A user with this phone number already exists.");
+
+            var user = new ApplicationUser
+            {
+                Id = Guid.NewGuid(),
+                DisplayName = dto.Name,
+                UserName = dto.PhoneNumber,
+                PhoneNumber = dto.PhoneNumber,
+                PhoneNumberConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return ApiResponseFactory.BadRequest($"Failed to create user: {errors}");
+            }
+
+            // Ensure the Staff role is assigned
+            await userManager.AddToRoleAsync(user, SmartMicrobus.Core.Enums.UserRole.Staff.ToString());
+
+            var staff = new Staff
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                StationId = stationId,
+                IsActive = true
+            };
+
+            await unitOfWork.StaffRepository.AddAsync(staff);
+            await unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Staff added successfully.");
+        }
+
+        public async Task<ApiResponse> UpdateStaffAsync(Guid staffId, SmartMicrobus.Core.DTO.Staff.UpdateStaffDTO dto, Guid stationId)
+        {
+            var staff = await unitOfWork.StaffRepository.GetByIdAsync(staffId, s => s.User);
+            if (staff == null || staff.StationId != stationId || staff.User.IsDeleted)
+                return ApiResponseFactory.NotFound("Staff not found.");
+
+            var existingUser = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber && u.Id != staff.UserId);
+            if (existingUser != null)
+                return ApiResponseFactory.BadRequest("A user with this phone number already exists.");
+
+            staff.User.DisplayName = dto.Name;
+            staff.User.PhoneNumber = dto.PhoneNumber;
+            staff.User.UserName = dto.PhoneNumber;
+            staff.IsActive = dto.IsActive;
+
+            await userManager.UpdateAsync(staff.User);
+            await unitOfWork.StaffRepository.UpdateAsync(staff);
+            await unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Staff updated successfully.");
+        }
+
+        public async Task<ApiResponse> DeleteStaffAsync(Guid staffId, Guid stationId)
+        {
+            var staff = await unitOfWork.StaffRepository.GetByIdAsync(staffId, s => s.User);
+            if (staff == null || staff.StationId != stationId || staff.User.IsDeleted)
+                return ApiResponseFactory.NotFound("Staff not found.");
+
+            staff.IsActive = false;
+
+            // Soft delete user
+            var originalPhone = staff.User.PhoneNumber;
+            staff.User.IsDeleted = true;
+            staff.User.PhoneNumber = $"DELETED_{staff.User.Id}_{originalPhone}";
+            staff.User.UserName = staff.User.PhoneNumber;
+            staff.User.PhoneNumberConfirmed = false;
+
+            await userManager.UpdateAsync(staff.User);
+            await unitOfWork.StaffRepository.UpdateAsync(staff);
+            await unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Staff deleted successfully.");
+        }
+
+        public async Task<ApiResponse> GetPaginatedStationStaffAsync(SmartMicrobus.Core.DTO.Staff.StaffQuery query, Guid stationId)
+        {
+            var (staffs, totalCount) = await unitOfWork.StaffRepository.GetPaginatedByStationAsync(stationId, query);
+
+            var mappedStaff = staffs.Select(staff => new SmartMicrobus.Core.DTO.Staff.StaffResponseDTO
+            {
+                Id = staff.Id,
+                UserId = staff.UserId,
+                Name = staff.User.DisplayName,
+                PhoneNumber = staff.User.PhoneNumber ?? "",
+                IsActive = staff.IsActive,
+                HasPassword = true
+            }).ToList();
+
+            var result = new Pagination<List<SmartMicrobus.Core.DTO.Staff.StaffResponseDTO>>(query.PageNumber, query.PageSize, totalCount, mappedStaff);
+            return ApiResponseFactory.Success("Paginated staff retrieved successfully.", result);
+        }
     }
 }
