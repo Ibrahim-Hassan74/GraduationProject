@@ -68,21 +68,6 @@ namespace SmartMicrobus.API.Controllers
             return Ok(response.Data);
         }
 
-        [HttpPost("start-trip")]
-        public async Task<IActionResult> StartTrip()
-        {
-            var driverIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(driverIdClaim, out Guid driverId))
-                return Unauthorized(ApiResponseFactory.Unauthorized());
-
-            var response = await tripService.StartTripAsync(driverId);
-            if (!response.Success)
-            {
-                return ToActionResult(response);
-            }
-            return Ok(response);
-        }
-
         [HttpPost("end-trip")]
         public async Task<IActionResult> EndTrip()
         {
