@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Infrastructure.Data;
@@ -24,6 +24,17 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .Include(d => d.Microbus).ThenInclude(r=>r.Route)
                 .FirstOrDefaultAsync(d => d.Microbus.PlateNumber == plateNumber);
             return driver;
+        }
+
+        public async Task<List<Driver>> GetDriversByStationAsync(Guid stationId)
+        {
+            return await context.Drivers
+                .Include(d => d.ApplicationUser)
+                .Include(d => d.Microbus)
+                    .ThenInclude(m => m.Route)
+                .Where(d => d.Microbus != null && 
+                           (d.Microbus.Route.FromStationId == stationId || d.Microbus.Route.ToStationId == stationId))
+                .ToListAsync();
         }
     }
 }

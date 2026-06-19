@@ -13,6 +13,27 @@ namespace SmartMicrobus.Infrastructure.Repository
         {
             _context = context;
         }
+
+        public Task<List<Microbus>> GetActiveMicrobusesByStationAsync(Guid stationId)
+        {
+            return _context.Microbuses
+                .Include(x => x.Route)
+                .Include(x => x.Driver)
+                    .ThenInclude(d => d.ApplicationUser)
+                .Where(m => m.Route.FromStationId == stationId && m.IsActive)
+                .ToListAsync();
+        }
+
+        public async Task<List<Microbus>> GetAllStationMicrobusesAsync(Guid stationId)
+        {
+            return await _context.Microbuses
+                .Include(x => x.Route)
+                .Include(x => x.Driver)
+                    .ThenInclude(d => d.ApplicationUser)
+                .Where(m => m.Route.FromStationId == stationId)
+                .ToListAsync();
+        }
+
         public async Task<Microbus?> GetByQrCodeAsync(string qrCode)
         {
             return await _context.Microbuses

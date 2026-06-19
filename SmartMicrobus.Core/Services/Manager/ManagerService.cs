@@ -164,5 +164,128 @@ namespace SmartMicrobus.Core.Services.Manager
 
             return ApiResponseFactory.Success("Excel generated successfully", content);
         }
+
+        public async Task<ApiResponseWithData<byte[]>> ExportStationDriversExcelAsync(Guid managerId)
+        {
+            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
+            if (manager == null)
+                return ApiResponseFactory.NotFound<byte[]>("Manager not found");
+
+            var drivers = await unitOfWork.DriverRepository.GetDriversByStationAsync(manager.StationId);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Drivers");
+
+            worksheet.Cell(1, 1).Value = "Driver ID";
+            worksheet.Cell(1, 2).Value = "Name";
+            worksheet.Cell(1, 3).Value = "Phone Number";
+            worksheet.Cell(1, 4).Value = "License Number";
+            worksheet.Cell(1, 5).Value = "Microbus Plate";
+            worksheet.Cell(1, 6).Value = "Assigned Route";
+
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+
+            int row = 2;
+            foreach (var driver in drivers)
+            {
+                worksheet.Cell(row, 1).Value = driver.Id.ToString();
+                worksheet.Cell(row, 2).Value = driver.ApplicationUser?.DisplayName ?? "N/A";
+                worksheet.Cell(row, 3).Value = driver.ApplicationUser?.PhoneNumber ?? "N/A";
+                worksheet.Cell(row, 4).Value = driver.LicenseNumber ?? "N/A";
+                worksheet.Cell(row, 5).Value = driver.Microbus?.PlateNumber ?? "N/A";
+                worksheet.Cell(row, 6).Value = (driver.Microbus?.Route?.FromEn != null && driver.Microbus?.Route?.ToEn != null) ? $"{driver.Microbus.Route.FromEn} to {driver.Microbus.Route.ToEn}" : "N/A";
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return ApiResponseFactory.Success("Excel generated successfully", content);
+        }
+
+        public async Task<ApiResponseWithData<byte[]>> ExportStationRoutesExcelAsync(Guid managerId)
+        {
+            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
+            if (manager == null)
+                return ApiResponseFactory.NotFound<byte[]>("Manager not found");
+
+            var routes = await unitOfWork.RouteRepository.GetRoutesByFromAsync(manager.StationId);
+            var activeBuses = await unitOfWork.MicrobusRepository.GetActiveMicrobusesByStationAsync(manager.StationId);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Drivers");
+
+            worksheet.Cell(1, 1).Value = "Route ID";
+            worksheet.Cell(1, 2).Value = "Name";
+            worksheet.Cell(1, 3).Value = "Price";
+            worksheet.Cell(1, 4).Value = "Distance";
+            worksheet.Cell(1, 5).Value = "Active Buses";
+
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+
+            int row = 2;
+            foreach (var route in routes)
+            {
+                worksheet.Cell(row, 1).Value = route.Id.ToString();
+                worksheet.Cell(row, 2).Value = route.FromEn + " to " + route.ToEn;
+                worksheet.Cell(row, 3).Value = route.Price;
+                worksheet.Cell(row, 4).Value = route.DistanceKm;
+                worksheet.Cell(row, 5).Value = activeBuses.Where(m => m.RouteId == route.Id).Count();
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return ApiResponseFactory.Success("Excel generated successfully", content);
+        }
+
+        public async Task<ApiResponseWithData<byte[]>> ExportMicrobusesExcelAsync(Guid managerId)
+        {
+            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
+            if (manager == null)
+                return ApiResponseFactory.NotFound<byte[]>("Manager not found");
+
+            var microbuses = await unitOfWork.MicrobusRepository.GetAllStationMicrobusesAsync(manager.StationId);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Drivers");
+
+            worksheet.Cell(1, 1).Value = "Microbus ID";
+            worksheet.Cell(1, 2).Value = "Model";
+            worksheet.Cell(1, 3).Value = "Capacity";
+            worksheet.Cell(1, 4).Value = "Color";
+            worksheet.Cell(1, 5).Value = "Status";
+
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+
+            int row = 2;
+            foreach (var microbus in microbuses)
+            {
+                worksheet.Cell(row, 1).Value = microbus.Id.ToString();
+                worksheet.Cell(row, 2).Value = microbus.Model;
+                worksheet.Cell(row, 3).Value = microbus.PassengerCount;
+                worksheet.Cell(row, 4).Value = microbus.Color;
+                worksheet.Cell(row, 5).Value = microbus.IsActive ? "Active" : "Inactive";
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return ApiResponseFactory.Success("Excel generated successfully", content);
+        }
     }
 }

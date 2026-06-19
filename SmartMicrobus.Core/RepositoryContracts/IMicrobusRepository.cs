@@ -6,5 +6,8 @@ namespace SmartMicrobus.Core.RepositoryContracts
     {
         Task<Microbus?> GetByQrCodeAsync(string qrCode);
         Task<Driver?> GetDriverAsync(string plateNumber);
+
+        Task<List<Microbus>> GetAllStationMicrobusesAsync(Guid stationId);
+        Task<List<Microbus>> GetActiveMicrobusesByStationAsync(Guid stationId);
     }
 }

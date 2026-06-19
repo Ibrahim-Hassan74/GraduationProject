@@ -76,5 +76,68 @@ namespace SmartMicrobus.API.Controllers
             var fileName = $"StationData_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}.xlsx";
             return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
+
+        [HttpGet]
+        [Route("export-station-drivers")]
+        public async Task<IActionResult> ExportStationDrivers()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.ExportStationDriversExcelAsync(managerId);
+
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileName = $"StationDrivers_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
+            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [HttpGet]
+        [Route("export-station-routes")]
+        public async Task<IActionResult> ExportStationRoutes()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.ExportStationRoutesExcelAsync(managerId);
+
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileName = $"StationRoutes_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
+            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [HttpGet]
+        [Route("export-station-microbuses")]
+        public async Task<IActionResult> ExportMicrobuses()
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.ExportMicrobusesExcelAsync(managerId);
+
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileName = $"Microbuses_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
+            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
     }
 }
