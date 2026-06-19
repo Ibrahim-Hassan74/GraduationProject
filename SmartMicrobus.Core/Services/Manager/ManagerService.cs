@@ -305,5 +305,15 @@ namespace SmartMicrobus.Core.Services.Manager
 
             return ApiResponseFactory.Success("Paginated microbuses retrieved successfully.", result);
         }
+
+        public async Task<ApiResponse> GetPaginatedStationDriversAsync(DriverQuery query, Guid stationId)
+        {
+            var (drivers, totalCount) = await unitOfWork.DriverRepository.GetPaginatedByStationAsync(stationId, query);
+
+            var mappedDrivers = mapper.Map<List<DriverResponse>>(drivers);
+            var result = new Pagination<List<DriverResponse>>(query.PageNumber, query.PageSize, totalCount, mappedDrivers);
+
+            return ApiResponseFactory.Success("Paginated drivers retrieved successfully.", result);
+        }
     }
 }

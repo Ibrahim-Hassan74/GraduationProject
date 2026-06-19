@@ -36,5 +36,52 @@ namespace SmartMicrobus.Infrastructure.Repository
                            (d.Microbus.Route.FromStationId == stationId || d.Microbus.Route.ToStationId == stationId))
                 .ToListAsync();
         }
+
+        public async Task<(List<Driver> Drivers, int TotalCount)> GetPaginatedByStationAsync(Guid stationId, SmartMicrobus.Core.DTO.Driver.DriverQuery queryObj)
+        {
+            var query = context.Drivers
+                .Include(d => d.ApplicationUser)
+                .Include(d => d.Microbus)
+                    .ThenInclude(m => m.Route)
+                .Where(d => d.Microbus != null && 
+                           (d.Microbus.Route.FromStationId == stationId || d.Microbus.Route.ToStationId == stationId));
+
+            if (!string.IsNullOrWhiteSpace(queryObj.Search))
+            {
+                var search = queryObj.Search.Trim().ToLower();
+                query = query.Where(d =>
+                    (d.ApplicationUser.DisplayName != null && d.ApplicationUser.DisplayName.ToLower().Contains(search)) ||
+                    (d.LicenseNumber != null && d.LicenseNumber.ToLower().Contains(search)) ||
+                    (d.Microbus.PlateNumber != null && d.Microbus.PlateNumber.ToLower().Contains(search)));
+            }
+
+            var isDescending = queryObj.SortOrder == SmartMicrobus.Core.Enums.SortOrderOptions.DESC;
+
+            query = queryObj.SortBy switch
+            {
+                SmartMicrobus.Core.Enums.DriverSortBy.DriverName => isDescending
+                    ? query.OrderByDescending(d => d.ApplicationUser.DisplayName)
+                    : query.OrderBy(d => d.ApplicationUser.DisplayName),
+
+                SmartMicrobus.Core.Enums.DriverSortBy.LicenseNumber => isDescending
+                    ? query.OrderByDescending(d => d.LicenseNumber)
+                    : query.OrderBy(d => d.LicenseNumber),
+
+                SmartMicrobus.Core.Enums.DriverSortBy.PlateNumber => isDescending
+                    ? query.OrderByDescending(d => d.Microbus.PlateNumber)
+                    : query.OrderBy(d => d.Microbus.PlateNumber),
+
+                _ => query.OrderBy(d => d.ApplicationUser.DisplayName)
+            };
+
+            var totalCount = await query.CountAsync();
+
+            var drivers = await query
+                .Skip((queryObj.PageNumber - 1) * queryObj.PageSize)
+                .Take(queryObj.PageSize)
+                .ToListAsync();
+
+            return (drivers, totalCount);
+        }
     }
 }

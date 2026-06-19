@@ -13,7 +13,7 @@ using System.Security.Claims;
 
 namespace SmartMicrobus.API.Controllers
 {
-    [Authorize(Roles = nameof(UserRole.Driver))]
+    [Authorize(Roles = $"{nameof(UserRole.Driver)}, {nameof(UserRole.Manager)}")]
     public class DriverController(IDriverService driverService, ITripService tripService, ILocationTrackingService locationTrackingService ) : CustomControllerBase
     {
         [HttpGet("{driverId}")]

@@ -16,5 +16,6 @@ namespace SmartMicrobus.Core.ServiceContracts.Manager
         Task<ApiResponseWithData<byte[]>> ExportStationDriversExcelAsync(Guid managerId);
         Task<ApiResponseWithData<byte[]>> ExportMicrobusesExcelAsync(Guid managerId);
         Task<ApiResponse> GetPaginatedStationMicrobusesAsync(MicrobusQuery query, Guid stationId);
+        Task<ApiResponse> GetPaginatedStationDriversAsync(DriverQuery query, Guid stationId);
     }
 }

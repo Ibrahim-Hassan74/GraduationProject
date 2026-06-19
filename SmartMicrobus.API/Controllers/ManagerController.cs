@@ -174,5 +174,23 @@ namespace SmartMicrobus.API.Controllers
             var result = response as ApiResponseWithData<Pagination<List<MicrobusResponse>>>;
             return Ok(result?.Data);
         }
+
+        [HttpGet]
+        [Route("station-drivers")]
+        public async Task<IActionResult> GetPaginatedStationDrivers([FromQuery] SmartMicrobus.Core.DTO.Driver.DriverQuery query)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.GetPaginatedStationDriversAsync(query, stationId);
+            if (!response.Success)
+                return ToActionResult(response);
+
+            var result = response as ApiResponseWithData<Pagination<List<SmartMicrobus.Core.DTO.Driver.DriverResponse>>>;
+            return Ok(result?.Data);
+        }
     }
 }
