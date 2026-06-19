@@ -40,21 +40,6 @@ namespace SmartMicrobus.Core.Services.Drivers
         }
 
 
-            if (trip == null)
-                return ApiResponseFactory.Failure(_localizer["NoActiveTripFound"], 404);
-
-            trip.Status = TripStatus.Completed;
-            trip.EndedAt = DateTimeOffset.UtcNow;
-
-            await _tripRepository.UpdateAsync(trip);
-            await _unitOfWork.CompleteAsync();
-
-            // Clean up driver's ETA and notify route subscribers
-            _routeTrackingNotificationService.RemoveDriverEta(trip.RouteId, driverId);
-            await _routeTrackingNotificationService.NotifyRouteUpdated(trip.RouteId);
-
-            return ApiResponseFactory.Success(_localizer["TripEndedSuccessfully"]);
-        }
         public async Task<ApiResponseWithData<DriverDashboardDTO>> GetDashboardAsync(Guid driverId)
         {
             var activeTrip = await _tripRepository.GetActiveTripAsync(driverId);
@@ -178,52 +163,14 @@ namespace SmartMicrobus.Core.Services.Drivers
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task<ApiResponse> StartTripAsync(Guid driverId)
-        {
-            var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
 
-            if (queueItem == null)
-                return ApiResponseFactory.NotFound(_localizer["DriverNotInQueue"]);
-
-            var first = await _queueItemRepository.GetFirstInQueueAsync(queueItem.QueueId);
-
-            if (first?.Id != queueItem.Id)
-                return ApiResponseFactory.Conflict(_localizer["NotYourTurn"]);
-
-            var trip = new Trip
+        public async Task<ApiResponse> GetDriverByPlateNumber(string plateNumber)
             {
-                DriverId = driverId,
-                MicrobusId = queueItem.MicrobusId,
-                RouteId = queueItem.Queue.RouteId,
-                StartedAt = DateTimeOffset.UtcNow,
-                Status = TripStatus.Started
-            };
-
-            await _tripRepository.AddAsync(trip);
-
-            queueItem.Status = QueueStatus.InTrip;
-            queueItem.LeftAt = DateTimeOffset.UtcNow;
-
-            await _queueItemRepository.UpdateAsync(queueItem);
-            await _unitOfWork.CompleteAsync();
-
-            return ApiResponseFactory.Success(_localizer["TripStartedSuccessfully"]);
-        }
-
-        public async Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request)
-        {
-            DateTime from;
-            DateTime to;
-
-            if (!request.FromDate.HasValue && !request.ToDate.HasValue)
-            {
-                from = DateTime.Today;
-                to = DateTime.Today.AddDays(1);
-            }
-            else
-            {
-                from = request.FromDate ?? DateTime.MinValue;
-                to = request.ToDate ?? DateTime.MaxValue;
+            var driver = await _driverRepository.GetDriverByPlateNumber(plateNumber);
+            if (driver == null)
+                return ApiResponseFactory.NotFound(_localizer["Driver_Not_Found_By_Plate"]);
+            var driverInfo = _mapper.Map<DriverResponse>(driver);
+            return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
             }
 
         public async Task<ApiResponseWithData<DriverResponse>> GetDriverByLicenseAsync(string licenseNumber)
