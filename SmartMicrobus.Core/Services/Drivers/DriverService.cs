@@ -221,24 +221,22 @@ namespace SmartMicrobus.Core.Services.Drivers
                 to = request.ToDate ?? DateTime.MaxValue;
             }
 
-            var tripsHistory = await _tripRepository.GetDriverTripsAsync(driverId, request);
-
-            if (tripsHistory == null || !tripsHistory.Trips.Any())
+        public async Task<ApiResponseWithData<DriverResponse>> GetDriverByLicenseAsync(string licenseNumber)
             {
-                return ApiResponseFactory.NotFound(_localizer["NoTripsFoundForPeriod"]);
-            }
+            var driver = await _driverRepository.GetDriverByLicense(licenseNumber);
+            if (driver == null)
+                return ApiResponseFactory.NotFound<DriverResponse>(_localizer["Driver_Not_Found_By_License"]);
 
-            var history = _mapper.Map<List<TripHistoryDTO>>(tripsHistory.Trips);
-            var response = new DriverHistoryResponse(tripsHistory.TotalAmount, history, tripsHistory.TotalCount);
-
-            return ApiResponseFactory.Success(_localizer["DriverTripHistoryRetrieved"], response);
+            var driverInfo = _mapper.Map<DriverResponse>(driver);
+            return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
         }
 
-        public async Task<ApiResponse> GetDriverByPlateNumber(string plateNumber)
+        public async Task<ApiResponseWithData<DriverResponse>> GetDriverByIdAsync(Guid driverId)
         {
-            var driver = await _driverRepository.GetDriverByPlateNumber(plateNumber);
+            var driver = await _driverRepository.GetByIdAsync(driverId);
             if (driver == null)
-                return ApiResponseFactory.NotFound(_localizer["Driver_Not_Found_By_Plate"]);
+                return ApiResponseFactory.NotFound<DriverResponse>(_localizer["Driver_Not_Found_By_Id"]);
+
             var driverInfo = _mapper.Map<DriverResponse>(driver);
             return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
         }

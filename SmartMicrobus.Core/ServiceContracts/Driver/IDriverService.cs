@@ -6,6 +6,8 @@ namespace SmartMicrobus.Core.ServiceContracts.Drivers
 {
     public interface IDriverService
     {
+        Task<ApiResponseWithData<DriverResponse>> GetDriverByIdAsync(Guid driverId);
+        Task<ApiResponseWithData<DriverResponse>> GetDriverByLicenseAsync(string licenseNumber);
         Task<ApiResponseWithData<DriverDashboardDTO>> GetDashboardAsync(Guid driverId);
 
         Task<ApiResponseWithData<int>> GetDriversBeforeMeAsync(Guid driverId);
