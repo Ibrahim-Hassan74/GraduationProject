@@ -42,13 +42,22 @@ namespace SmartMicrobus.Core.Services.Route
             _osrmRouteService = osrmRouteService;
         }
 
-        public async Task<ApiResponse> AddRouteAsync(RouteAddRequest routeAddRequest)
+        public async Task<ApiResponse> AddRouteAsync(Guid stationId, RouteAddRequest routeAddRequest)
         {
             if (routeAddRequest is null)
             {
                 return ApiResponseFactory.Failure("Route data is required.", 404);
             }
-            await _routeRepository.AddAsync(_mapper.Map<RouteEntity>(routeAddRequest));
+
+            var station = await _unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (station is null)
+                return ApiResponseFactory.Failure("Station not found.", 404);
+
+            var routeEntity = _mapper.Map<RouteEntity>(routeAddRequest);
+            routeEntity.FromAr = station.NameAr;
+            routeEntity.FromEn = station.NameEn;
+
+            await _routeRepository.AddAsync(routeEntity);
             await _unitOfWork.CompleteAsync();
 
             return ApiResponseFactory.Success("Route added successfully.");

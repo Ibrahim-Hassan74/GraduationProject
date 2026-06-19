@@ -83,7 +83,13 @@ namespace SmartMicrobus.API.Controllers
         [Authorize(Roles = nameof(UserRole.Manager))]
         public async Task<IActionResult> AddRoute([FromBody] RouteAddRequest routeAddRequest)
         {
-            var response = await _routeService.AddRouteAsync(routeAddRequest);
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await _routeService.AddRouteAsync(stationId, routeAddRequest);
 
             if (!response.Success)
                 return ToActionResult(response);

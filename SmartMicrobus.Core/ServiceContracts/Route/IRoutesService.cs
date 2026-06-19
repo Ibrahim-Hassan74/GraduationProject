@@ -17,7 +17,7 @@ namespace SmartMicrobus.Core.ServiceContracts.Route
 
         Task<ApiResponse> GetMicrobusesOnTheWayAsync(Guid routeId); // return List<MicrobusOnTheWayResponse> (includes microbus details and estimated arrival time)
 
-        Task<ApiResponse> AddRouteAsync(RouteAddRequest routeAddRequest); 
+        Task<ApiResponse> AddRouteAsync(Guid stationId, RouteAddRequest routeAddRequest);
 
         Task<ApiResponse> UpdateRouteAsync(RouteUpdateRequest routeUpdateRequest);
         Task<ApiResponse> DeleteRouteAsync(Guid routeId);
