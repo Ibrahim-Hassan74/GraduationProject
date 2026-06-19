@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using SmartMicrobus.Core.DTO.Driver;
-using SmartMicrobus.Core.Enums;
-using SmartMicrobus.Core.ServiceContracts.Manager;
-using SmartMicrobus.Core.DTO.Microbus;
 using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Driver;
+using SmartMicrobus.Core.DTO.Microbus;
+using SmartMicrobus.Core.DTO.Report;
 using SmartMicrobus.Core.DTO.Station;
+using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.ServiceContracts.Manager;
+using System.Security.Claims;
 
 namespace SmartMicrobus.API.Controllers
 {
@@ -61,7 +62,11 @@ namespace SmartMicrobus.API.Controllers
         [HttpGet("dashboard/overview")]
         public async Task<IActionResult> GetDashboard()
         {
-            var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
+            var stattionString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stattionString) || !Guid.TryParse(stattionString, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
 
             var result = await managerService.GetStationDashboardAsync(stationId);
 
@@ -77,13 +82,13 @@ namespace SmartMicrobus.API.Controllers
         [Route("export-station-data")]
         public async Task<IActionResult> ExportStationData([FromQuery] DateTimeOffset startDate, [FromQuery] DateTimeOffset endDate)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            var stationString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationString) || !Guid.TryParse(stationString, out Guid stationId))
             {
                 return Unauthorized(new { Message = "User ID not found or invalid." });
             }
 
-            var response = await managerService.ExportStationDataExcelAsync(managerId, startDate, endDate);
+            var response = await managerService.ExportStationDataExcelAsync(stationId, startDate, endDate);
 
             if (!response.Success)
             {
@@ -98,13 +103,13 @@ namespace SmartMicrobus.API.Controllers
         [Route("export-station-drivers")]
         public async Task<IActionResult> ExportStationDrivers()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            var stationString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationString) || !Guid.TryParse(stationString, out Guid stationId))
             {
                 return Unauthorized(new { Message = "User ID not found or invalid." });
             }
 
-            var response = await managerService.ExportStationDriversExcelAsync(managerId);
+            var response = await managerService.ExportStationDriversExcelAsync(stationId);
 
             if (!response.Success)
             {
@@ -119,13 +124,13 @@ namespace SmartMicrobus.API.Controllers
         [Route("export-station-routes")]
         public async Task<IActionResult> ExportStationRoutes()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            var stationString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationString) || !Guid.TryParse(stationString, out Guid stationId))
             {
                 return Unauthorized(new { Message = "User ID not found or invalid." });
             }
 
-            var response = await managerService.ExportStationRoutesExcelAsync(managerId);
+            var response = await managerService.ExportStationRoutesExcelAsync(stationId);
 
             if (!response.Success)
             {
@@ -140,13 +145,13 @@ namespace SmartMicrobus.API.Controllers
         [Route("export-station-microbuses")]
         public async Task<IActionResult> ExportMicrobuses()
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            var stationString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationString) || !Guid.TryParse(stationString, out Guid stationId))
             {
                 return Unauthorized(new { Message = "User ID not found or invalid." });
             }
 
-            var response = await managerService.ExportMicrobusesExcelAsync(managerId);
+            var response = await managerService.ExportMicrobusesExcelAsync(stationId);
 
             if (!response.Success)
             {
@@ -155,6 +160,26 @@ namespace SmartMicrobus.API.Controllers
 
             var fileName = $"Microbuses_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
             return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [HttpGet]
+        [Route("export-reports")]
+        public async Task<IActionResult> ExportReports([FromQuery] GetReportsQuery query)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await _reportService.ExportReportsExcelAsync(query, stationId);
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileContent = ((ApiResponseWithData<byte[]>)response).Data;
+            return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Reports_Export_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
         }
 
         [HttpGet]

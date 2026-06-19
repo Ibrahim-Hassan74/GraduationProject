@@ -1,6 +1,8 @@
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Microbus;
+using SmartMicrobus.Core.DTO.Report;
+using SmartMicrobus.Core.DTO.Staff;
 
 namespace SmartMicrobus.Core.ServiceContracts.Manager
 {
@@ -11,17 +13,19 @@ namespace SmartMicrobus.Core.ServiceContracts.Manager
         Task<ApiResponse> GetManagerStationAsync(Guid managerId);
         Task<ApiResponse> AssignDriverToMicrobusAsync(DriverAssignRequest driverAssignRequest);
         Task<ApiResponse> GetStationDashboardAsync(Guid stationId);
-        Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid managerId, DateTimeOffset startDate, DateTimeOffset endDate);
-        Task <ApiResponseWithData<byte[]>> ExportStationRoutesExcelAsync(Guid managerId);
-        Task<ApiResponseWithData<byte[]>> ExportStationDriversExcelAsync(Guid managerId);
-        Task<ApiResponseWithData<byte[]>> ExportMicrobusesExcelAsync(Guid managerId);
+        Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid stationId, DateTimeOffset startDate, DateTimeOffset endDate);
+        Task <ApiResponseWithData<byte[]>> ExportStationRoutesExcelAsync(Guid stationId);
+        Task<ApiResponseWithData<byte[]>> ExportStationDriversExcelAsync(Guid stationId);
+        Task<ApiResponseWithData<byte[]>> ExportMicrobusesExcelAsync(Guid stationId);
+        Task<ApiResponseWithData<byte[]>> ExportReportsExcelAsync(GetReportsQuery query, Guid stationId);
         Task<ApiResponse> GetPaginatedStationMicrobusesAsync(MicrobusQuery query, Guid stationId);
         Task<ApiResponse> GetPaginatedStationDriversAsync(DriverQuery query, Guid stationId);
+        
 
         // Staff CRUD
-        Task<ApiResponse> AddStaffAsync(SmartMicrobus.Core.DTO.Staff.AddStaffDTO dto, Guid stationId);
-        Task<ApiResponse> UpdateStaffAsync(Guid staffId, SmartMicrobus.Core.DTO.Staff.UpdateStaffDTO dto, Guid stationId);
+        Task<ApiResponse> AddStaffAsync(AddStaffDTO dto, Guid stationId);
+        Task<ApiResponse> UpdateStaffAsync(Guid staffId, UpdateStaffDTO dto, Guid stationId);
         Task<ApiResponse> DeleteStaffAsync(Guid staffId, Guid stationId);
-        Task<ApiResponse> GetPaginatedStationStaffAsync(SmartMicrobus.Core.DTO.Staff.StaffQuery query, Guid stationId);
+        Task<ApiResponse> GetPaginatedStationStaffAsync(StaffQuery query, Guid stationId);
     }
 }

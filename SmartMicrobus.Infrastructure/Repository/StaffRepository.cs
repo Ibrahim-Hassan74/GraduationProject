@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SmartMicrobus.Core.Domain.Entities;
+using SmartMicrobus.Core.DTO.Staff;
+using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Infrastructure.Data;
 
@@ -18,7 +20,7 @@ namespace SmartMicrobus.Infrastructure.Repository
             return await _context.Staff.FirstOrDefaultAsync(s => s.UserId == userId);
         }
 
-        public async Task<(System.Collections.Generic.List<Staff> Staffs, int TotalCount)> GetPaginatedByStationAsync(Guid stationId, SmartMicrobus.Core.DTO.Staff.StaffQuery queryObj)
+        public async Task<(List<Staff> Staffs, int TotalCount)> GetPaginatedByStationAsync(Guid stationId, StaffQuery queryObj)
         {
             var query = _context.Staff
                 .Include(s => s.User)

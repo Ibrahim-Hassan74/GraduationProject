@@ -1,16 +1,20 @@
+using AutoMapper;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Identity;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Microbus;
+using SmartMicrobus.Core.DTO.Report;
+using SmartMicrobus.Core.DTO.Staff;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Manager;
-using ClosedXML.Excel;
-
-using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using SmartMicrobus.Core.Enums;
+using StaffEntity = SmartMicrobus.Core.Domain.Entities.Staff;
 
 namespace SmartMicrobus.Core.Services.Manager
 {
@@ -124,13 +128,13 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Dashboard stats retrieved successfully", stats);
         }
 
-        public async Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid managerId, DateTimeOffset startDate, DateTimeOffset endDate)
+        public async Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid stationId, DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
-            if (manager == null)
-                return ApiResponseFactory.NotFound<byte[]>("Manager not found");
+            var station = await unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (station == null)
+                return ApiResponseFactory.NotFound<byte[]>("Station not found");
 
-            var trips = await unitOfWork.TripRepository.GetTripsByStationAndDateAsync(manager.StationId, startDate, endDate);
+            var trips = await unitOfWork.TripRepository.GetTripsByStationAndDateAsync(stationId, startDate, endDate);
 
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Trips");
@@ -173,13 +177,13 @@ namespace SmartMicrobus.Core.Services.Manager
         }
 
  
-        public async Task<ApiResponseWithData<byte[]>> ExportStationDriversExcelAsync(Guid managerId)
+        public async Task<ApiResponseWithData<byte[]>> ExportStationDriversExcelAsync(Guid stationId)
         {
-            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
-            if (manager == null)
-                return ApiResponseFactory.NotFound<byte[]>("Manager not found");
+            var station = await unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (station == null)
+                return ApiResponseFactory.NotFound<byte[]>("Station not found");
 
-            var drivers = await unitOfWork.DriverRepository.GetDriversByStationAsync(manager.StationId);
+            var drivers = await unitOfWork.DriverRepository.GetDriversByStationAsync(stationId);
 
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Drivers");
@@ -215,14 +219,14 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Excel generated successfully", content);
         }
 
-        public async Task<ApiResponseWithData<byte[]>> ExportStationRoutesExcelAsync(Guid managerId)
+        public async Task<ApiResponseWithData<byte[]>> ExportStationRoutesExcelAsync(Guid stationId)
         {
-            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
-            if (manager == null)
-                return ApiResponseFactory.NotFound<byte[]>("Manager not found");
+            var station = await unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (station == null)
+                return ApiResponseFactory.NotFound<byte[]>("Station not found");
 
-            var routes = await unitOfWork.RouteRepository.GetRoutesByFromAsync(manager.StationId);
-            var activeBuses = await unitOfWork.MicrobusRepository.GetActiveMicrobusesByStationAsync(manager.StationId);
+            var routes = await unitOfWork.RouteRepository.GetRoutesByFromAsync(stationId);
+            var activeBuses = await unitOfWork.MicrobusRepository.GetActiveMicrobusesByStationAsync(stationId);
 
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Drivers");
@@ -256,13 +260,13 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Excel generated successfully", content);
         }
 
-        public async Task<ApiResponseWithData<byte[]>> ExportMicrobusesExcelAsync(Guid managerId)
+        public async Task<ApiResponseWithData<byte[]>> ExportMicrobusesExcelAsync(Guid stationId)
         {
-            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
-            if (manager == null)
-                return ApiResponseFactory.NotFound<byte[]>("Manager not found");
+            var station = await unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (station == null)
+                return ApiResponseFactory.NotFound<byte[]>("Station not found");
 
-            var microbuses = await unitOfWork.MicrobusRepository.GetAllStationMicrobusesAsync(manager.StationId);
+            var microbuses = await unitOfWork.MicrobusRepository.GetAllStationMicrobusesAsync(stationId);
 
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Drivers");
@@ -296,6 +300,50 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Excel generated successfully", content);
         }
 
+        public async Task<ApiResponseWithData<byte[]>> ExportReportsExcelAsync(GetReportsQuery query, Guid stationId)
+        {
+            query.PageNumber = 1;
+            query.PageSize = int.MaxValue;
+
+            var (items, totalCount) = await unitOfWork.ReportRepository.GetPagedReportsForAdminAsync(query, stationId);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Reports");
+
+            worksheet.Cell(1, 1).Value = "Report ID";
+            worksheet.Cell(1, 2).Value = "Passenger Name";
+            worksheet.Cell(1, 3).Value = "Plate Number";
+            worksheet.Cell(1, 4).Value = "Driver Name";
+            worksheet.Cell(1, 5).Value = "Description";
+            worksheet.Cell(1, 6).Value = "Status";
+            worksheet.Cell(1, 7).Value = "Created At";
+            worksheet.Cell(1, 8).Value = "Resolved At";
+
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+
+            int row = 2;
+            foreach (var report in items)
+            {
+                worksheet.Cell(row, 1).Value = report.Id.ToString();
+                worksheet.Cell(row, 2).Value = report.Passenger?.ApplicationUser.DisplayName ?? "N/A";
+                worksheet.Cell(row, 3).Value = report.PlateNumber ?? "N/A";
+                worksheet.Cell(row, 4).Value = report.Driver?.ApplicationUser?.DisplayName ?? "N/A";
+                worksheet.Cell(row, 5).Value = report.Description ?? "N/A";
+                worksheet.Cell(row, 6).Value = report.Status.ToString();
+                worksheet.Cell(row, 7).Value = report.CreatedAt.ToString("yyyy-MM-dd HH:mm");
+                worksheet.Cell(row, 8).Value = report.ResolvedAt?.ToString("yyyy-MM-dd HH:mm") ?? "N/A";
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new System.IO.MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return ApiResponseFactory.Success("Excel generated successfully", content);
+        }
         public async Task<ApiResponse> GetPaginatedStationMicrobusesAsync(MicrobusQuery query, Guid stationId)
         {
             var (microbuses, totalCount) = await unitOfWork.MicrobusRepository.GetPaginatedByStationAsync(stationId, query);
@@ -316,7 +364,7 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Paginated drivers retrieved successfully.", result);
         }
 
-        public async Task<ApiResponse> AddStaffAsync(SmartMicrobus.Core.DTO.Staff.AddStaffDTO dto, Guid stationId)
+        public async Task<ApiResponse> AddStaffAsync(AddStaffDTO dto, Guid stationId)
         {
             var existingUser = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
             if (existingUser != null)
@@ -339,9 +387,9 @@ namespace SmartMicrobus.Core.Services.Manager
             }
 
             // Ensure the Staff role is assigned
-            await userManager.AddToRoleAsync(user, SmartMicrobus.Core.Enums.UserRole.Staff.ToString());
+            await userManager.AddToRoleAsync(user, UserRole.Staff.ToString());
 
-            var staff = new Staff
+            var staff = new StaffEntity
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
@@ -355,7 +403,7 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Staff added successfully.");
         }
 
-        public async Task<ApiResponse> UpdateStaffAsync(Guid staffId, SmartMicrobus.Core.DTO.Staff.UpdateStaffDTO dto, Guid stationId)
+        public async Task<ApiResponse> UpdateStaffAsync(Guid staffId, UpdateStaffDTO dto, Guid stationId)
         {
             var staff = await unitOfWork.StaffRepository.GetByIdAsync(staffId, s => s.User);
             if (staff == null || staff.StationId != stationId || staff.User.IsDeleted)
@@ -399,11 +447,11 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Staff deleted successfully.");
         }
 
-        public async Task<ApiResponse> GetPaginatedStationStaffAsync(SmartMicrobus.Core.DTO.Staff.StaffQuery query, Guid stationId)
+        public async Task<ApiResponse> GetPaginatedStationStaffAsync(StaffQuery query, Guid stationId)
         {
             var (staffs, totalCount) = await unitOfWork.StaffRepository.GetPaginatedByStationAsync(stationId, query);
 
-            var mappedStaff = staffs.Select(staff => new SmartMicrobus.Core.DTO.Staff.StaffResponseDTO
+            var mappedStaff = staffs.Select(staff => new StaffResponseDTO
             {
                 Id = staff.Id,
                 UserId = staff.UserId,
@@ -413,7 +461,7 @@ namespace SmartMicrobus.Core.Services.Manager
                 HasPassword = true
             }).ToList();
 
-            var result = new Pagination<List<SmartMicrobus.Core.DTO.Staff.StaffResponseDTO>>(query.PageNumber, query.PageSize, totalCount, mappedStaff);
+            var result = new Pagination<List<StaffResponseDTO>>(query.PageNumber, query.PageSize, totalCount, mappedStaff);
             return ApiResponseFactory.Success("Paginated staff retrieved successfully.", result);
         }
     }
