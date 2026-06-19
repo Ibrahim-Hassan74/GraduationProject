@@ -296,44 +296,14 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Excel generated successfully", content);
         }
 
-        public async Task<ApiResponse> GetPaginatedStationRoutesAsync(Guid managerId, int pageNumber, int pageSize)
+        public async Task<ApiResponse> GetPaginatedStationMicrobusesAsync(MicrobusQuery query, Guid stationId)
         {
-            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
-            if (manager == null)
-                return ApiResponseFactory.NotFound<string>("Manager not found");
+            var (microbuses, totalCount) = await unitOfWork.MicrobusRepository.GetPaginatedByStationAsync(stationId, query);
 
-            var routes = await unitOfWork.RouteRepository.GetRoutesByFromAsync(manager.StationId);
-            var totalCount = routes.Count();
+            var mappedMicrobuses = mapper.Map<List<MicrobusResponse>>(microbuses);
+            var result = new Pagination<List<MicrobusResponse>>(query.PageNumber, query.PageSize, totalCount, mappedMicrobuses);
 
-            var paginatedRoutes = routes
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            var mappedRoutes = mapper.Map<List<SmartMicrobus.Core.DTO.Route.RouteResponse>>(paginatedRoutes);
-            var result = new Pagination<List<SmartMicrobus.Core.DTO.Route.RouteResponse>>(pageNumber, pageSize, totalCount, mappedRoutes);
-
-            return ApiResponseFactory.Success("Paginated routes retrieved successfully", result);
-        }
-
-        public async Task<ApiResponse> GetPaginatedStationMicrobusesAsync(Guid managerId, int pageNumber, int pageSize)
-        {
-            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
-            if (manager == null)
-                return ApiResponseFactory.NotFound<string>("Manager not found");
-
-            var microbuses = await unitOfWork.MicrobusRepository.GetActiveMicrobusesByStationAsync(manager.StationId);
-            var totalCount = microbuses.Count();
-
-            var paginatedMicrobuses = microbuses
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            var mappedMicrobuses = mapper.Map<List<SmartMicrobus.Core.DTO.Microbus.MicrobusResponse>>(paginatedMicrobuses);
-            var result = new Pagination<List<SmartMicrobus.Core.DTO.Microbus.MicrobusResponse>>(pageNumber, pageSize, totalCount, mappedMicrobuses);
-
-            return ApiResponseFactory.Success("Paginated microbuses retrieved successfully", result);
+            return ApiResponseFactory.Success("Paginated microbuses retrieved successfully.", result);
         }
     }
 }

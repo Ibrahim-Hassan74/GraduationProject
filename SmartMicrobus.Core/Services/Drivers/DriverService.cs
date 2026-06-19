@@ -163,9 +163,7 @@ namespace SmartMicrobus.Core.Services.Drivers
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task<ApiResponse> StartTripAsync(Guid driverId)
-        {
-            var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
+        
 
         public async Task<ApiResponse> GetDriverByPlateNumber(string plateNumber)
         {
@@ -220,8 +218,7 @@ namespace SmartMicrobus.Core.Services.Drivers
                 history,
                 tripsHistory.TotalCount);
 
-            var driverInfo = _mapper.Map<DriverResponse>(driver);
-            return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
+            return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], response);
         }
     }
 }

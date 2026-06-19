@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Route;
@@ -30,7 +30,7 @@ namespace SmartMicrobus.API.Controllers
             var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
             var response = await _routeService.GetPaginatedRoutesAsync(query, stationId);
             if (!response.Success)
-                ToActionResult(response);
+                return ToActionResult(response);
             var result = response as ApiResponseWithData<Pagination<List<RouteDetails>>>;
 
             return Ok(result?.Data);

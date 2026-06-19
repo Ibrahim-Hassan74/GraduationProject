@@ -7,6 +7,7 @@ using SmartMicrobus.Core.ServiceContracts.Manager;
 using SmartMicrobus.Core.DTO.Microbus;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Station;
+using SmartMicrobus.Core.Helper;
 
 namespace SmartMicrobus.API.Controllers
 {
@@ -94,27 +95,6 @@ namespace SmartMicrobus.API.Controllers
         }
 
         [HttpGet]
-        [Route("export-station-data")]
-        public async Task<IActionResult> ExportStationData([FromQuery] DateTimeOffset startDate, [FromQuery] DateTimeOffset endDate)
-        {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
-            {
-                return Unauthorized(new { Message = "User ID not found or invalid." });
-            }
-
-            var response = await managerService.ExportStationDataExcelAsync(managerId, startDate, endDate);
-
-            if (!response.Success)
-            {
-                return ToActionResult(response);
-            }
-
-            var fileName = $"StationData_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}.xlsx";
-            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
-        }
-
-        [HttpGet]
         [Route("export-station-drivers")]
         public async Task<IActionResult> ExportStationDrivers()
         {
@@ -178,31 +158,21 @@ namespace SmartMicrobus.API.Controllers
         }
 
         [HttpGet]
-        [Route("station-routes")]
-        public async Task<IActionResult> GetPaginatedStationRoutes([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
-            {
-                return Unauthorized(new { Message = "User ID not found or invalid." });
-            }
-
-            var response = await managerService.GetPaginatedStationRoutesAsync(managerId, pageNumber, pageSize);
-            return ToActionResult(response);
-        }
-
-        [HttpGet]
         [Route("station-microbuses")]
-        public async Task<IActionResult> GetPaginatedStationMicrobuses([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetPaginatedStationMicrobuses([FromQuery] MicrobusQuery query)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
             {
-                return Unauthorized(new { Message = "User ID not found or invalid." });
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
             }
 
-            var response = await managerService.GetPaginatedStationMicrobusesAsync(managerId, pageNumber, pageSize);
-            return ToActionResult(response);
+            var response = await managerService.GetPaginatedStationMicrobusesAsync(query, stationId);
+            if (!response.Success)
+                return ToActionResult(response);
+
+            var result = response as ApiResponseWithData<Pagination<List<MicrobusResponse>>>;
+            return Ok(result?.Data);
         }
     }
 }

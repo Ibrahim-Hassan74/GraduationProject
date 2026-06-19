@@ -12,10 +12,9 @@ namespace SmartMicrobus.Core.ServiceContracts.Manager
         Task<ApiResponse> AssignDriverToMicrobusAsync(DriverAssignRequest driverAssignRequest);
         Task<ApiResponse> GetStationDashboardAsync(Guid stationId);
         Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid managerId, DateTimeOffset startDate, DateTimeOffset endDate);
+        Task <ApiResponseWithData<byte[]>> ExportStationRoutesExcelAsync(Guid managerId);
         Task<ApiResponseWithData<byte[]>> ExportStationDriversExcelAsync(Guid managerId);
-        Task<ApiResponseWithData<byte[]>> ExportStationRoutesExcelAsync(Guid managerId);
         Task<ApiResponseWithData<byte[]>> ExportMicrobusesExcelAsync(Guid managerId);
-        Task<ApiResponse> GetPaginatedStationRoutesAsync(Guid managerId, int pageNumber, int pageSize);
-        Task<ApiResponse> GetPaginatedStationMicrobusesAsync(Guid managerId, int pageNumber, int pageSize);
+        Task<ApiResponse> GetPaginatedStationMicrobusesAsync(MicrobusQuery query, Guid stationId);
     }
 }

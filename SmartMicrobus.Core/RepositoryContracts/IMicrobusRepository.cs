@@ -1,4 +1,5 @@
 using SmartMicrobus.Core.Domain.Entities;
+using SmartMicrobus.Core.DTO.Microbus;
 
 namespace SmartMicrobus.Core.RepositoryContracts
 {
@@ -9,5 +10,6 @@ namespace SmartMicrobus.Core.RepositoryContracts
 
         Task<List<Microbus>> GetAllStationMicrobusesAsync(Guid stationId);
         Task<List<Microbus>> GetActiveMicrobusesByStationAsync(Guid stationId);
+        Task<(List<Microbus> Microbuses, int TotalCount)> GetPaginatedByStationAsync(Guid stationId, MicrobusQuery query);
     }
 }
