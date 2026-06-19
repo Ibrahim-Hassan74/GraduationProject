@@ -1,4 +1,4 @@
-﻿using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Queue;
 

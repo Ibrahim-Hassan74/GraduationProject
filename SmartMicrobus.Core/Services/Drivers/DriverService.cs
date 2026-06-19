@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
@@ -161,16 +161,16 @@ namespace SmartMicrobus.Core.Services.Drivers
 
 
         public async Task<ApiResponse> GetDriverByPlateNumber(string plateNumber)
-            {
+        {
             var driver = await _driverRepository.GetDriverByPlateNumber(plateNumber);
             if (driver == null)
                 return ApiResponseFactory.NotFound(_localizer["Driver_Not_Found_By_Plate"]);
             var driverInfo = _mapper.Map<DriverResponse>(driver);
             return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
-            }
+        }
 
         public async Task<ApiResponseWithData<DriverResponse>> GetDriverByLicenseAsync(string licenseNumber)
-            {
+        {
             var driver = await _driverRepository.GetDriverByLicense(licenseNumber);
             if (driver == null)
                 return ApiResponseFactory.NotFound<DriverResponse>(_localizer["Driver_Not_Found_By_License"]);
