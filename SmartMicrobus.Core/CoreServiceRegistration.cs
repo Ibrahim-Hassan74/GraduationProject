@@ -29,6 +29,8 @@ using System.Text;
 using System.Text.Json;
 using SmartMicrobus.Core.Services.Manager;
 using SmartMicrobus.Core.Services.Report;
+using SmartMicrobus.Core.ServiceContracts.Microbus;
+using SmartMicrobus.Core.Services.Microbus;
 
 namespace SmartMicrobus.Core
 {
@@ -132,6 +134,7 @@ namespace SmartMicrobus.Core
             services.AddScoped<IManagerService, ManagerService>();
             services.AddScoped<ICustomWhatsAppService, CustomWhatsAppService>();
             services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IMicrobusService, MicrobusService>();
 
             // Location tracking services
             services.AddScoped<ILocationTrackingService, LocationTrackingService>();       

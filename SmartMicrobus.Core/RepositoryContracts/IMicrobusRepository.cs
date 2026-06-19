@@ -1,4 +1,5 @@
 using SmartMicrobus.Core.Domain.Entities;
+using SmartMicrobus.Core.DTO.Microbus;
 
 namespace SmartMicrobus.Core.RepositoryContracts
 {
@@ -6,5 +7,7 @@ namespace SmartMicrobus.Core.RepositoryContracts
     {
         Task<Microbus?> GetByQrCodeAsync(string qrCode);
         Task<Driver?> GetDriverAsync(string plateNumber);
+        Task<(IEnumerable<Microbus> Microbuses, int TotalCount)> GetFilteredMicrobusesAsync(Guid stationId, MicrobusQuery filter);
+        Task<Microbus?> GetByIdWithDetailsAsync(Guid microbusId, Guid stationId);
     }
 }
