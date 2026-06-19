@@ -35,9 +35,6 @@ namespace SmartMicrobus.Core.Services.Drivers
             _driverRepository = unitOfWork.DriverRepository;
         }
 
-        public async Task<ApiResponse> EndTripAsync(Guid driverId)
-        {
-            var trip = await _tripRepository.GetActiveTripAsync(driverId);
 
             if (trip == null)
                 return ApiResponseFactory.Failure(_localizer["NoActiveTripFound"], 404);
