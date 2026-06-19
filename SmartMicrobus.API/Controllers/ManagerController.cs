@@ -139,5 +139,33 @@ namespace SmartMicrobus.API.Controllers
             var fileName = $"Microbuses_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
             return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
+
+        [HttpGet]
+        [Route("station-routes")]
+        public async Task<IActionResult> GetPaginatedStationRoutes([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.GetPaginatedStationRoutesAsync(managerId, pageNumber, pageSize);
+            return ToActionResult(response);
+        }
+
+        [HttpGet]
+        [Route("station-microbuses")]
+        public async Task<IActionResult> GetPaginatedStationMicrobuses([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.GetPaginatedStationMicrobusesAsync(managerId, pageNumber, pageSize);
+            return ToActionResult(response);
+        }
     }
 }
