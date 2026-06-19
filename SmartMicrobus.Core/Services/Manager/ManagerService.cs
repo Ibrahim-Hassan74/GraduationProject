@@ -46,7 +46,7 @@ namespace SmartMicrobus.Core.Services.Manager
 
         public async Task<ApiResponse> AddMicrobusAsync(MicrobusAddRequest microbusAddRequest)
         {
-            var microbus = new Microbus
+            var microbus = new Core.Domain.Entities.Microbus
             {
                 Id = Guid.NewGuid(),
                 Color = microbusAddRequest.Color,
