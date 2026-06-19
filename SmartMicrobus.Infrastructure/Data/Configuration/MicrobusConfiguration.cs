@@ -1,4 +1,4 @@
-﻿
+
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,11 +22,6 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
                 .WithMany(r => r.Microbuses)
                 .HasForeignKey(m => m.RouteId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-                builder.HasOne(m => m.Route)
-                    .WithMany()
-                    .HasForeignKey(m => m.RouteId)
-                    .OnDelete(DeleteBehavior.Restrict);
 
                 builder.HasOne(m => m.Driver)
                     .WithOne(d => d.Microbus)
