@@ -1,17 +1,20 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using SmartMicrobus.Core.DTO.Driver;
-using SmartMicrobus.Core.Enums;
-using SmartMicrobus.Core.ServiceContracts.Manager;
-using SmartMicrobus.Core.DTO.Microbus;
 using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Driver;
+using SmartMicrobus.Core.DTO.Microbus;
+using SmartMicrobus.Core.DTO.Staff;
 using SmartMicrobus.Core.DTO.Station;
+using SmartMicrobus.Core.Enums;
+using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.ServiceContracts.Manager;
+using SmartMicrobus.Core.ServiceContracts.Staff;
+using System.Security.Claims;
 
 namespace SmartMicrobus.API.Controllers
 {
     [Authorize(Roles = nameof(UserRole.Manager))]
-    public class ManagerController(IManagerService managerService) : CustomControllerBase
+    public class ManagerController(IManagerService managerService, IStaffService staffService) : CustomControllerBase
     {
         [HttpPost]
         [Route("add-driver")]
@@ -92,5 +95,14 @@ namespace SmartMicrobus.API.Controllers
             var fileName = $"StationData_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}.xlsx";
             return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
+        [HttpPost("check-in")]
+        public async Task<IActionResult> CheckInAtGate([FromBody] CheckInRequest request)
+        {
+            var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
+            var response = await staffService.CheckInAtGateAsync(request.QrCode, stationId);
+            return ToActionResult(response);
+        }
+
+
     }
 }
