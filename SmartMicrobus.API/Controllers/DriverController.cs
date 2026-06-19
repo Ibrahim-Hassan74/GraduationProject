@@ -16,6 +16,27 @@ namespace SmartMicrobus.API.Controllers
     [Authorize(Roles = nameof(UserRole.Driver))]
     public class DriverController(IDriverService driverService, ITripService tripService, ILocationTrackingService locationTrackingService ) : CustomControllerBase
     {
+        [HttpGet("{driverId}")]
+        public async Task<IActionResult> GetDriverById([FromRoute] Guid driverId)
+        {
+            var response = await driverService.GetDriverByIdAsync(driverId);
+            if (!response.Success)
+                return ToActionResult(response);
+
+            return Ok(response);
+        }
+
+        [HttpGet("license/{licenseNumber}")]
+        public async Task<IActionResult> GetDriverByLicense([FromRoute] string licenseNumber)
+        {
+            var response = await driverService.GetDriverByLicenseAsync(licenseNumber);
+            if (!response.Success)
+                return ToActionResult(response);
+
+            return Ok(response);
+        }
+    
+
         [HttpGet("get-current-postion")]
         public async Task<IActionResult> CurrentPosition()
         {
