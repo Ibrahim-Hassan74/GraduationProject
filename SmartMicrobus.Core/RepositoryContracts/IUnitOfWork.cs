@@ -19,6 +19,7 @@ namespace SmartMicrobus.Core.RepositoryContracts
         IReportRepository ReportRepository { get; }
         IReportReasonRepository ReportReasonRepository { get; }
         IStaffRepository StaffRepository { get; }
+        IUserRepository UserRepository { get; }
 
         Task<int> CompleteAsync();
 
