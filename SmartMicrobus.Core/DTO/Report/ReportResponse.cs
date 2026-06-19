@@ -10,6 +10,8 @@ namespace SmartMicrobus.Core.DTO.Report
 
         public DateTimeOffset CreatedAt { get; set; }
 
+        public DateTimeOffset? ResolvedAt { get; set; }
+
         public string Status { get; set; }
     }
 }

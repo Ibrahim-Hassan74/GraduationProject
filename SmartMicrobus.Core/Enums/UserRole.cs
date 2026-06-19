@@ -6,6 +6,7 @@
         Manager,
         Staff,
         Driver,
-        Passenger
+        Passenger,
+        Owner
     }
 }

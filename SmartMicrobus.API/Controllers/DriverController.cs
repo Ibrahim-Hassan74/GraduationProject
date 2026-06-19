@@ -141,7 +141,7 @@ namespace SmartMicrobus.API.Controllers
 
         [HttpGet("location/{driverId}")]
         [AllowAnonymous]
-        [TypeFilter(typeof(PassengerOnlyFilter))]
+        [TypeFilter(typeof(CustomAuthorizeFilter))]
         public async Task<IActionResult> GetDriverLocation(Guid driverId)
         {
             var response = await locationTrackingService.GetDriverLocationAsync(driverId);

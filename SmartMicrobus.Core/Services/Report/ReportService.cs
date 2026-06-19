@@ -1,13 +1,17 @@
 using AutoMapper;
+using Hangfire;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
+using SmartMicrobus.Core.Domain.Entities;
+using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Report;
-using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
+using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Report;
 using System.Globalization;
-using Microsoft.Extensions.Localization;
 
 namespace SmartMicrobus.Core.Services.Report
 {
@@ -18,20 +22,69 @@ namespace SmartMicrobus.Core.Services.Report
         private readonly IReportReasonRepository _reasonRepository;
         private readonly IMapper _mapper;
         private readonly IStringLocalizer<ReportService> _localizer;
-
-        public ReportService(IUnitOfWork unitOfWork, IMapper mapper, IStringLocalizer<ReportService> localizer)
+        private readonly ICustomWhatsAppService _customWhatsAppService;
+        private readonly UserManager<ApplicationUser> _userManager;
+        public ReportService(IUnitOfWork unitOfWork, IMapper mapper, IStringLocalizer<ReportService> localizer, ICustomWhatsAppService customWhatsAppService, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _reportRepository = unitOfWork.ReportRepository;
             _reasonRepository = unitOfWork.ReportReasonRepository;
             _mapper = mapper;
             _localizer = localizer;
+            _customWhatsAppService = customWhatsAppService;
+            _userManager = userManager;
+        }
+
+        public async Task<ApiResponse> GetAllReportsAsync(GetReportsQuery query, Guid stationId)
+        {
+
+            var (items, totalCount) = await _reportRepository.GetPagedReportsForAdminAsync(query, stationId);
+
+            var reportResponses = _mapper.Map<List<ReportResponse>>(items);
+
+            var pagedResponse = new PagedResponse<ReportResponse>
+            {
+                Items = reportResponses,
+                TotalCount = totalCount,
+                PageNumber = query.PageNumber,
+                PageSize = query.PageSize
+            };
+
+            return ApiResponseFactory.Success(_localizer["ReportsRetrieved"], pagedResponse);
+        }
+
+        public async Task<ApiResponse> GetReportByIdForAdminAsync(Guid reportId, Guid stationId)
+        {
+            var report = await _reportRepository.GetByIdWithReasonsAsync(reportId, stationId);
+
+            if (report == null)
+                return ApiResponseFactory.NotFound(_localizer["ReportNotFound"]);
+
+            var reportResponse = _mapper.Map<ReportResponseForManager>(report);
+
+            return ApiResponseFactory.Success(_localizer["ReportRetrieved"], reportResponse);
+        }
+
+        public async Task<ApiResponse> UpdateReportStatusAsync(Guid reportId, UpdateReportStatusRequest request)
+        {
+            var report = await _reportRepository.GetByIdAsync(reportId);
+
+            if (report == null)
+                return ApiResponseFactory.NotFound(_localizer["ReportNotFound"]);
+
+            report.Status = request.Status;
+            report.ResolvedAt = request.Status == ReportStatus.Reviewed ? DateTimeOffset.UtcNow : (DateTimeOffset?)null;
+
+            await _reportRepository.UpdateAsync(report);
+            await _unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success(_localizer["ReportUpdated"]);
         }
 
         public async Task<ApiResponse> CreateReportAsync(Guid passengerId, CreateReportRequest request)
         {
-           var validate= ValidationHelper.ModelValidation(request);
-            if(!validate.Success)
+            var validate = ValidationHelper.ModelValidation(request);
+            if (!validate.Success)
                 return validate;
 
             var driver = await _unitOfWork.MicrobusRepository.GetDriverAsync(request.PlateNumber);
@@ -76,6 +129,16 @@ namespace SmartMicrobus.Core.Services.Report
 
             await _reportRepository.AddAsync(report);
             await _unitOfWork.CompleteAsync();
+            var user = await _userManager.FindByIdAsync(passengerId.ToString());
+            if (user != null)
+            {
+                BackgroundJob.Enqueue(() =>
+                    _customWhatsAppService.SendMessageAsync(
+                        user.PhoneNumber!,
+                        _localizer["Report_Submitted_Message"]
+                    )
+                );
+            }
 
             return ApiResponseFactory.Success(
                 _localizer["Report_Submitted_Success"]

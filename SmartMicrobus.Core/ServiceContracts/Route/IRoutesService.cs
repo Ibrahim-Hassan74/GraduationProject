@@ -7,7 +7,7 @@ namespace SmartMicrobus.Core.ServiceContracts.Route
     {
         Task<ApiResponse> GetAllRoutesAsync(); // return List<RouteLocationResponse>
 
-        Task<ApiResponse> GetPaginatedRoutesAsync(int pageNumber, int pageSize);
+        Task<ApiResponse> GetPaginatedRoutesAsync(RouteQuery query, Guid stationId);
 
         Task<ApiResponse> GetDestinationsByFromAsync(Guid fromStationId); // return List<DestinationResponse> of destinations
 
@@ -21,5 +21,6 @@ namespace SmartMicrobus.Core.ServiceContracts.Route
 
         Task<ApiResponse> UpdateRouteAsync(RouteUpdateRequest routeUpdateRequest);
         Task<ApiResponse> DeleteRouteAsync(Guid routeId);
+        Task<ApiResponse> GetRouteByIdAsync(Guid routeId, Guid stationId);
     }
 }

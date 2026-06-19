@@ -11,6 +11,7 @@ using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.Resources;
 using SmartMicrobus.Core.Resources.Services.Drivers;
 using SmartMicrobus.Core.ServiceContracts.Drivers;
+using SmartMicrobus.Core.ServiceContracts.Route;
 
 namespace SmartMicrobus.Core.Services.Drivers
 {
@@ -22,10 +23,12 @@ namespace SmartMicrobus.Core.Services.Drivers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStringLocalizer<DriverService> _localizer;
         private readonly IDriverRepository _driverRepository;
+        private readonly IRouteTrackingNotificationService _routeTrackingNotificationService;
         public DriverService(
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IStringLocalizer<DriverService> localizer)
+            IStringLocalizer<DriverService> localizer,
+            IRouteTrackingNotificationService routeTrackingNotificationService)
         {
             _queueItemRepository = unitOfWork.QueueItemRepository;
             _tripRepository = unitOfWork.TripRepository;
@@ -33,6 +36,7 @@ namespace SmartMicrobus.Core.Services.Drivers
             _unitOfWork = unitOfWork;
             _localizer = localizer;
             _driverRepository = unitOfWork.DriverRepository;
+            _routeTrackingNotificationService = routeTrackingNotificationService;
         }
 
 
@@ -159,6 +163,9 @@ namespace SmartMicrobus.Core.Services.Drivers
             await _unitOfWork.CompleteAsync();
         }
 
+        public async Task<ApiResponse> StartTripAsync(Guid driverId)
+        {
+            var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
 
         public async Task<ApiResponse> GetDriverByPlateNumber(string plateNumber)
         {
@@ -168,7 +175,6 @@ namespace SmartMicrobus.Core.Services.Drivers
             var driverInfo = _mapper.Map<DriverResponse>(driver);
             return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
         }
-
         public async Task<ApiResponseWithData<DriverResponse>> GetDriverByLicenseAsync(string licenseNumber)
         {
             var driver = await _driverRepository.GetDriverByLicense(licenseNumber);
@@ -184,6 +190,35 @@ namespace SmartMicrobus.Core.Services.Drivers
             var driver = await _driverRepository.GetByIdAsync(driverId);
             if (driver == null)
                 return ApiResponseFactory.NotFound<DriverResponse>(_localizer["Driver_Not_Found_By_Id"]);
+
+            var driverInfo = _mapper.Map<DriverResponse>(driver);
+            return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
+        }
+
+        public async Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request)
+        {
+            if (!request.FromDate.HasValue && !request.ToDate.HasValue)
+            {
+                request.FromDate = DateTime.Today;
+                request.ToDate = DateTime.Today.AddDays(1);
+            }
+            else
+            {
+                request.FromDate = request.FromDate ?? DateTime.MinValue;
+                request.ToDate = request.ToDate ?? DateTime.MaxValue;
+            }
+
+            var tripsHistory = await _tripRepository.GetDriverTripsAsync(driverId, request);
+
+            if (tripsHistory == null || !tripsHistory.Trips.Any())
+                return ApiResponseFactory.NotFound(_localizer["NoTripsFoundForPeriod"]);
+
+            var history = _mapper.Map<List<TripHistoryDTO>>(tripsHistory.Trips);
+
+            var response = new DriverHistoryResponse(
+                tripsHistory.TotalAmount,
+                history,
+                tripsHistory.TotalCount);
 
             var driverInfo = _mapper.Map<DriverResponse>(driver);
             return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);

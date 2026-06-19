@@ -1,3 +1,4 @@
+using SmartMicrobus.Core.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartMicrobus.Core.DTO.Report
@@ -5,7 +6,7 @@ namespace SmartMicrobus.Core.DTO.Report
     public class GetReportsQuery
     {
         [StringLength(200)]
-        public string? PlateNumber { get; set; }
+        public string? PlateNumber { get; set; } 
 
         public DateTime? FromDate { get; set; }
 
@@ -16,5 +17,9 @@ namespace SmartMicrobus.Core.DTO.Report
 
         [Range(1, 100, ErrorMessage = "Page size must be between 1 and 100.")]
         public int PageSize { get; set; } = 10;
+        public ReportStatus? Status { get; set; }
+        public SortOrderOptions OrderOptions { get; set; } = SortOrderOptions.ASC;
+        public OrderByOptions OrderByOptions { get; set; } = OrderByOptions.CreatedAt;
+
     }
 }

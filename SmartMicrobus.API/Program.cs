@@ -1,7 +1,9 @@
+using Hangfire;
+using Microsoft.Extensions.Options;
+using SmartMicrobus.API.Filters;
 using SmartMicrobus.API.Hubs;
 using SmartMicrobus.API.Middleware;
 using SmartMicrobus.API.StartupExtensions;
-using Microsoft.Extensions.Options;
 using SmartMicrobus.Core;
 using SmartMicrobus.Infrastructure;
 
@@ -30,7 +32,7 @@ var localizationOptions = app.Services
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "1.0");
         options.SwaggerEndpoint("/swagger/v2/swagger.json", "2.0");
-    }); 
+    });
 }
 app.UseExceptionHandlingMiddleware();
 
@@ -40,6 +42,8 @@ app.UseStaticFiles();
 
 app.UseCors("AllowAllOrigins");
 
+app.UseRateLimiter();
+
 app.UseHttpsRedirection();
 
 app.UseRequestLocalization(localizationOptions);
@@ -48,6 +52,12 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.UseHangfireDashboard("/dashboard", new DashboardOptions
+{
+    Authorization = new[] { new HangfireAuthorizationFilter(app.Services, app.Environment) },
+    AppPath = null
+});
+
 app.MapControllers();
 
 app.MapHub<DriverQueueHub>("/hubs/driver-queue");
@@ -55,5 +65,7 @@ app.MapHub<DriverQueueHub>("/hubs/driver-queue");
 app.MapHub<DriverDashboardHub>("/hubs/driver-dashboard");
 
 app.MapHub<LocationTrackingHub>("/hubs/location-tracking");
+
+app.MapHub<RouteTrackingHub>("/hubs/route-tracking");
 
 app.Run();

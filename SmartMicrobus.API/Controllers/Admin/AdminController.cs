@@ -7,7 +7,6 @@ using SmartMicrobus.Core.ServiceContracts.Admin;
 namespace SmartMicrobus.API.Controllers.Admin
 {
     [Authorize(Roles = nameof(UserRole.Admin))]
-    [Route("api/admin")]
     public class AdminController(IAdminService adminService) : CustomControllerBase
     {
         [HttpPost("add-manager")]

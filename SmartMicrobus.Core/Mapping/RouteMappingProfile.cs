@@ -44,8 +44,20 @@ namespace SmartMicrobus.Core.Mapping
             CreateMap<RouteUpdateRequest, Route>();
             CreateMap<Route, RouteResponse>();
 
+            CreateMap<Route, RouteDetails>()
+            .ForMember(dest => dest.From,
+                opt => opt.MapFrom(src =>
+                    CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                        ? src.FromAr
+                        : src.FromEn))
 
-          
+            .ForMember(dest => dest.To,
+                opt => opt.MapFrom(src =>
+                    CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ar"
+                        ? src.ToAr
+                        : src.ToEn));
+
+
 
         }
     }

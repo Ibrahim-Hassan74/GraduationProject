@@ -124,6 +124,17 @@ namespace SmartMicrobus.Core.Resources.Services.Report {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your report has been submitted successfully.
+        ///The report will be reviewed and the appropriate action will be taken as soon as possible.
+        ///Thank you for cooperating with Wasla..
+        /// </summary>
+        public static string Report_Submitted_Message {
+            get {
+                return ResourceManager.GetString("Report_Submitted_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Report submitted successfully..
         /// </summary>
         public static string Report_Submitted_Success {

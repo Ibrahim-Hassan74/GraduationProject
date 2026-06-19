@@ -8,7 +8,7 @@ using SmartMicrobus.Core.Enums;
 
 namespace SmartMicrobus.API.Controllers
 {
-    [Authorize(Roles = nameof(UserRole.Passenger))]
+    [Authorize]
     public class ReportController : CustomControllerBase
     {
         private readonly IReportService _reportService;
@@ -19,7 +19,7 @@ namespace SmartMicrobus.API.Controllers
         }
 
         [HttpPost]
-
+        [Authorize(Roles = nameof(UserRole.Passenger))]
         public async Task<IActionResult> CreateReport([FromBody] CreateReportRequest request)
         {
             var passengerId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -44,6 +44,7 @@ namespace SmartMicrobus.API.Controllers
 
         [HttpGet]
 
+        [Authorize(Roles = nameof(UserRole.Passenger))]
         public async Task<IActionResult> GetReports([FromQuery] GetReportsQuery query)
         {
             var passengerId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -59,8 +60,9 @@ namespace SmartMicrobus.API.Controllers
 
         }
 
-        [HttpGet("{id}")]
 
+        [HttpGet("{id}")]
+        [Authorize(Roles = nameof(UserRole.Passenger))]
         public async Task<IActionResult> GetReportById(Guid id)
         {
             var passengerId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
@@ -76,7 +78,7 @@ namespace SmartMicrobus.API.Controllers
         }
 
         [HttpPut("{id}")]
-
+        [Authorize(Roles = nameof(UserRole.Passenger))]
         public async Task<IActionResult> UpdateReport(Guid id, [FromBody] UpdateReportRequest request)
         {
             var passengerId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
@@ -84,13 +86,54 @@ namespace SmartMicrobus.API.Controllers
             return ToActionResult(res);
         }
 
-        [HttpDelete("{id}")]
 
+        [HttpDelete("{id}")]
+        [Authorize(Roles = nameof(UserRole.Passenger))]
         public async Task<IActionResult> DeleteReport(Guid id)
         {
             var passengerId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var res = await _reportService.DeleteReportAsync(passengerId, id);
 
+            return ToActionResult(res);
+        }
+
+        // Admin / Manager endpoints
+        [HttpGet("admin/all")]
+        [Authorize(Roles = nameof(UserRole.Manager))]
+        public async Task<IActionResult> GetAllReports([FromQuery] GetReportsQuery query)
+        {
+            var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
+            var res = await _reportService.GetAllReportsAsync(query, stationId);
+
+            if (!res.Success)
+            {
+                return ToActionResult(res);
+            }
+            var response = res as ApiResponseWithData<PagedResponse<ReportResponse>>;
+            return Ok(response?.Data);
+        }
+
+        [HttpGet("admin/{id}")]
+        [Authorize(Roles = nameof(UserRole.Manager))]
+        public async Task<IActionResult> GetReportByIdForAdmin(Guid id)
+        {
+
+            var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
+            var res = await _reportService.GetReportByIdForAdminAsync(id, stationId);
+
+            if (!res.Success)
+            {
+                return ToActionResult(res);
+            }
+            var response = res as ApiResponseWithData<ReportResponseForManager>;
+            return Ok(response?.Data);
+        }
+
+        [HttpPatch("admin/{id}/status")]
+        [Authorize(Roles = nameof(UserRole.Manager))]
+        public async Task<IActionResult> UpdateReportStatus(Guid id, [FromBody] UpdateReportStatusRequest request)
+        {
+            var res = await _reportService.UpdateReportStatusAsync(id, request);
             return ToActionResult(res);
         }
     }

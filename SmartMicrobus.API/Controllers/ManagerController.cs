@@ -5,6 +5,8 @@ using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.ServiceContracts.Manager;
 using SmartMicrobus.Core.DTO.Microbus;
+using SmartMicrobus.Core.DTO.Common;
+using SmartMicrobus.Core.DTO.Station;
 
 namespace SmartMicrobus.API.Controllers
 {
@@ -54,6 +56,41 @@ namespace SmartMicrobus.API.Controllers
                 return BadRequest("failed to assign driver");
 
             return Ok(result);
+        }
+        [HttpGet("dashboard/overview")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
+
+            var result = await managerService.GetStationDashboardAsync(stationId);
+
+            if (!result.Success)
+                return ToActionResult(result);
+
+            var response = result as ApiResponseWithData<StationDashboardDTO>;
+
+            return Ok(response?.Data);
+        }
+
+        [HttpGet]
+        [Route("export-station-data")]
+        public async Task<IActionResult> ExportStationData([FromQuery] DateTimeOffset startDate, [FromQuery] DateTimeOffset endDate)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.ExportStationDataExcelAsync(managerId, startDate, endDate);
+
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileName = $"StationData_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}.xlsx";
+            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
         [HttpGet]

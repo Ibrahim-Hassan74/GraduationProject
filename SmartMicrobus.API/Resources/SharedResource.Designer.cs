@@ -115,6 +115,15 @@ namespace SmartMicrobus.API.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Something went wrong. Please try again later..
+        /// </summary>
+        public static string InternalServerError {
+            get {
+                return ResourceManager.GetString("InternalServerError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Email &apos;{0}&apos; is invalid..
         /// </summary>
         public static string InvalidEmail {
@@ -228,6 +237,15 @@ namespace SmartMicrobus.API.Resources {
         public static string StationNotFound {
             get {
                 return ResourceManager.GetString("StationNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Too Many Requests. Please try again later..
+        /// </summary>
+        public static string TooManyRequests {
+            get {
+                return ResourceManager.GetString("TooManyRequests", resourceCulture);
             }
         }
         

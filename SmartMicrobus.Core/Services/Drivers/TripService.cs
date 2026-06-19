@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
@@ -8,16 +8,36 @@ using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Driver;
+using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.Services.Common;
 
 namespace SmartMicrobus.Core.Services.Drivers
 {
-    public class TripService(IUnitOfWork _unitOfWork, IMapper _mapper, DriverDashboardRealtimeService driverDashboardRealtime, IStringLocalizer<TripService> localizer) : ITripService
+    public class TripService : ITripService
     {
-        private readonly IQueueItemRepository _queueItemRepository = _unitOfWork.QueueItemRepository;
-        private readonly ITripRepository _tripRepository = _unitOfWork.TripRepository;
-        private readonly IStringLocalizer<TripService> _localizer = localizer;
-        private readonly DriverDashboardRealtimeService _driverDashboardRealtime = driverDashboardRealtime;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly IQueueItemRepository _queueItemRepository;
+        private readonly ITripRepository _tripRepository;
+        private readonly IStringLocalizer<TripService> _localizer;
+        private readonly DriverDashboardRealtimeService _driverDashboardRealtime;
+        private readonly IRouteTrackingNotificationService _routeTrackingNotificationService;
+
+        public TripService(
+            IUnitOfWork unitOfWork,
+            IMapper mapper,
+            DriverDashboardRealtimeService driverDashboardRealtime,
+            IStringLocalizer<TripService> localizer,
+            IRouteTrackingNotificationService routeTrackingNotificationService)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+            _queueItemRepository = _unitOfWork.QueueItemRepository;
+            _tripRepository = _unitOfWork.TripRepository;
+            _localizer = localizer;
+            _driverDashboardRealtime = driverDashboardRealtime;
+            _routeTrackingNotificationService = routeTrackingNotificationService;
+        }
         public async Task<ApiResponse> StartTripAsync(Guid driverId)
         {
             var queueItem = await _queueItemRepository.GetActiveByDriverIdAsync(driverId);
@@ -63,25 +83,26 @@ namespace SmartMicrobus.Core.Services.Drivers
 
             await _tripRepository.UpdateAsync(trip);
             await _unitOfWork.CompleteAsync();
-            await _driverDashboardRealtime.PushDashboard(driverId); 
+            await _driverDashboardRealtime.PushDashboard(driverId);
+
+            // Clean up driver's ETA and notify route subscribers
+            _routeTrackingNotificationService.RemoveDriverEta(trip.RouteId, driverId);
+            await _routeTrackingNotificationService.NotifyRouteUpdated(trip.RouteId);
 
             return ApiResponseFactory.Success(_localizer["TripEndedSuccessfully"]);
         }
 
         public async Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request)
         {
-            DateTime from;
-            DateTime to;
-
             if (!request.FromDate.HasValue && !request.ToDate.HasValue)
             {
-                from = DateTime.Today;
-                to = DateTime.Today.AddDays(1);
+                request.FromDate = DateTime.Today;
+                request.ToDate = DateTime.Today.AddDays(1);
             }
             else
             {
-                from = request.FromDate ?? DateTime.MinValue;
-                to = request.ToDate ?? DateTime.MaxValue;
+                request.FromDate = request.FromDate ?? DateTime.MinValue;
+                request.ToDate = request.ToDate ?? DateTime.MaxValue;
             }
 
             var tripsHistory = await _tripRepository.GetDriverTripsAsync(driverId, request);

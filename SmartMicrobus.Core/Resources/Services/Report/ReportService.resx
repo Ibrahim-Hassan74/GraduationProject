@@ -170,5 +170,9 @@
 <data name="ReportDeleted" xml:space="preserve">
   <value>Report deleted successfully.</value>
 </data>
-
+	<data name="Report_Submitted_Message" xml:space="preserve">
+  <value>Your report has been submitted successfully.
+The report will be reviewed and the appropriate action will be taken as soon as possible.
+Thank you for cooperating with Wasla.</value>
+</data>
 </root>

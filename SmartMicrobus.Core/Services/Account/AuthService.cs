@@ -33,6 +33,7 @@ namespace SmartMicrobus.Core.Services.Account
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
         private readonly IStringLocalizer<AuthService> _localizer;
+        private readonly ICustomWhatsAppService _customWhatsAppService;
         public AuthService(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IJwtService jwtService,
@@ -43,7 +44,8 @@ namespace SmartMicrobus.Core.Services.Account
             RoleManager<ApplicationRole> roleManager,
             IMapper mapper,
             IConfiguration configuration,
-            IStringLocalizer<AuthService> localizer)
+            IStringLocalizer<AuthService> localizer,
+            ICustomWhatsAppService customWhatsAppService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -58,6 +60,7 @@ namespace SmartMicrobus.Core.Services.Account
             _mapper = mapper;
             _configuration = configuration;
             _localizer = localizer;
+            _customWhatsAppService = customWhatsAppService;
         }
 
         // Parse stored token format:
@@ -87,10 +90,14 @@ namespace SmartMicrobus.Core.Services.Account
             try
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
-                var ok = await _whatsAppService.SendOTPAsync(
-                    user.PhoneNumber!,
-                    otp,
-                    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //var ok = await _whatsAppService.SendOTPAsync(
+                //    user.PhoneNumber!,
+                //    otp,
+                //    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //);
+
+                var ok = await _customWhatsAppService.SendMessageAsync(
+                    user.PhoneNumber!, _localizer["ConfirmAccount_Message", otp]
                 );
 
                 if (!ok)
@@ -128,6 +135,15 @@ namespace SmartMicrobus.Core.Services.Account
 
         public async Task<ApiResponse> RegisterPassengerAsync(RegisterPassengerDTO dto)
         {
+            var existingUser = await _userManager.Users
+                    .SingleOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+
+            if (existingUser != null)
+            {
+                return ApiResponseFactory.BadRequest(
+                    _localizer["PhoneNumberAlreadyExists"]
+                );
+            }
             var user = new ApplicationUser
             {
                 UserName = dto.PhoneNumber,
@@ -150,10 +166,14 @@ namespace SmartMicrobus.Core.Services.Account
             try
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
-                var ok = await _whatsAppService.SendOTPAsync(
-                    user.PhoneNumber!,
-                    otp,
-                    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //var ok = await _whatsAppService.SendOTPAsync(
+                //    user.PhoneNumber!,
+                //    otp,
+                //    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //);
+
+                var ok = await _customWhatsAppService.SendMessageAsync(
+                    user.PhoneNumber!, _localizer["ConfirmAccount_Message", otp]
                 );
 
                 if (!ok)
@@ -378,10 +398,14 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
 
-                var ok = await _whatsAppService.SendOTPAsync(
-                    user.PhoneNumber!,
-                    otp,
-                    _configuration["WhatsAppTemplates:ResetPassword"]
+                //var ok = await _whatsAppService.SendOTPAsync(
+                //    user.PhoneNumber!,
+                //    otp,
+                //    _configuration["WhatsAppTemplates:ResetPassword"]
+                //);
+
+                var ok = await _customWhatsAppService.SendMessageAsync(
+                    user.PhoneNumber!, _localizer["ResetPassword_Message", otp]
                 );
 
                 if (!ok)
@@ -531,10 +555,14 @@ namespace SmartMicrobus.Core.Services.Account
             {
                 var otp = await _otpService.GenerateOtpAsync(user);
 
-                var result = await _whatsAppService.SendOTPAsync(
-                    user.PhoneNumber!,
-                    otp,
-                    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //var result = await _whatsAppService.SendOTPAsync(
+                //    user.PhoneNumber!,
+                //    otp,
+                //    _configuration["WhatsAppTemplates:ConfirmAccount"]
+                //);
+
+                var result = await _customWhatsAppService.SendMessageAsync(
+                    user.PhoneNumber!, _localizer["ConfirmAccount_Message", otp]
                 );
 
                 if (!result)
@@ -555,7 +583,7 @@ namespace SmartMicrobus.Core.Services.Account
                 }
 
                 return ApiResponseFactory.InternalServerError(
-                    _localizer["OTP_Send_Failed"] 
+                    _localizer["OTP_Send_Failed"]
                 );
             }
 
@@ -678,18 +706,30 @@ namespace SmartMicrobus.Core.Services.Account
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
+            {
                 return ApiResponseFactory.NotFound(
                     _localizer["RefreshToken_User_Not_Found"]
                 );
+            }
 
-            var deleted = await _userManager.DeleteAsync(user);
+            var originalPhone = user.PhoneNumber;
 
-            if (!deleted.Succeeded)
+            user.IsDeleted = true;
+            user.PhoneNumber = $"DELETED_{user.Id}_{originalPhone}";
+            user.UserName = user.PhoneNumber;
+            user.PhoneNumberConfirmed = false;
+            user.EmailConfirmed = false;
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
                 return ApiResponseFactory.Failure(
                     _localizer["DeleteAccount_Failed"],
                     400,
-                    deleted.Errors.Select(e => e.Description).ToArray()
+                    result.Errors.Select(e => e.Description).ToArray()
                 );
+            }
 
             return ApiResponseFactory.Success(
                 _localizer["DeleteAccount_Success"]

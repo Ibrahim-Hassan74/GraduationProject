@@ -16,6 +16,7 @@ namespace SmartMicrobus.Infrastructure.Repository
         public async Task<QueueItem?> GetActiveByDriverIdAsync(Guid driverId)
         {
             return await _context.QueueItems
+                .Include(x => x.Microbus)
                 .Include(x => x.Queue)
                     .ThenInclude(q => q.Route)
                     .Include(x => x.Driver)

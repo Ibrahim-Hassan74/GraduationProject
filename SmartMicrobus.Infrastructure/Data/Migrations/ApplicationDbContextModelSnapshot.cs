@@ -165,6 +165,9 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -220,6 +223,22 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.ToTable("FavoriteRoute");
                 });
 
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Manager", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StationId")
+                        .IsUnique();
+
+                    b.ToTable("Managers");
+                });
+
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Microbus", b =>
                 {
                     b.Property<Guid>("Id")
@@ -230,7 +249,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("DriverId")
+                    b.Property<Guid?>("DriverId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
@@ -249,7 +268,6 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("QrCode")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("RouteId")
@@ -258,7 +276,8 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DriverId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[DriverId] IS NOT NULL");
 
                     b.HasIndex("PlateNumber")
                         .IsUnique();
@@ -431,6 +450,31 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.ToTable("Routes");
                 });
 
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Staff", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("StationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StationId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Staff");
+                });
+
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Station", b =>
                 {
                     b.Property<Guid>("Id")
@@ -594,6 +638,9 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -622,9 +669,6 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
                     b.Property<DateTimeOffset>("RefreshTokenExpirationDateTime")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -766,13 +810,31 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Navigation("Route");
                 });
 
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Manager", b =>
+                {
+                    b.HasOne("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", "ApplicationUser")
+                        .WithOne()
+                        .HasForeignKey("SmartMicrobus.Core.Domain.Entities.Manager", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "Station")
+                        .WithOne("Manager")
+                        .HasForeignKey("SmartMicrobus.Core.Domain.Entities.Manager", "StationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApplicationUser");
+
+                    b.Navigation("Station");
+                });
+
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Microbus", b =>
                 {
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Driver", "Driver")
                         .WithOne("Microbus")
                         .HasForeignKey("SmartMicrobus.Core.Domain.Entities.Microbus", "DriverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Route", "Route")
                         .WithMany("Microbuses")
@@ -870,6 +932,25 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                     b.Navigation("ToStation");
                 });
 
+            modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Staff", b =>
+                {
+                    b.HasOne("SmartMicrobus.Core.Domain.Entities.Station", "Station")
+                        .WithMany("StaffMembers")
+                        .HasForeignKey("StationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", "User")
+                        .WithOne("Staff")
+                        .HasForeignKey("SmartMicrobus.Core.Domain.Entities.Staff", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Station");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Trip", b =>
                 {
                     b.HasOne("SmartMicrobus.Core.Domain.Entities.Driver", "Driver")
@@ -907,8 +988,7 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.Driver", b =>
                 {
-                    b.Navigation("Microbus")
-                        .IsRequired();
+                    b.Navigation("Microbus");
                 });
 
             modelBuilder.Entity("SmartMicrobus.Core.Domain.Entities.DriverReport", b =>
@@ -946,7 +1026,11 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
                 {
                     b.Navigation("FromRoutes");
 
+                    b.Navigation("Manager");
+
                     b.Navigation("Queues");
+
+                    b.Navigation("StaffMembers");
 
                     b.Navigation("ToRoutes");
                 });
@@ -954,6 +1038,8 @@ namespace SmartMicrobus.Infrastructure.Data.Migrations
             modelBuilder.Entity("SmartMicrobus.Core.Domain.IdentityEntities.ApplicationUser", b =>
                 {
                     b.Navigation("Photo");
+
+                    b.Navigation("Staff");
                 });
 #pragma warning restore 612, 618
         }

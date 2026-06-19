@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace SmartMicrobus.API.Hubs
 {
    
-    [Authorize(Roles = $"{nameof(UserRole.Passenger)}")]
+    [Authorize(Roles = $"{nameof(UserRole.Passenger)},{nameof(UserRole.Manager)},{nameof(UserRole.Admin)}")]
     public class LocationTrackingHub : Hub
     {
         private const string DriverGroupPrefix = "driver-";

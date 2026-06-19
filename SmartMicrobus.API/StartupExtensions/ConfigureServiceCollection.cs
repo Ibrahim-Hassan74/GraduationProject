@@ -1,10 +1,12 @@
 ﻿using Asp.Versioning;
+using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Localization;
 using Microsoft.OpenApi.Models;
 using SmartMicrobus.API.Filters;
 using SmartMicrobus.API.Identity;
@@ -14,10 +16,12 @@ using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Account;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Notification;
+using SmartMicrobus.Core.ServiceContracts.Route;
 using SmartMicrobus.Core.Services.Account;
 using SmartMicrobus.Core.Services.Common;
 using SmartMicrobus.Infrastructure.Data;
 using System.Globalization;
+using System.Threading.RateLimiting;
 
 namespace SmartMicrobus.API.StartupExtensions
 {
@@ -53,6 +57,33 @@ namespace SmartMicrobus.API.StartupExtensions
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"), x => x.UseNetTopologySuite());
+            });
+
+            services.AddRateLimiter(options =>
+            {
+                options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+                {
+                    var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                    return RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: ip,
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 15,
+                            Window = TimeSpan.FromSeconds(1),
+                            AutoReplenishment = true,
+                            QueueLimit = 0
+                        });
+                });
+
+                options.OnRejected = async (context, token) =>
+                {
+                    context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                    context.HttpContext.Response.ContentType = "application/json";
+
+                    var localizer = context.HttpContext.RequestServices.GetRequiredService<IStringLocalizer<SharedResource>>();
+                    var response = ApiResponseFactory.TooManyRequests(localizer["TooManyRequests"].Value);
+                    await context.HttpContext.Response.WriteAsJsonAsync(response);
+                };
             });
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -117,6 +148,7 @@ namespace SmartMicrobus.API.StartupExtensions
 
 
             services.AddScoped<IQrTokenService, QrTokenService>();
+            services.AddScoped<IRouteTrackingNotificationService, SignalRRouteTrackingNotificationService>();
             services.AddSwaggerGen(options =>
             {
                 options.IncludeXmlComments(
@@ -197,6 +229,13 @@ namespace SmartMicrobus.API.StartupExtensions
             services.AddEndpointsApiExplorer();
 
             services.AddHttpClient();
+
+            services.AddHangfire(x =>
+                x.UseSqlServerStorage(
+                    configuration.GetConnectionString("DefaultConnection")
+                ));
+
+            services.AddHangfireServer();
 
             return services;
         }

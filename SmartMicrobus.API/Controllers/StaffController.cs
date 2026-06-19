@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Staff;
 using SmartMicrobus.Core.Enums;
+using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Staff;
 
 namespace SmartMicrobus.API.Controllers
@@ -14,7 +15,8 @@ namespace SmartMicrobus.API.Controllers
         [HttpPost("check-in")]
         public async Task<IActionResult> CheckInAtGate([FromBody] CheckInRequest request)
         {
-            var response = await _staffService.CheckInAtGateAsync(request.QrCode, request.StationId);
+            var stationId = User.GetStationId();
+            var response = await _staffService.CheckInAtGateAsync(request.QrCode, stationId);
             return ToActionResult(response);
         }
 

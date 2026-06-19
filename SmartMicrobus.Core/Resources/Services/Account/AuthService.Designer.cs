@@ -97,6 +97,18 @@ namespace SmartMicrobus.Core.Resources.Services.Account {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello,
+        ///Your account has been successfully created in Wasla.
+        ///Your account confirmation code is: *{0}*
+        ///Please do not share this code with anyone..
+        /// </summary>
+        public static string ConfirmAccount_Message {
+            get {
+                return ResourceManager.GetString("ConfirmAccount_Message", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Account confirmed successfully..
         /// </summary>
         public static string ConfirmAccount_Success {
@@ -250,6 +262,15 @@ namespace SmartMicrobus.Core.Resources.Services.Account {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An account with this phone number already exists..
+        /// </summary>
+        public static string PhoneNumberAlreadyExists {
+            get {
+                return ResourceManager.GetString("PhoneNumberAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Access token is invalid..
         /// </summary>
         public static string RefreshToken_Access_Invalid {
@@ -381,6 +402,15 @@ namespace SmartMicrobus.Core.Resources.Services.Account {
         public static string ResetPassword_Failed {
             get {
                 return ResourceManager.GetString("ResetPassword_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, *{0}* is your password recovery code..
+        /// </summary>
+        public static string ResetPassword_Message {
+            get {
+                return ResourceManager.GetString("ResetPassword_Message", resourceCulture);
             }
         }
         

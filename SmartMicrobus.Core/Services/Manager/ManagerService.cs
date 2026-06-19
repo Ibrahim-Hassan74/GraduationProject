@@ -118,6 +118,11 @@ namespace SmartMicrobus.Core.Services.Manager
 
             return ApiResponseFactory.Success("Manager station retrieved successfully", manager.StationId);
         }
+        public async Task<ApiResponse> GetStationDashboardAsync(Guid stationId)
+        {
+            var stats = await unitOfWork.StationRepository.GetDashboardStatsAsync(stationId);
+            return ApiResponseFactory.Success("Dashboard stats retrieved successfully", stats);
+        }
 
         public async Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid managerId, DateTimeOffset startDate, DateTimeOffset endDate)
         {
@@ -167,6 +172,7 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Excel generated successfully", content);
         }
 
+ 
         public async Task<ApiResponseWithData<byte[]>> ExportStationDriversExcelAsync(Guid managerId)
         {
             var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
