@@ -15,6 +15,5 @@ namespace SmartMicrobus.Core.DTO.Station
         public double Longitude { get; set; }
         public string? AddressAr { get; set; }
         public string? AddressEn { get; set; }
-        public Point? Location { get; set; } = null!;
     }
 }
