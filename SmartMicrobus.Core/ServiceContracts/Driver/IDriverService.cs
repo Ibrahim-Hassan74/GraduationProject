@@ -15,7 +15,6 @@ namespace SmartMicrobus.Core.ServiceContracts.Drivers
         Task<ApiResponseWithData<IEnumerable<QueueItemResponse>>> GetMyQueueAsync(Guid driverId);
 
         Task ResetDailyQueueAsync();
-        Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request);
         Task<ApiResponse> GetDriverByPlateNumber(string plateNumber);
     }
 
