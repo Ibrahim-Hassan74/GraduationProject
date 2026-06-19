@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.ServiceContracts.Manager;
@@ -56,7 +57,6 @@ namespace SmartMicrobus.API.Controllers
 
             return Ok(result);
         }
-
         [HttpGet("dashboard/overview")]
         public async Task<IActionResult> GetDashboard()
         {
@@ -70,6 +70,27 @@ namespace SmartMicrobus.API.Controllers
             var response = result as ApiResponseWithData<StationDashboardDTO>;
 
             return Ok(response?.Data);
+        }
+
+        [HttpGet]
+        [Route("export-station-data")]
+        public async Task<IActionResult> ExportStationData([FromQuery] DateTimeOffset startDate, [FromQuery] DateTimeOffset endDate)
+        {
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.ExportStationDataExcelAsync(managerId, startDate, endDate);
+
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileName = $"StationData_{startDate:yyyyMMdd}_{endDate:yyyyMMdd}.xlsx";
+            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
     }
 }

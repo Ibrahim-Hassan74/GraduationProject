@@ -11,5 +11,6 @@ namespace SmartMicrobus.Core.ServiceContracts.Manager
         Task<ApiResponse> GetManagerStationAsync(Guid managerId);
         Task<ApiResponse> AssignDriverToMicrobusAsync(DriverAssignRequest driverAssignRequest);
         Task<ApiResponse> GetStationDashboardAsync(Guid stationId);
+        Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid managerId, DateTimeOffset startDate, DateTimeOffset endDate);
     }
 }

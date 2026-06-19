@@ -165,16 +165,16 @@ namespace SmartMicrobus.Core.Services.Drivers
 
 
         public async Task<ApiResponse> GetDriverByPlateNumber(string plateNumber)
-            {
+        {
             var driver = await _driverRepository.GetDriverByPlateNumber(plateNumber);
             if (driver == null)
                 return ApiResponseFactory.NotFound(_localizer["Driver_Not_Found_By_Plate"]);
             var driverInfo = _mapper.Map<DriverResponse>(driver);
             return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
-            }
+        }
 
         public async Task<ApiResponseWithData<DriverResponse>> GetDriverByLicenseAsync(string licenseNumber)
-            {
+        {
             var driver = await _driverRepository.GetDriverByLicense(licenseNumber);
             if (driver == null)
                 return ApiResponseFactory.NotFound<DriverResponse>(_localizer["Driver_Not_Found_By_License"]);
@@ -192,5 +192,34 @@ namespace SmartMicrobus.Core.Services.Drivers
             var driverInfo = _mapper.Map<DriverResponse>(driver);
             return ApiResponseFactory.Success(_localizer["Driver_Fetch_Success"], driverInfo);
         }
+
+        public async Task<ApiResponse> GetDriverHistoryAsync(Guid driverId, DriverHistoryRequest request)
+        {
+            if (!request.FromDate.HasValue && !request.ToDate.HasValue)
+            {
+                request.FromDate = DateTime.Today;
+                request.ToDate = DateTime.Today.AddDays(1);
+            }
+            else
+            {
+                request.FromDate = request.FromDate ?? DateTime.MinValue;
+                request.ToDate = request.ToDate ?? DateTime.MaxValue;
+            }
+
+            var tripsHistory = await _tripRepository.GetDriverTripsAsync(driverId, request);
+
+            if (tripsHistory == null || !tripsHistory.Trips.Any())
+                return ApiResponseFactory.NotFound(_localizer["NoTripsFoundForPeriod"]);
+
+            var history = _mapper.Map<List<TripHistoryDTO>>(tripsHistory.Trips);
+
+            var response = new DriverHistoryResponse(
+                tripsHistory.TotalAmount,
+                history,
+                tripsHistory.TotalCount);
+
+            return ApiResponseFactory.Success(_localizer["DriverTripHistoryRetrieved"], response);
+        }
+
     }
 }
