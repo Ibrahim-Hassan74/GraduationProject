@@ -8,6 +8,7 @@ using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Manager;
+using ClosedXML.Excel;
 
 namespace SmartMicrobus.Core.Services.Manager
 {
@@ -114,6 +115,54 @@ namespace SmartMicrobus.Core.Services.Manager
                 return ApiResponseFactory.NotFound("Manager not found");
 
             return ApiResponseFactory.Success("Manager station retrieved successfully", manager.StationId);
+        }
+
+        public async Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid managerId, DateTimeOffset startDate, DateTimeOffset endDate)
+        {
+            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
+            if (manager == null)
+                return ApiResponseFactory.NotFound<byte[]>("Manager not found");
+
+            var trips = await unitOfWork.TripRepository.GetTripsByStationAndDateAsync(manager.StationId, startDate, endDate);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Trips");
+
+            worksheet.Cell(1, 1).Value = "Trip ID";
+            worksheet.Cell(1, 2).Value = "Driver Name";
+            worksheet.Cell(1, 3).Value = "Microbus Plate";
+            worksheet.Cell(1, 4).Value = "Route";
+            worksheet.Cell(1, 5).Value = "Started At";
+            worksheet.Cell(1, 6).Value = "Ended At";
+            worksheet.Cell(1, 7).Value = "Distance (Km)";
+            worksheet.Cell(1, 8).Value = "Total Amount";
+            worksheet.Cell(1, 9).Value = "Status";
+
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+
+            int row = 2;
+            foreach (var trip in trips)
+            {
+                worksheet.Cell(row, 1).Value = trip.Id.ToString();
+                worksheet.Cell(row, 2).Value = trip.Driver?.ApplicationUser?.DisplayName ?? "N/A";
+                worksheet.Cell(row, 3).Value = trip.Microbus?.PlateNumber ?? "N/A";
+                worksheet.Cell(row, 4).Value = (trip.Route?.FromEn != null && trip.Route?.ToEn != null) ? $"{trip.Route.FromEn} to {trip.Route.ToEn}" : "N/A";
+                worksheet.Cell(row, 5).Value = trip.StartedAt.ToString("yyyy-MM-dd HH:mm");
+                worksheet.Cell(row, 6).Value = trip.EndedAt?.ToString("yyyy-MM-dd HH:mm") ?? "N/A";
+                worksheet.Cell(row, 7).Value = trip.DistanceKm;
+                worksheet.Cell(row, 8).Value = trip.TotalAmount;
+                worksheet.Cell(row, 9).Value = trip.Status.ToString();
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return ApiResponseFactory.Success("Excel generated successfully", content);
         }
     }
 }
