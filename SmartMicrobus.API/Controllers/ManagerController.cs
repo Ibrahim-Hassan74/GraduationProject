@@ -1,19 +1,22 @@
+using Azure.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Microbus;
 using SmartMicrobus.Core.DTO.Report;
+using SmartMicrobus.Core.DTO.Staff;
 using SmartMicrobus.Core.DTO.Station;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
+using SmartMicrobus.Core.ServiceContracts.Driver;
 using SmartMicrobus.Core.ServiceContracts.Manager;
 using System.Security.Claims;
 
 namespace SmartMicrobus.API.Controllers
 {
     [Authorize(Roles = nameof(UserRole.Manager))]
-    public class ManagerController(IManagerService managerService) : CustomControllerBase
+    public class ManagerController(IManagerService managerService, ITripService tripService) : CustomControllerBase
     {
         [HttpPost]
         [Route("add-driver")]
@@ -202,7 +205,7 @@ namespace SmartMicrobus.API.Controllers
 
         [HttpGet]
         [Route("station-drivers")]
-        public async Task<IActionResult> GetPaginatedStationDrivers([FromQuery] SmartMicrobus.Core.DTO.Driver.DriverQuery query)
+        public async Task<IActionResult> GetPaginatedStationDrivers([FromQuery] DriverQuery query)
         {
             var stationIdValue = User.FindFirst("StationId")?.Value;
             if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
@@ -214,13 +217,13 @@ namespace SmartMicrobus.API.Controllers
             if (!response.Success)
                 return ToActionResult(response);
 
-            var result = response as ApiResponseWithData<Pagination<List<SmartMicrobus.Core.DTO.Driver.DriverResponse>>>;
+            var result = response as ApiResponseWithData<Pagination<List<DriverResponse>>>;
             return Ok(result?.Data);
         }
 
         [HttpPost]
         [Route("station-staff")]
-        public async Task<IActionResult> AddStaff([FromBody] SmartMicrobus.Core.DTO.Staff.AddStaffDTO dto)
+        public async Task<IActionResult> AddStaff([FromBody] AddStaffDTO dto)
         {
             var stationIdValue = User.FindFirst("StationId")?.Value;
             if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
@@ -234,7 +237,7 @@ namespace SmartMicrobus.API.Controllers
 
         [HttpPut]
         [Route("station-staff/{id}")]
-        public async Task<IActionResult> UpdateStaff(Guid id, [FromBody] SmartMicrobus.Core.DTO.Staff.UpdateStaffDTO dto)
+        public async Task<IActionResult> UpdateStaff(Guid id, [FromBody] UpdateStaffDTO dto)
         {
             var stationIdValue = User.FindFirst("StationId")?.Value;
             if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
@@ -262,7 +265,7 @@ namespace SmartMicrobus.API.Controllers
 
         [HttpGet]
         [Route("station-staff")]
-        public async Task<IActionResult> GetPaginatedStationStaff([FromQuery] SmartMicrobus.Core.DTO.Staff.StaffQuery query)
+        public async Task<IActionResult> GetPaginatedStationStaff([FromQuery] StaffQuery query)
         {
             var stationIdValue = User.FindFirst("StationId")?.Value;
             if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
@@ -274,8 +277,27 @@ namespace SmartMicrobus.API.Controllers
             if (!response.Success)
                 return ToActionResult(response);
 
-            var result = response as ApiResponseWithData<Pagination<List<SmartMicrobus.Core.DTO.Staff.StaffResponseDTO>>>;
+            var result = response as ApiResponseWithData<Pagination<List<StaffResponseDTO>>>;
             return Ok(result?.Data);
+        }
+
+        [HttpGet("history")]
+        public async Task<IActionResult> GetDriverHistory([FromQuery] DriverHistoryRequest request)
+        {
+            var driverIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(driverIdClaim, out Guid driverId))
+                return Unauthorized(ApiResponseFactory.Unauthorized());
+
+            var response = await tripService.GetDriverHistoryAsync(driverId, request);
+
+            if (!response.Success || response is not ApiResponseWithData<DriverHistoryResponse> result || result.Data is null)
+            {
+                return ToActionResult(response);
+            }
+
+            var pagination = new Pagination<DriverHistoryResponse>(request.PageNumber, request.PageSize, result.Data.TotalCount, result.Data);
+
+            return Ok(pagination);
         }
     }
 }
