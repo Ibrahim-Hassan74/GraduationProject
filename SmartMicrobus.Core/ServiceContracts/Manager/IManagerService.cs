@@ -10,6 +10,8 @@ namespace SmartMicrobus.Core.ServiceContracts.Manager
     {
         Task<ApiResponse> AddDriverAsync(DriverAddRequest driverAddRequest);
         Task<ApiResponse> AddMicrobusAsync(MicrobusAddRequest microbusAddRequest);
+        Task<ApiResponse> UpdateMicrobusAsync(Guid microbusId, MicrobusUpdateRequest updateRequest);
+        Task<ApiResponse> DeleteMicrobusAsync(Guid microbusId);
         Task<ApiResponse> GetManagerStationAsync(Guid managerId);
         Task<ApiResponse> AssignDriverToMicrobusAsync(DriverAssignRequest driverAssignRequest);
         Task<ApiResponse> GetStationDashboardAsync(Guid stationId);

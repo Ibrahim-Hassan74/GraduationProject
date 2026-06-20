@@ -46,6 +46,33 @@ namespace SmartMicrobus.API.Controllers
             return Ok(result);
         }
 
+        [HttpPut]
+        [Route("update-microbus/{microbusId}")]
+        public async Task<IActionResult> UpdateMicrobus([FromRoute] Guid microbusId, [FromBody] MicrobusUpdateRequest microbusUpdateRequest)
+        {
+            if (microbusUpdateRequest == null)
+                return BadRequest("microbus data cannot be empty");
+
+            var result = await managerService.UpdateMicrobusAsync(microbusId, microbusUpdateRequest);
+
+            if (!result.Success)
+                return ToActionResult(result);
+
+            return Ok(result);
+        }
+
+        [HttpDelete]
+        [Route("delete-microbus/{microbusId}")]
+        public async Task<IActionResult> DeleteMicrobus([FromRoute] Guid microbusId)
+        {
+            var result = await managerService.DeleteMicrobusAsync(microbusId);
+
+            if (!result.Success)
+                return ToActionResult(result);
+
+            return Ok(result);
+        }
+
         [HttpPost]
         [Route("assign-driver-microbus")]
         public async Task<IActionResult> AssignDriverToMicrobus([FromBody] DriverAssignRequest driverAssignRequest)

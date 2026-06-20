@@ -72,6 +72,39 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("microbus added successfully", result.Id);
         }
 
+        public async Task<ApiResponse> UpdateMicrobusAsync(Guid microbusId, MicrobusUpdateRequest updateRequest)
+        {
+            var microbus = await unitOfWork.MicrobusRepository.GetByIdAsync(microbusId);
+            if (microbus == null)
+                return ApiResponseFactory.NotFound("Microbus not found");
+
+            if (updateRequest.PlateNumber != null) microbus.PlateNumber = updateRequest.PlateNumber;
+            if (updateRequest.RouteId.HasValue) microbus.RouteId = updateRequest.RouteId.Value;
+            if (updateRequest.PassengerCount.HasValue) microbus.PassengerCount = updateRequest.PassengerCount.Value;
+            if (updateRequest.Model != null) microbus.Model = updateRequest.Model;
+            if (updateRequest.Color != null) microbus.Color = updateRequest.Color;
+            if (updateRequest.IsActive.HasValue) microbus.IsActive = updateRequest.IsActive.Value;
+
+            await unitOfWork.MicrobusRepository.UpdateAsync(microbus);
+            await unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Microbus updated successfully");
+        }
+
+        public async Task<ApiResponse> DeleteMicrobusAsync(Guid microbusId)
+        {
+            var microbus = await unitOfWork.MicrobusRepository.GetByIdAsync(microbusId);
+            if (microbus == null)
+                return ApiResponseFactory.NotFound("Microbus not found");
+
+            microbus.IsActive = false;
+
+            await unitOfWork.MicrobusRepository.UpdateAsync(microbus);
+            await unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Microbus deleted successfully");
+        }
+
         public async Task<ApiResponse> AssignDriverToMicrobusAsync(DriverAssignRequest driverAssignRequest)
         {
             var driver = await unitOfWork.DriverRepository.GetByIdAsync(driverAssignRequest.DriverId, d => d.ApplicationUser);
