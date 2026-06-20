@@ -319,12 +319,9 @@ namespace SmartMicrobus.API.Controllers
             return Ok(result?.Data);
         }
 
-        [HttpGet("history")]
-        public async Task<IActionResult> GetDriverHistory([FromQuery] DriverHistoryRequest request)
+        [HttpGet("{driverId}/driver-history")]
+        public async Task<IActionResult> GetDriverHistory(Guid driverId, [FromQuery] DriverHistoryRequest request)
         {
-            var driverIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(driverIdClaim, out Guid driverId))
-                return Unauthorized(ApiResponseFactory.Unauthorized());
 
             var response = await tripService.GetDriverHistoryAsync(driverId, request);
 
