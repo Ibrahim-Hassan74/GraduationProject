@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using SmartMicrobus.Core.Domain.Entities;
-using SmartMicrobus.Core.Enums;
-using System;
 
 namespace SmartMicrobus.Core.Domain.IdentityEntities
 {
@@ -13,6 +11,5 @@ namespace SmartMicrobus.Core.Domain.IdentityEntities
         public DateTimeOffset RefreshTokenExpirationDateTime { get; set; }
         public virtual Photo? Photo { get; set; }
         public virtual Staff? Staff { get; set; }
-        //public UserRole Role { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Route;
@@ -30,7 +30,7 @@ namespace SmartMicrobus.API.Controllers
             var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
             var response = await _routeService.GetPaginatedRoutesAsync(query, stationId);
             if (!response.Success)
-                ToActionResult(response);
+                return ToActionResult(response);
             var result = response as ApiResponseWithData<Pagination<List<RouteDetails>>>;
 
             return Ok(result?.Data);
@@ -83,7 +83,13 @@ namespace SmartMicrobus.API.Controllers
         [Authorize(Roles = nameof(UserRole.Manager))]
         public async Task<IActionResult> AddRoute([FromBody] RouteAddRequest routeAddRequest)
         {
-            var response = await _routeService.AddRouteAsync(routeAddRequest);
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await _routeService.AddRouteAsync(stationId, routeAddRequest);
 
             if (!response.Success)
                 return ToActionResult(response);

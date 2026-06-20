@@ -1,4 +1,4 @@
-﻿using SmartMicrobus.Core.DTO.Account;
+using SmartMicrobus.Core.DTO.Account;
 using SmartMicrobus.Core.DTO.Common;
 
 namespace SmartMicrobus.Core.ServiceContracts.Account

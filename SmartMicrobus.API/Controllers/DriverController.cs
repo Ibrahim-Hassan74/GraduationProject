@@ -13,9 +13,9 @@ using System.Security.Claims;
 
 namespace SmartMicrobus.API.Controllers
 {
-    [Authorize(Roles = nameof(UserRole.Driver))]
     public class DriverController(IDriverService driverService, ITripService tripService, ILocationTrackingService locationTrackingService ) : CustomControllerBase
     {
+        [Authorize(Roles = $"{nameof(UserRole.Manager)}")]
         [HttpGet("{driverId}")]
         public async Task<IActionResult> GetDriverById([FromRoute] Guid driverId)
         {
@@ -26,6 +26,7 @@ namespace SmartMicrobus.API.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = $"{nameof(UserRole.Manager)}")]
         [HttpGet("license/{licenseNumber}")]
         public async Task<IActionResult> GetDriverByLicense([FromRoute] string licenseNumber)
         {
@@ -35,8 +36,8 @@ namespace SmartMicrobus.API.Controllers
 
             return Ok(response);
         }
-    
 
+        [Authorize(Roles = $"{nameof(UserRole.Driver)}")]
         [HttpGet("get-current-postion")]
         public async Task<IActionResult> CurrentPosition()
         {
@@ -50,6 +51,7 @@ namespace SmartMicrobus.API.Controllers
             return Ok(response.Data);
         }
 
+        [Authorize(Roles = $"{nameof(UserRole.Driver)}")]
         [HttpGet("get-driver-queue")]
         public async Task<IActionResult> DriverQueue()
         {
@@ -68,45 +70,43 @@ namespace SmartMicrobus.API.Controllers
             return Ok(response.Data);
         }
 
-        [HttpPost("start-trip")]
-        public async Task<IActionResult> StartTrip(Guid driverId)
-        {
-            var response = await tripService.StartTripAsync(driverId);
-            if (!response.Success)
-            {
-                return BadRequest(response);
-            }
-            return Ok(response);
-        }
+        [Authorize(Roles = $"{nameof(UserRole.Driver)}")]
 
         [HttpPost("end-trip")]
-        public async Task<IActionResult> EndTrip(Guid driverId)
+        public async Task<IActionResult> EndTrip()
         {
+            var driverIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(driverIdClaim, out Guid driverId))
+                return Unauthorized(ApiResponseFactory.Unauthorized());
+
             var response = await tripService.EndTripAsync(driverId);
             if (!response.Success)
             {
-                return BadRequest(response);
+                return ToActionResult(response);
             }
             return Ok(response);
         }
 
+        [Authorize(Roles = $"{nameof(UserRole.Driver)}")]
         [HttpGet("history")]
         public async Task<IActionResult> GetDriverHistory([FromQuery] DriverHistoryRequest request)
         {
-            var driverId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var driverIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(driverIdClaim, out Guid driverId))
+                return Unauthorized(ApiResponseFactory.Unauthorized());
 
-            var response = await tripService.GetDriverHistoryAsync(Guid.Parse(driverId!), request);
+            var response = await tripService.GetDriverHistoryAsync(driverId, request);
 
-            var result = response as ApiResponseWithData<DriverHistoryResponse>;
-            if (!response.Success || result.Data is null)
+            if (!response.Success || response is not ApiResponseWithData<DriverHistoryResponse> result || result.Data is null)
             {
-                return NotFound(ApiResponseFactory.NotFound(response.Message!));
+                return ToActionResult(response);
             }
 
             var pagination = new Pagination<DriverHistoryResponse>(request.PageNumber, request.PageSize, result.Data.TotalCount, result.Data);
 
             return Ok(pagination);
         }
+
 
         [HttpGet("get-by-plate-number")]
         [AllowAnonymous]
@@ -116,16 +116,20 @@ namespace SmartMicrobus.API.Controllers
             if (!response.Success)
                 return ToActionResult(response);
 
-            var result = response as ApiResponseWithData<DriverResponse>;
-            return Ok(result?.Data);
+            if (response is ApiResponseWithData<DriverResponse> result)
+                return Ok(result.Data);
+                
+            return Ok();
         }
 
-        
+        [Authorize(Roles = $"{nameof(UserRole.Driver)}")]
         [HttpPost("location")]
         public async Task<IActionResult> UpdateLocation([FromBody] UpdateDriverLocationRequest request)
         {
 
-            var driverId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+            var driverIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(driverIdClaim, out Guid driverId))
+                return Unauthorized(ApiResponseFactory.Unauthorized());
 
             var updateResponse = await locationTrackingService.UpdateDriverLocationAsync(
                 driverId,
@@ -135,7 +139,7 @@ namespace SmartMicrobus.API.Controllers
 
             if (!updateResponse.Success)
             {
-                return BadRequest(updateResponse);
+                return ToActionResult(updateResponse);
             }
 
             return Ok(updateResponse);
@@ -150,10 +154,13 @@ namespace SmartMicrobus.API.Controllers
 
             if (!response.Success)
             {
-                return NotFound(response);
+                return ToActionResult(response);
             }
-            var result = response as ApiResponseWithData<RouteResultDTO>;
-            return Ok(result?.Data);
+            
+            if (response is ApiResponseWithData<RouteResultDTO> result)
+                return Ok(result.Data);
+                
+            return Ok();
         }
 
     }

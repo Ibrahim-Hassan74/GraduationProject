@@ -1,18 +1,24 @@
+using AutoMapper;
+using ClosedXML.Excel;
 using Microsoft.AspNetCore.Identity;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.Domain.IdentityEntities;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Microbus;
+using SmartMicrobus.Core.DTO.Report;
+using SmartMicrobus.Core.DTO.Staff;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.RepositoryContracts;
 using SmartMicrobus.Core.ServiceContracts.Common;
 using SmartMicrobus.Core.ServiceContracts.Manager;
-using ClosedXML.Excel;
+using Microsoft.EntityFrameworkCore;
+using SmartMicrobus.Core.Enums;
+using StaffEntity = SmartMicrobus.Core.Domain.Entities.Staff;
 
 namespace SmartMicrobus.Core.Services.Manager
 {
-    public class ManagerService(IUnitOfWork unitOfWork, IQrTokenService qrService, UserManager<ApplicationUser> userManager) : IManagerService
+    public class ManagerService(IUnitOfWork unitOfWork, IQrTokenService qrService, UserManager<ApplicationUser> userManager, IMapper mapper) : IManagerService
     {
         public async Task<ApiResponse> AddDriverAsync(DriverAddRequest driverAddRequest)
         {
@@ -122,13 +128,13 @@ namespace SmartMicrobus.Core.Services.Manager
             return ApiResponseFactory.Success("Dashboard stats retrieved successfully", stats);
         }
 
-        public async Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid managerId, DateTimeOffset startDate, DateTimeOffset endDate)
+        public async Task<ApiResponseWithData<byte[]>> ExportStationDataExcelAsync(Guid stationId, DateTimeOffset startDate, DateTimeOffset endDate)
         {
-            var manager = await unitOfWork.ManagerRepository.GetByIdAsync(managerId, m => m.Station);
-            if (manager == null)
-                return ApiResponseFactory.NotFound<byte[]>("Manager not found");
+            var station = await unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (station == null)
+                return ApiResponseFactory.NotFound<byte[]>("Station not found");
 
-            var trips = await unitOfWork.TripRepository.GetTripsByStationAndDateAsync(manager.StationId, startDate, endDate);
+            var trips = await unitOfWork.TripRepository.GetTripsByStationAndDateAsync(stationId, startDate, endDate);
 
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Trips");
@@ -168,6 +174,295 @@ namespace SmartMicrobus.Core.Services.Manager
             var content = stream.ToArray();
 
             return ApiResponseFactory.Success("Excel generated successfully", content);
+        }
+
+ 
+        public async Task<ApiResponseWithData<byte[]>> ExportStationDriversExcelAsync(Guid stationId)
+        {
+            var station = await unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (station == null)
+                return ApiResponseFactory.NotFound<byte[]>("Station not found");
+
+            var drivers = await unitOfWork.DriverRepository.GetDriversByStationAsync(stationId);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Drivers");
+
+            worksheet.Cell(1, 1).Value = "Driver ID";
+            worksheet.Cell(1, 2).Value = "Name";
+            worksheet.Cell(1, 3).Value = "Phone Number";
+            worksheet.Cell(1, 4).Value = "License Number";
+            worksheet.Cell(1, 5).Value = "Microbus Plate";
+            worksheet.Cell(1, 6).Value = "Assigned Route";
+
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+
+            int row = 2;
+            foreach (var driver in drivers)
+            {
+                worksheet.Cell(row, 1).Value = driver.Id.ToString();
+                worksheet.Cell(row, 2).Value = driver.ApplicationUser?.DisplayName ?? "N/A";
+                worksheet.Cell(row, 3).Value = driver.ApplicationUser?.PhoneNumber ?? "N/A";
+                worksheet.Cell(row, 4).Value = driver.LicenseNumber ?? "N/A";
+                worksheet.Cell(row, 5).Value = driver.Microbus?.PlateNumber ?? "N/A";
+                worksheet.Cell(row, 6).Value = (driver.Microbus?.Route?.FromEn != null && driver.Microbus?.Route?.ToEn != null) ? $"{driver.Microbus.Route.FromEn} to {driver.Microbus.Route.ToEn}" : "N/A";
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return ApiResponseFactory.Success("Excel generated successfully", content);
+        }
+
+        public async Task<ApiResponseWithData<byte[]>> ExportStationRoutesExcelAsync(Guid stationId)
+        {
+            var station = await unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (station == null)
+                return ApiResponseFactory.NotFound<byte[]>("Station not found");
+
+            var routes = await unitOfWork.RouteRepository.GetRoutesByFromAsync(stationId);
+            var activeBuses = await unitOfWork.MicrobusRepository.GetActiveMicrobusesByStationAsync(stationId);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Drivers");
+
+            worksheet.Cell(1, 1).Value = "Route ID";
+            worksheet.Cell(1, 2).Value = "Name";
+            worksheet.Cell(1, 3).Value = "Price";
+            worksheet.Cell(1, 4).Value = "Distance";
+            worksheet.Cell(1, 5).Value = "Active Buses";
+
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+
+            int row = 2;
+            foreach (var route in routes)
+            {
+                worksheet.Cell(row, 1).Value = route.Id.ToString();
+                worksheet.Cell(row, 2).Value = route.FromEn + " to " + route.ToEn;
+                worksheet.Cell(row, 3).Value = route.Price;
+                worksheet.Cell(row, 4).Value = route.DistanceKm;
+                worksheet.Cell(row, 5).Value = activeBuses.Where(m => m.RouteId == route.Id).Count();
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return ApiResponseFactory.Success("Excel generated successfully", content);
+        }
+
+        public async Task<ApiResponseWithData<byte[]>> ExportMicrobusesExcelAsync(Guid stationId)
+        {
+            var station = await unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (station == null)
+                return ApiResponseFactory.NotFound<byte[]>("Station not found");
+
+            var microbuses = await unitOfWork.MicrobusRepository.GetAllStationMicrobusesAsync(stationId);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Drivers");
+
+            worksheet.Cell(1, 1).Value = "Microbus ID";
+            worksheet.Cell(1, 2).Value = "Model";
+            worksheet.Cell(1, 3).Value = "Capacity";
+            worksheet.Cell(1, 4).Value = "Color";
+            worksheet.Cell(1, 5).Value = "Status";
+
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+
+            int row = 2;
+            foreach (var microbus in microbuses)
+            {
+                worksheet.Cell(row, 1).Value = microbus.Id.ToString();
+                worksheet.Cell(row, 2).Value = microbus.Model;
+                worksheet.Cell(row, 3).Value = microbus.PassengerCount;
+                worksheet.Cell(row, 4).Value = microbus.Color;
+                worksheet.Cell(row, 5).Value = microbus.IsActive ? "Active" : "Inactive";
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return ApiResponseFactory.Success("Excel generated successfully", content);
+        }
+
+        public async Task<ApiResponseWithData<byte[]>> ExportReportsExcelAsync(GetReportsQuery query, Guid stationId)
+        {
+            query.PageNumber = 1;
+            query.PageSize = int.MaxValue;
+
+            var (items, totalCount) = await unitOfWork.ReportRepository.GetPagedReportsForAdminAsync(query, stationId);
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Reports");
+
+            worksheet.Cell(1, 1).Value = "Report ID";
+            worksheet.Cell(1, 2).Value = "Passenger Name";
+            worksheet.Cell(1, 3).Value = "Plate Number";
+            worksheet.Cell(1, 4).Value = "Driver Name";
+            worksheet.Cell(1, 5).Value = "Description";
+            worksheet.Cell(1, 6).Value = "Status";
+            worksheet.Cell(1, 7).Value = "Created At";
+            worksheet.Cell(1, 8).Value = "Resolved At";
+
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+
+            int row = 2;
+            foreach (var report in items)
+            {
+                worksheet.Cell(row, 1).Value = report.Id.ToString();
+                worksheet.Cell(row, 2).Value = report.Passenger?.ApplicationUser.DisplayName ?? "N/A";
+                worksheet.Cell(row, 3).Value = report.PlateNumber ?? "N/A";
+                worksheet.Cell(row, 4).Value = report.Driver?.ApplicationUser?.DisplayName ?? "N/A";
+                worksheet.Cell(row, 5).Value = report.Description ?? "N/A";
+                worksheet.Cell(row, 6).Value = report.Status.ToString();
+                worksheet.Cell(row, 7).Value = report.CreatedAt.ToString("yyyy-MM-dd HH:mm");
+                worksheet.Cell(row, 8).Value = report.ResolvedAt?.ToString("yyyy-MM-dd HH:mm") ?? "N/A";
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new System.IO.MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return ApiResponseFactory.Success("Excel generated successfully", content);
+        }
+        public async Task<ApiResponse> GetPaginatedStationMicrobusesAsync(MicrobusQuery query, Guid stationId)
+        {
+            var (microbuses, totalCount) = await unitOfWork.MicrobusRepository.GetFilteredMicrobusesAsync(stationId, query);
+
+            var mappedMicrobuses = mapper.Map<List<MicrobusResponse>>(microbuses);
+            var result = new Pagination<List<MicrobusResponse>>(query.PageNumber, query.PageSize, totalCount, mappedMicrobuses);
+
+            return ApiResponseFactory.Success("Paginated microbuses retrieved successfully.", result);
+        }
+
+        public async Task<ApiResponse> GetPaginatedStationDriversAsync(DriverQuery query, Guid stationId)
+        {
+            var (drivers, totalCount) = await unitOfWork.DriverRepository.GetPaginatedByStationAsync(stationId, query);
+
+            var mappedDrivers = mapper.Map<List<DriverResponse>>(drivers);
+            var result = new Pagination<List<DriverResponse>>(query.PageNumber, query.PageSize, totalCount, mappedDrivers);
+
+            return ApiResponseFactory.Success("Paginated drivers retrieved successfully.", result);
+        }
+
+        public async Task<ApiResponse> AddStaffAsync(AddStaffDTO dto, Guid stationId)
+        {
+            var existingUser = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber);
+            if (existingUser != null)
+                return ApiResponseFactory.BadRequest("A user with this phone number already exists.");
+
+            var user = new ApplicationUser
+            {
+                Id = Guid.NewGuid(),
+                DisplayName = dto.Name,
+                UserName = dto.PhoneNumber,
+                PhoneNumber = dto.PhoneNumber,
+                PhoneNumberConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(user, dto.Password);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                return ApiResponseFactory.BadRequest($"Failed to create user: {errors}");
+            }
+
+            // Ensure the Staff role is assigned
+            await userManager.AddToRoleAsync(user, UserRole.Staff.ToString());
+
+            var staff = new StaffEntity
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                StationId = stationId,
+                IsActive = true
+            };
+
+            await unitOfWork.StaffRepository.AddAsync(staff);
+            await unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Staff added successfully.");
+        }
+
+        public async Task<ApiResponse> UpdateStaffAsync(Guid staffId, UpdateStaffDTO dto, Guid stationId)
+        {
+            var staff = await unitOfWork.StaffRepository.GetByIdAsync(staffId, s => s.User);
+            if (staff == null || staff.StationId != stationId || staff.User.IsDeleted)
+                return ApiResponseFactory.NotFound("Staff not found.");
+
+            var existingUser = await userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == dto.PhoneNumber && u.Id != staff.UserId);
+            if (existingUser != null)
+                return ApiResponseFactory.BadRequest("A user with this phone number already exists.");
+
+            staff.User.DisplayName = dto.Name;
+            staff.User.PhoneNumber = dto.PhoneNumber;
+            staff.User.UserName = dto.PhoneNumber;
+            staff.IsActive = dto.IsActive;
+
+            await userManager.UpdateAsync(staff.User);
+            await unitOfWork.StaffRepository.UpdateAsync(staff);
+            await unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Staff updated successfully.");
+        }
+
+        public async Task<ApiResponse> DeleteStaffAsync(Guid staffId, Guid stationId)
+        {
+            var staff = await unitOfWork.StaffRepository.GetByIdAsync(staffId, s => s.User);
+            if (staff == null || staff.StationId != stationId || staff.User.IsDeleted)
+                return ApiResponseFactory.NotFound("Staff not found.");
+
+            staff.IsActive = false;
+
+            // Soft delete user
+            var originalPhone = staff.User.PhoneNumber;
+            staff.User.IsDeleted = true;
+            staff.User.PhoneNumber = $"DELETED_{staff.User.Id}_{originalPhone}";
+            staff.User.UserName = staff.User.PhoneNumber;
+            staff.User.PhoneNumberConfirmed = false;
+
+            await userManager.UpdateAsync(staff.User);
+            await unitOfWork.StaffRepository.UpdateAsync(staff);
+            await unitOfWork.CompleteAsync();
+
+            return ApiResponseFactory.Success("Staff deleted successfully.");
+        }
+
+        public async Task<ApiResponse> GetPaginatedStationStaffAsync(StaffQuery query, Guid stationId)
+        {
+            var (staffs, totalCount) = await unitOfWork.StaffRepository.GetPaginatedByStationAsync(stationId, query);
+
+            var mappedStaff = staffs.Select(staff => new StaffResponseDTO
+            {
+                Id = staff.Id,
+                UserId = staff.UserId,
+                Name = staff.User.DisplayName,
+                PhoneNumber = staff.User.PhoneNumber ?? "",
+                IsActive = staff.IsActive,
+                HasPassword = true
+            }).ToList();
+
+            var result = new Pagination<List<StaffResponseDTO>>(query.PageNumber, query.PageSize, totalCount, mappedStaff);
+            return ApiResponseFactory.Success("Paginated staff retrieved successfully.", result);
         }
     }
 }

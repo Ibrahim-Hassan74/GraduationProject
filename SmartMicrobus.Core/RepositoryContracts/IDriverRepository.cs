@@ -1,4 +1,4 @@
-﻿using SmartMicrobus.Core.Domain.Entities;
+using SmartMicrobus.Core.Domain.Entities;
 
 namespace SmartMicrobus.Core.RepositoryContracts
 {
@@ -6,5 +6,7 @@ namespace SmartMicrobus.Core.RepositoryContracts
     {
         Task<Driver?> GetDriverByLicense(string licenseNumber);
         Task<Driver?> GetDriverByPlateNumber(string plateNumber);
+        Task<List<Driver>> GetDriversByStationAsync(Guid stationId);
+        Task<(List<Driver> Drivers, int TotalCount)> GetPaginatedByStationAsync(Guid stationId, SmartMicrobus.Core.DTO.Driver.DriverQuery query);
     }
 }

@@ -3,13 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Microbus;
+using SmartMicrobus.Core.DTO.Report;
 using SmartMicrobus.Core.DTO.Staff;
 using SmartMicrobus.Core.DTO.Station;
-using SmartMicrobus.Core.Enums;
-using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Manager;
 using SmartMicrobus.Core.ServiceContracts.Staff;
-using System.Security.Claims;
+using SmartMicrobus.Core.Enums;
+using SmartMicrobus.Core.Helper;
 
 namespace SmartMicrobus.API.Controllers
 {
@@ -63,7 +63,11 @@ namespace SmartMicrobus.API.Controllers
         [HttpGet("dashboard/overview")]
         public async Task<IActionResult> GetDashboard()
         {
-            var stationId = Guid.Parse(User.FindFirst("StationId")?.Value);
+            var stationString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationString) || !Guid.TryParse(stationString, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
 
             var result = await managerService.GetStationDashboardAsync(stationId);
 
@@ -79,13 +83,13 @@ namespace SmartMicrobus.API.Controllers
         [Route("export-station-data")]
         public async Task<IActionResult> ExportStationData([FromQuery] DateTimeOffset startDate, [FromQuery] DateTimeOffset endDate)
         {
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid managerId))
+            var stationString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationString) || !Guid.TryParse(stationString, out Guid stationId))
             {
                 return Unauthorized(new { Message = "User ID not found or invalid." });
             }
 
-            var response = await managerService.ExportStationDataExcelAsync(managerId, startDate, endDate);
+            var response = await managerService.ExportStationDataExcelAsync(stationId, startDate, endDate);
 
             if (!response.Success)
             {
@@ -104,5 +108,184 @@ namespace SmartMicrobus.API.Controllers
         }
 
 
+
+        [HttpGet]
+        [Route("export-station-drivers")]
+        public async Task<IActionResult> ExportStationDrivers()
+        {
+            var stationString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationString) || !Guid.TryParse(stationString, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.ExportStationDriversExcelAsync(stationId);
+
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileName = $"StationDrivers_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
+            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [HttpGet]
+        [Route("export-station-routes")]
+        public async Task<IActionResult> ExportStationRoutes()
+        {
+            var stationString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationString) || !Guid.TryParse(stationString, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.ExportStationRoutesExcelAsync(stationId);
+
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileName = $"StationRoutes_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
+            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [HttpGet]
+        [Route("export-station-microbuses")]
+        public async Task<IActionResult> ExportMicrobuses()
+        {
+            var stationString = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationString) || !Guid.TryParse(stationString, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "User ID not found or invalid." });
+            }
+
+            var response = await managerService.ExportMicrobusesExcelAsync(stationId);
+
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileName = $"Microbuses_{DateTime.UtcNow:yyyyMMdd_HHmm}.xlsx";
+            return File(response.Data, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [HttpGet]
+        [Route("export-reports")]
+        public async Task<IActionResult> ExportReports([FromQuery] GetReportsQuery query)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.ExportReportsExcelAsync(query, stationId);
+            if (!response.Success)
+            {
+                return ToActionResult(response);
+            }
+
+            var fileContent = ((ApiResponseWithData<byte[]>)response).Data;
+            return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Reports_Export_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
+        }
+
+        //[HttpGet]
+        //[Route("station-microbuses")]
+        //public async Task<IActionResult> GetPaginatedStationMicrobuses([FromQuery] MicrobusQuery query)
+        //{
+        //    var stationIdValue = User.FindFirst("StationId")?.Value;
+        //    if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+        //    {
+        //        return Unauthorized(new { Message = "Station ID not found or invalid." });
+        //    }
+
+        //    var response = await managerService.GetPaginatedStationMicrobusesAsync(query, stationId);
+        //    if (!response.Success)
+        //        return ToActionResult(response);
+
+        //    var result = response as ApiResponseWithData<Pagination<List<MicrobusResponse>>>;
+        //    return Ok(result?.Data);
+        //}
+
+        [HttpGet]
+        [Route("station-drivers")]
+        public async Task<IActionResult> GetPaginatedStationDrivers([FromQuery] SmartMicrobus.Core.DTO.Driver.DriverQuery query)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.GetPaginatedStationDriversAsync(query, stationId);
+            if (!response.Success)
+                return ToActionResult(response);
+
+            var result = response as ApiResponseWithData<Pagination<List<SmartMicrobus.Core.DTO.Driver.DriverResponse>>>;
+            return Ok(result?.Data);
+        }
+
+        [HttpPost]
+        [Route("station-staff")]
+        public async Task<IActionResult> AddStaff([FromBody] SmartMicrobus.Core.DTO.Staff.AddStaffDTO dto)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.AddStaffAsync(dto, stationId);
+            return ToActionResult(response);
+        }
+
+        [HttpPut]
+        [Route("station-staff/{id}")]
+        public async Task<IActionResult> UpdateStaff(Guid id, [FromBody] SmartMicrobus.Core.DTO.Staff.UpdateStaffDTO dto)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.UpdateStaffAsync(id, dto, stationId);
+            return ToActionResult(response);
+        }
+
+        [HttpDelete]
+        [Route("station-staff/{id}")]
+        public async Task<IActionResult> DeleteStaff(Guid id)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.DeleteStaffAsync(id, stationId);
+            return ToActionResult(response);
+        }
+
+        [HttpGet]
+        [Route("station-staff")]
+        public async Task<IActionResult> GetPaginatedStationStaff([FromQuery] SmartMicrobus.Core.DTO.Staff.StaffQuery query)
+        {
+            var stationIdValue = User.FindFirst("StationId")?.Value;
+            if (string.IsNullOrEmpty(stationIdValue) || !Guid.TryParse(stationIdValue, out Guid stationId))
+            {
+                return Unauthorized(new { Message = "Station ID not found or invalid." });
+            }
+
+            var response = await managerService.GetPaginatedStationStaffAsync(query, stationId);
+            if (!response.Success)
+                return ToActionResult(response);
+
+            var result = response as ApiResponseWithData<Pagination<List<SmartMicrobus.Core.DTO.Staff.StaffResponseDTO>>>;
+            return Ok(result?.Data);
+        }
     }
 }
