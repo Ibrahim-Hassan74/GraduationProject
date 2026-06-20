@@ -172,7 +172,7 @@ namespace SmartMicrobus.API.Controllers
                 return Unauthorized(new { Message = "Station ID not found or invalid." });
             }
 
-            var response = await _reportService.ExportReportsExcelAsync(query, stationId);
+            var response = await managerService.ExportReportsExcelAsync(query, stationId);
             if (!response.Success)
             {
                 return ToActionResult(response);
