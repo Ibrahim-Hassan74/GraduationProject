@@ -185,7 +185,10 @@ namespace SmartMicrobus.Core.Services.Drivers
 
         public async Task<ApiResponseWithData<DriverResponse>> GetDriverByIdAsync(Guid driverId)
         {
-            var driver = await _driverRepository.GetByIdAsync(driverId);
+            var driver = await _driverRepository.GetByIdAsync(driverId,
+                d => d.ApplicationUser,
+                d => d.Microbus!,
+                d => d.Microbus!.Route);
             if (driver == null)
                 return ApiResponseFactory.NotFound<DriverResponse>(_localizer["Driver_Not_Found_By_Id"]);
 
