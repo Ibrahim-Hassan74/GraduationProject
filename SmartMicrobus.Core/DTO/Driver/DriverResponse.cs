@@ -12,5 +12,6 @@ namespace SmartMicrobus.Core.DTO.Driver
         public Guid DriverId { get; set; }
         public string DriverName { get; set; } = string.Empty;
         public string PlateNumber { get; set; }
+        public string LicenseNumber { get; set; }
     }
 }

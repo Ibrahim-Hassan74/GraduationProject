@@ -107,10 +107,11 @@ namespace SmartMicrobus.Core.Services.Common
 
             if (!info.Exists)
             {
-                throw new FileNotFoundException(
-                    _localizer["File_Not_Found"],
-                    src
-                );
+                //throw new FileNotFoundException(
+                //_localizer["File_Not_Found"],
+                //    src
+                //);
+                return false;
             }
 
             var root = info.PhysicalPath;

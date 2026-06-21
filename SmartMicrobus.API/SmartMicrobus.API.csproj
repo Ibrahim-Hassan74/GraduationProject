@@ -19,10 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SmartMicrobus.Core\SmartMicrobus.Core.csproj" />
     <ProjectReference Include="..\SmartMicrobus.Infrastructure\SmartMicrobus.Infrastructure.csproj" />
   </ItemGroup>
@@ -35,6 +31,12 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\Wasla.apk">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+	
   <ItemGroup>
     <EmbeddedResource Update="Resources\SharedResource.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

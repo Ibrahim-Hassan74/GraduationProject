@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>وصلة | Wasla</title>
+  <link rel="icon" type="image/x-icon" href="/wasla2.png" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Cairo', sans-serif;
+      background-color: #555555;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .header-title {
+      color: white;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 40px;
+      width: 450px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .share-btn {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: 36px;
+      height: 36px;
+      background-color: #f8f9fa;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #555;
+      text-decoration: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      transition: background-color 0.2s;
+    }
+
+      .share-btn:hover {
+        background-color: #e2e2e2;
+      }
+
+    .app-icon {
+      width: 120px;
+      height: 120px;
+      background-color: #fff;
+      border: 1px solid #eee;
+      border-radius: 24px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: #d15b40;
+      font-weight: bold;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+      .app-icon img {
+        max-width: 80%;
+        max-height: 80%;
+        object-fit: contain;
+      }
+
+    .download-text {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #222;
+    }
+
+    .store-btn {
+      display: block;
+      width: 100%;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+
+      .store-btn:hover {
+        transform: scale(1.02);
+      }
+
+      .store-btn img {
+        width: 100%;
+        height: 50px;
+        display: block;
+        object-fit: contain;
+      }
+
+    /* Fallback for the icon if no image */
+    .icon-text {
+      color: #d15b40;
+      font-size: 48px;
+      font-weight: bold;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+    <div class="header-title">وصلة | Wasla</div>
+
+    <div class="card">
+        <!-- Share icon -->
+        <a href="javascript:void(0)" onclick="navigator.share({title: 'Wasla', url: window.location.href})" class="share-btn" title="Share">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+            </svg>
+        </a>
+
+        <!-- App Icon -->
+        <div class="app-icon">
+            <img src="/wasla2.png" alt="Wasla Logo" style="width: 100%; height: 100%; border-radius: 24px;">
+        </div>
+
+        <div class="download-text">حمل التطبيق الآن</div>
+
+        <!-- App Store Button -->
+        <a href="#" class="store-btn">
+            <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on the App Store">
+        </a>
+
+        <!-- Google Play Button / Direct APK Download -->
+        <a href="/Wasla.apk" class="store-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play">
+        </a>
+    </div>
+
+</body>
+</html>

@@ -36,6 +36,15 @@ var localizationOptions = app.Services
 }
 app.UseExceptionHandlingMiddleware();
 
+app.UseDefaultFiles();
+
+var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+provider.Mappings[".apk"] = "application/vnd.android.package-archive";
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = provider
+});
+
 app.UseStaticFiles();
 
 //app.UseCors("AllowFrontend");
