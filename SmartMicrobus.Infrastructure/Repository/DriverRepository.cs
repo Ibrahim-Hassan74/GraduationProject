@@ -46,7 +46,7 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .Include(d => d.Microbus)
                     .ThenInclude(m => m.Route)
                 .Where(d => d.Microbus != null && 
-                           (d.Microbus.Route.FromStationId == stationId || d.Microbus.Route.ToStationId == stationId));
+                           (d.Microbus.Route.FromStationId == stationId));
 
             if (!string.IsNullOrWhiteSpace(queryObj.Search))
             {
@@ -54,7 +54,11 @@ namespace SmartMicrobus.Infrastructure.Repository
                 query = query.Where(d =>
                     (d.ApplicationUser.DisplayName != null && d.ApplicationUser.DisplayName.ToLower().Contains(search)) ||
                     (d.LicenseNumber != null && d.LicenseNumber.ToLower().Contains(search)) ||
-                    (d.Microbus.PlateNumber != null && d.Microbus.PlateNumber.ToLower().Contains(search)));
+                    (d.Microbus.PlateNumber != null && d.Microbus.PlateNumber.ToLower().Contains(search)) ||
+                    (d.Microbus.Route.FromEn != null && d.Microbus.Route.FromEn.ToLower().Contains(search)) ||
+                    (d.Microbus.Route.FromAr != null && d.Microbus.Route.FromAr.ToLower().Contains(search)) ||
+                    (d.Microbus.Route.ToEn != null && d.Microbus.Route.ToEn.ToLower().Contains(search)) ||
+                    (d.Microbus.Route.ToAr != null && d.Microbus.Route.ToAr.ToLower().Contains(search)));
             }
 
             var isDescending = queryObj.SortOrder == SortOrderOptions.DESC;

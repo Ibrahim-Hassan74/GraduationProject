@@ -49,13 +49,26 @@ namespace SmartMicrobus.Core.Services.Route
                 return ApiResponseFactory.Failure("Route data is required.", 404);
             }
 
-            var station = await _unitOfWork.StationRepository.GetByIdAsync(stationId);
-            if (station is null)
+            var FromStation = await _unitOfWork.StationRepository.GetByIdAsync(stationId);
+            if (FromStation is null)
                 return ApiResponseFactory.Failure("Station not found.", 404);
 
+            var ToStation = await _unitOfWork.StationRepository.GetByIdAsync(routeAddRequest.ToStationId);
+            if (ToStation is null)
+                return ApiResponseFactory.Failure("Destination not supported", 404);
+
+
             var routeEntity = _mapper.Map<RouteEntity>(routeAddRequest);
-            routeEntity.FromAr = station.NameAr;
-            routeEntity.FromEn = station.NameEn;
+            routeEntity.FromStationId = FromStation.Id;
+            routeEntity.ToStationId = ToStation.Id;
+
+            routeEntity.FromAr = FromStation.NameAr;
+            routeEntity.FromEn = FromStation.NameEn;
+
+            routeEntity.ToAr = ToStation.NameAr;
+            routeEntity.ToEn = ToStation.NameEn;
+
+
 
             await _routeRepository.AddAsync(routeEntity);
             await _unitOfWork.CompleteAsync();
