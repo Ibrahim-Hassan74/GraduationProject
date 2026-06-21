@@ -1,6 +1,4 @@
-﻿using SmartMicrobus.Core.Domain.Entities;
-
-namespace SmartMicrobus.Core.RepositoryContracts
+﻿namespace SmartMicrobus.Core.RepositoryContracts
 {
     public interface IUnitOfWork
     {

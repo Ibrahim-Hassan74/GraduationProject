@@ -15,8 +15,8 @@ namespace SmartMicrobus.Infrastructure.Data.Configuration
                 .HasForeignKey<Manager>(m => m.Id);
 
             builder.HasOne(m => m.Station)
-                .WithOne(s => s.Manager)
-                .HasForeignKey<Manager>(m => m.StationId);
+                .WithMany(s => s.Managers)
+                .HasForeignKey(m => m.StationId);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace SmartMicrobus.Core.Domain.Entities
         public string? AddressEn { get; set; }
         public Point? Location { get; set; } = null!;
         //public ICollection<Route> Routes { get; set; } = new List<Route>();
-        public virtual Manager? Manager { get; set; }
+        public virtual ICollection<Manager?> Managers { get; set; }
         public ICollection<Route> FromRoutes { get; set; } = new List<Route>();
         public ICollection<Route> ToRoutes { get; set; } = new List<Route>();
         public ICollection<Queue> Queues { get; set; } = new List<Queue>();
