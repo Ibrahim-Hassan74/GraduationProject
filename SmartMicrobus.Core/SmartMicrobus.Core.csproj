@@ -28,6 +28,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>AuthService.resx</DependentUpon>
     </Compile>
+    <Compile Update="Resources\Services\Admin\AdminService.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AdminService.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Services\Common\ImageService.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -84,6 +89,10 @@
     <EmbeddedResource Update="Resources\Services\Account\AuthService.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>AuthService.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Services\Admin\AdminService.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>AdminService.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Services\Common\ImageService.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

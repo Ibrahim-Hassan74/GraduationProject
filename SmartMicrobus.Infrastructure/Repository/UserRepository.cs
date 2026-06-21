@@ -1,3 +1,4 @@
+using SmartMicrobus.Core.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using SmartMicrobus.Core.DTO.Admin;
 using SmartMicrobus.Core.Enums;
@@ -116,6 +117,12 @@ namespace SmartMicrobus.Infrastructure.Repository
                 .FirstOrDefaultAsync();
 
             return user;
+        }
+        public async Task<Manager?> GetByIdWithUserAsync(Guid managerId)
+        {
+            return await _context.Managers
+                .Include(m => m.ApplicationUser)
+                .FirstOrDefaultAsync(m => m.Id == managerId);
         }
     }
 }
