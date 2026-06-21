@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,6 +71,31 @@ namespace SmartMicrobus.Core
                             context.Token = accessToken;
                         }
 
+                        if (path.StartsWithSegments("/dashboard"))
+                        {
+                            var token = context.Request.Query["token"].FirstOrDefault();
+                            if (string.IsNullOrEmpty(token))
+                            {
+                                token = context.Request.Cookies["hangfire_token"];
+                            }
+                            if (!string.IsNullOrEmpty(token))
+                            {
+                                context.Token = token;
+                            }
+                        }
+
+                        return Task.CompletedTask;
+                    },
+
+                    OnAuthenticationFailed = context =>
+                    {
+                        var failedPath = context.HttpContext.Request.Path;
+                        if (failedPath.StartsWithSegments("/dashboard") &&
+                            context.HttpContext.Request.Cookies.ContainsKey("hangfire_token"))
+                        {
+                            context.HttpContext.Response.Cookies.Delete("hangfire_token",
+                                new CookieOptions { Path = "/dashboard" });
+                        }
                         return Task.CompletedTask;
                     },
 

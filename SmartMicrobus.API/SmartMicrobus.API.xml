@@ -37,6 +37,24 @@
             <param name="builder"></param>
             <returns></returns>
         </member>
+        <member name="T:SmartMicrobus.API.Middleware.HangfireTokenCookieMiddleware">
+            <summary>
+            Intercepts the initial Hangfire dashboard request containing a JWT in the query string,
+            stores it in an HttpOnly cookie, and redirects to strip the token from the URL.
+            Must be registered before UseHangfireDashboard.
+            </summary>
+        </member>
+        <member name="T:SmartMicrobus.API.Middleware.HangfireTokenCookieMiddlewareExtensions">
+            <summary>
+            Extension method to register the Hangfire token cookie middleware.
+            </summary>
+        </member>
+        <member name="M:SmartMicrobus.API.Middleware.HangfireTokenCookieMiddlewareExtensions.UseHangfireTokenCookie(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Stores the Hangfire dashboard JWT from the query string into an HttpOnly cookie
+            and redirects to strip the token from the URL.
+            </summary>
+        </member>
         <member name="M:SmartMicrobus.API.Realtime.SignalRRouteTrackingNotificationService.NotifyRouteUpdated(System.Guid)">
             <summary>
             Called on check-in/check-out events — re-queries counts and includes

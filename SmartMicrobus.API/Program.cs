@@ -61,9 +61,11 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.UseHangfireTokenCookie();
+
 app.UseHangfireDashboard("/dashboard", new DashboardOptions
 {
-    Authorization = new[] { new HangfireAuthorizationFilter(app.Services, app.Environment) },
+    Authorization = new[] { new HangfireAuthorizationFilter() },
     AppPath = null
 });
 
