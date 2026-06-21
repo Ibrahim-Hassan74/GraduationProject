@@ -1,5 +1,6 @@
-﻿using Asp.Versioning;
+using Asp.Versioning;
 using Hangfire;
+using Hangfire.Console;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Localization;
@@ -233,7 +234,8 @@ namespace SmartMicrobus.API.StartupExtensions
             services.AddHangfire(x =>
                 x.UseSqlServerStorage(
                     configuration.GetConnectionString("DefaultConnection")
-                ));
+                )
+                .UseConsole());
 
             services.AddHangfireServer();
 

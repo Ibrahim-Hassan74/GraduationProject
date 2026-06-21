@@ -112,7 +112,8 @@ namespace SmartMicrobus.Infrastructure.Repository
                     Role = _context.UserRoles
                                 .Where(ur => ur.UserId == u.Id)
                                 .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Name)
-                                .FirstOrDefault()
+                                .FirstOrDefault(),
+                    IsConfirmed = u.PhoneNumberConfirmed,
                 })
                 .FirstOrDefaultAsync();
 

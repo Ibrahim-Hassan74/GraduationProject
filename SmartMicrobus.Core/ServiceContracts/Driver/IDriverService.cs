@@ -1,6 +1,7 @@
 using SmartMicrobus.Core.DTO.Common;
 using SmartMicrobus.Core.DTO.Driver;
 using SmartMicrobus.Core.DTO.Queue;
+using Hangfire.Server;
 
 namespace SmartMicrobus.Core.ServiceContracts.Drivers
 {
@@ -14,7 +15,7 @@ namespace SmartMicrobus.Core.ServiceContracts.Drivers
 
         Task<ApiResponseWithData<IEnumerable<QueueItemResponse>>> GetMyQueueAsync(Guid driverId);
 
-        Task ResetDailyQueueAsync();
+        Task ResetDailyQueueAsync(PerformContext? context = null);
         Task<ApiResponse> GetDriverByPlateNumber(string plateNumber);
     }
 
