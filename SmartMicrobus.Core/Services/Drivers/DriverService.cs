@@ -1,4 +1,6 @@
 using AutoMapper;
+using Hangfire.Console;
+using Hangfire.Server;
 using Microsoft.Extensions.Localization;
 using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Common;
@@ -115,52 +117,41 @@ namespace SmartMicrobus.Core.Services.Drivers
             return ApiResponseFactory.Success<IEnumerable<QueueItemResponse>>(_localizer["QueueRetrievedSuccessfully"], result);
         }
 
-        public async Task ResetDailyQueueAsync()
+        public async Task ResetDailyQueueAsync(PerformContext? context = null)
         {
-            var today = DateTimeOffset.UtcNow.Date;
-            var now = DateTimeOffset.UtcNow;
-
-            var pendingItems = await _queueItemRepository
-                .GetAllActiveBeforeDateAsync(today);
-
-            if (!pendingItems.Any())
-                return;
-
-            var groupedByQueue = pendingItems
-                .GroupBy(x => x.QueueId);
-
-            foreach (var group in groupedByQueue)
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                var queueId = group.Key;
+                var now = DateTimeOffset.UtcNow;
 
-                int newPosition = 1;
+                var pendingItems = await _queueItemRepository
+                    .GetAllActiveBeforeDateAsync(now);
+                    
+                context?.WriteLine($"Found {pendingItems.Count} items to reset.");
 
-                var orderedItems = group
-                    .OrderBy(x => x.Position)
-                    .ToList();
+                if (!pendingItems.Any())
+                    return;
 
-                foreach (var item in orderedItems)
+                var groupedByQueue = pendingItems.GroupBy(x => x.QueueId);
+                
+                context?.WriteLine($"Resetting items across {groupedByQueue.Count()} queues...");
+
+                foreach (var group in groupedByQueue)
                 {
-                    item.Status = QueueStatus.Skipped;
-                    item.LeftAt = now;
+                    int newPosition = 1;
 
-                    var newItem = new QueueItem
+                    foreach (var item in group.OrderBy(x => x.Position))
                     {
-                        QueueId = queueId,
-                        DriverId = item.DriverId,
-                        MicrobusId = item.MicrobusId,
-                        Position = newPosition,
-                        Status = QueueStatus.Waiting,
-                        JoinedAt = now
-                    };
-
-                    await _queueItemRepository.AddAsync(newItem);
-
-                    newPosition++;
+                        item.Position = newPosition;
+                        item.JoinedAt = now;
+                        item.Status = QueueStatus.Waiting;
+                        newPosition++;
+                    }
                 }
-            }
 
-            await _unitOfWork.CompleteAsync();
+                await _unitOfWork.CompleteAsync();
+                
+                context?.WriteLine("Queue reset transaction committed successfully.");
+            });
         }
 
         

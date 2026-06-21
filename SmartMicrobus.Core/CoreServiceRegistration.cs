@@ -31,6 +31,9 @@ using SmartMicrobus.Core.Services.Manager;
 using SmartMicrobus.Core.Services.Report;
 using SmartMicrobus.Core.ServiceContracts.Microbus;
 using SmartMicrobus.Core.Services.Microbus;
+using SmartMicrobus.Core.BackgroundJobs.Interfaces;
+using SmartMicrobus.Core.BackgroundJobs.Jobs;
+using SmartMicrobus.Core.BackgroundJobs.Schedulers;
 
 namespace SmartMicrobus.Core
 {
@@ -162,7 +165,11 @@ namespace SmartMicrobus.Core
             services.AddScoped<IMicrobusService, MicrobusService>();
 
             // Location tracking services
-            services.AddScoped<ILocationTrackingService, LocationTrackingService>();       
+            services.AddScoped<ILocationTrackingService, LocationTrackingService>();
+
+            // Background jobs
+            services.AddScoped<ResetDailyQueueJob>();
+            services.AddSingleton<IJobScheduler, HangfireJobScheduler>();       
             return services;
         }
     }

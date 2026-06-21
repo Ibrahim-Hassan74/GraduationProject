@@ -1,4 +1,5 @@
 using Hangfire;
+using SmartMicrobus.Core.BackgroundJobs.Interfaces;
 using Microsoft.Extensions.Options;
 using SmartMicrobus.API.Filters;
 using SmartMicrobus.API.Hubs;
@@ -68,6 +69,9 @@ app.UseHangfireDashboard("/dashboard", new DashboardOptions
     Authorization = new[] { new HangfireAuthorizationFilter() },
     AppPath = null
 });
+
+var jobScheduler = app.Services.GetRequiredService<IJobScheduler>();
+jobScheduler.RegisterJobs();
 
 app.MapControllers();
 
