@@ -12,5 +12,7 @@ namespace SmartMicrobus.Core.ServiceContracts.Admin
         Task<ApplicationUserResponse?> GetUserByIdAsync(Guid userId);
         Task<ApiResponse> LockAccountAsync(Guid userId);
         Task<ApiResponse> UnlockAccountAsync(Guid userId);
+        Task<ApiResponse> DeleteManagerAsync(Guid managerId);
+        Task<ApiResponse> UpdateManagerStationAsync(Guid managerId, UpdateManagerStationDTO dto);
     }
 }

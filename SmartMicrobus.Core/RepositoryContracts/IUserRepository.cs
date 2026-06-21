@@ -1,3 +1,4 @@
+using SmartMicrobus.Core.Domain.Entities;
 using SmartMicrobus.Core.DTO.Admin;
 
 namespace SmartMicrobus.Core.RepositoryContracts
@@ -7,5 +8,7 @@ namespace SmartMicrobus.Core.RepositoryContracts
         Task<(List<UserListItem> Items, int TotalCount)> GetPagedUsersWithRolesAsync(GetUsersQuery query);
 
         Task<UserListItem?> GetUserByIdAsync(Guid id);
+
+        Task<Manager?> GetByIdWithUserAsync(Guid managerId);
     }
 }
