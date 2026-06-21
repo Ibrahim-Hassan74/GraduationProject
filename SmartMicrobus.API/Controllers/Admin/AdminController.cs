@@ -5,10 +5,11 @@ using SmartMicrobus.Core.DTO.Manager;
 using SmartMicrobus.Core.Enums;
 using SmartMicrobus.Core.Helper;
 using SmartMicrobus.Core.ServiceContracts.Admin;
+using SmartMicrobus.Core.Services.Admin;
 
 namespace SmartMicrobus.API.Controllers.Admin
 {
-    //[Authorize(Roles = nameof(UserRole.Admin))]
+    [Authorize(Roles = nameof(UserRole.Admin))]
     public class AdminController(IAdminService adminService) : CustomControllerBase
     {
         [HttpPost("add-manager")]
@@ -19,7 +20,7 @@ namespace SmartMicrobus.API.Controllers.Admin
         }
 
         [HttpGet("users")]
-        public async Task<IActionResult> GetUsers([FromQuery]GetUsersQuery query)
+        public async Task<IActionResult> GetUsers([FromQuery] GetUsersQuery query)
         {
             var result = await adminService.GetUsersAsync(query);
             return ToActionResult(result);
@@ -45,6 +46,23 @@ namespace SmartMicrobus.API.Controllers.Admin
         {
             var result = await adminService.UnlockAccountAsync(id);
             return ToActionResult(result);
+        }
+
+        [HttpDelete("managers/{managerId:guid}")]
+        public async Task<IActionResult> DeleteManager(Guid managerId)
+        {
+            var response = await adminService.DeleteManagerAsync(managerId);
+
+            return ToActionResult(response);
+        }
+
+        [HttpPut("managers/{managerId:guid}/station")]
+        public async Task<IActionResult> UpdateManagerStation(Guid managerId, UpdateManagerStationDTO dto)
+        {
+            var response = await adminService
+                .UpdateManagerStationAsync(managerId, dto);
+
+            return ToActionResult(response);
         }
     }
 }
