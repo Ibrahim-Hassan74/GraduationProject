@@ -1,3 +1,4 @@
+using SmartMicrobus.Core.Helper;
 using System.ComponentModel.DataAnnotations;
 
 namespace SmartMicrobus.Core.DTO.Staff
@@ -8,7 +9,8 @@ namespace SmartMicrobus.Core.DTO.Staff
         public string Name { get; set; } = null!;
 
         [Required]
-        [Phone]
+        [EgyptianPhone(ErrorMessageResourceName = "InvalidPhoneNumber",
+                       ErrorMessageResourceType = typeof(Resources.DTO.Account.AuthValidationMessages))]
         public string PhoneNumber { get; set; } = null!;
 
         [Required]
